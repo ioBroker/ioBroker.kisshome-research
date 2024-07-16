@@ -1,0 +1,94 @@
+{
+    "i18n": true,
+    "type": "tabs",
+    "items": {
+        "_options": {
+            "type": "panel",
+            "label": "General settings",
+            "items": {
+                "email": {
+                    "type": "text",
+                    "sm": 12,
+                    "md": 3,
+                    "lg": 3,
+                    "label": "Email",
+                    "tooltip": "Email address as registered in the KISSHome research"
+                },
+                "_hint": {
+                    "newLine": true,
+                    "type": "staticLink",
+                    "sm": 12,
+                    "href": "https://kisshome-feldversuch.if-is.net/register",
+                    "text": "To participate in the KISSHome research, you need to register here."
+                },
+                "fritzbox": {
+                    "newLine": true,
+                    "type": "ip",
+                    "sm": 12,
+                    "md": 3,
+                    "lg": 3,
+                    "default": "192.168.1.1",
+                    "label": "FritzBox IP"
+                },
+                "login": {
+                    "newLine": true,
+                    "type": "text",
+                    "sm": 12,
+                    "md": 3,
+                    "lg": 3,
+                    "label": "Login"
+                },
+                "password": {
+                    "type": "password",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "label": "Password"
+                }
+            }
+        },
+        "_instances": {
+            "type": "panel",
+            "label": "Known instances",
+            "items": {
+                "_custom": {
+                    "newLine": true,
+                    "type": "custom",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "i18n": true,
+                    "url": "custom/customComponents.js",
+                    "name": "ConfigCustomInstancesSelector/Components/ConfigCustomInstancesSelector"
+                }
+            }
+        },
+        "_custom": {
+            "type": "panel",
+            "label": "Custom IP addresses",
+            "items": {
+                "customIPs": {
+                    "type": "table",
+                    "newLine": true,
+                    "items": [
+                        {
+                            "type": "text",
+                            "sm": 3,
+                            "label": "IP address"
+                        },
+                        {
+                            "type": "text",
+                            "sm": 3,
+                            "label": "MAC address"
+                        },
+                        {
+                            "type": "text",
+                            "sm": 3,
+                            "label": "Description"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,131 @@
+{
+  "common": {
+    "name": "kisshome-research",
+    "version": "0.0.1",
+    "news": {
+    },
+    "title": "Matter",
+    "titleLang": {
+      "en": "KISSHome research",
+      "de": "KISSHome-Forschung",
+      "ru": "Исследование KISSHome",
+      "pt": "Pesquisa KISSHome",
+      "nl": "KISSHome-onderzoek",
+      "fr": "Recherche KISSHome",
+      "it": "Ricerca KISSHome",
+      "es": "Investigación de KISSHome",
+      "pl": "Badania KISSHome",
+      "uk": "Дослідження KISSHome",
+      "zh-cn": "KISSHome研究"
+    },
+    "desc": {
+      "en": "Collection of information for KISSHome research",
+      "de": "Sammlung von Informationen für KISSHome-Forschung",
+        "ru": "Сбор информации для исследования KISSHome",
+        "pt": "Coleção de informações para pesquisa KISSHome",
+        "nl": "Verzameling informatie voor KISSHome-onderzoek",
+        "fr": "Collection d'informations pour la recherche KISSHome",
+        "it": "Raccolta di informazioni per la ricerca KISSHome",
+        "es": "Colección de información para la investigación de KISSHome",
+        "pl": "Zbiór informacji do badań KISSHome",
+        "uk": "Збір інформації для дослідження KISSHome",
+        "zh-cn": "KISSHome研究信息收集"
+    },
+    "authors": [
+      "Denis Haev <dogafox@gmail.com>"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "nogit": true,
+    "loglevel": "info",
+    "readme": "https://github.com/ioBroker/ioBroker.kisshome-research/blob/master/README.md",
+    "icon": "kisshome-research.png",
+    "connectionType": "local",
+    "dataSource": "push",
+    "adminUI": {
+      "config": "json"
+    },
+    "tier": 3,
+    "keywords": [
+      "kisshome-research"
+    ],
+    "stopTimeout": 5000,
+    "enabled": true,
+    "compact": false,
+    "singletonHost": true,
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.kisshome-research/master/admin/kisshome-research.png",
+    "type": "misc-data",
+    "plugins": {
+      "sentry": {
+        "dsn": "https://de38f4a20c964ce395d2e236c64aa075@sentry.iobroker.net/234"
+      }
+    },
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    }
+  },
+  "protectedNative": [
+    "password",
+    "login"
+  ],
+  "encryptedNative": [
+    "password"
+  ],
+  "native": {
+    "fritzbox": "192.168.1.1",
+    "login": "",
+    "password": "",
+    "customIPs": [],
+    "instances": []
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Information",
+          "de": "Informationen",
+          "ru": "Информация",
+          "pt": "Informação",
+          "nl": "Informatie",
+          "fr": "Information",
+          "it": "Informazioni",
+          "es": "Información",
+          "pl": "Informacja",
+          "uk": "Інформація",
+          "zh-cn": "信息"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Connected to FritzBox",
+          "de": "Verbindung mit FritzBox",
+          "ru": "Подключен к FritzBox",
+          "pt": "Conectado ao FritzBox",
+          "nl": "Verbinding met FritzBoxr",
+          "fr": "Connecté au FritzBox",
+          "it": "Collegato al FritzBox",
+          "es": "Conectado al FritzBox",
+          "pl": "Łączy się z FritzBox",
+          "uk": "Підключення до FritzBox",
+          "zh-cn": "Connected with FritzBox"
+        },
+        "type": "boolean",
+        "role": "indicator.connected",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
+}
