@@ -70,7 +70,7 @@ gulp.task('1-npm', () => {
     return npmInstall();
 });
 
-gulp.task('1-npm-dep', gulp.series('clean', '1-npm'));
+gulp.task('1-npm-dep', gulp.series('0-clean', '1-npm'));
 
 function buildAdmin() {
     const version = JSON.parse(fs.readFileSync(`${__dirname}/package.json`).toString('utf8')).version;
@@ -109,7 +109,7 @@ function buildAdmin() {
 
 gulp.task('2-compile', () => buildAdmin());
 
-gulp.task('2-compile-dep', gulp.series('1-npm-dep', '3-compile'));
+gulp.task('2-compile-dep', gulp.series('1-npm-dep', '2-compile'));
 
 gulp.task('3-copy', () => Promise.all([
     gulp.src(['src-admin/build/static/js/*.js', '!src-admin/build/static/js/vendors*.js']).pipe(gulp.dest('admin/custom/static/js')),

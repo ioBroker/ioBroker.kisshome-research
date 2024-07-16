@@ -48,11 +48,10 @@ jobs:
 
     needs: [check-and-lint]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -85,10 +84,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 20.x
         uses: actions/setup-node@v4.0.0
         with:
-          node-version: 18.x
+          node-version: 20.x
 
       - name: Extract the version and commit body from the tag
         id: extract_release
@@ -130,27 +129,16 @@ jobs:
           prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
           body: ${{ steps.extract_release.outputs.BODY }}
 
-      - name: Notify Sentry.io about the release
-        run: |
-          npm i -g @sentry/cli
-          export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-          export SENTRY_URL=https://sentry.iobroker.net
-          export SENTRY_ORG=iobroker
-          export SENTRY_PROJECT=iobroker-matter
-          export SENTRY_VERSION=iobroker.matter@${{ env.VERSION }}
-          sentry-cli releases new $SENTRY_VERSION
-          sentry-cli releases finalize $SENTRY_VERSION
-
-      - name: Notify Sentry.io about the release
-        run: |
-          npm i -g @sentry/cli
-          export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-          export SENTRY_URL=https://sentry.iobroker.net
-          export SENTRY_ORG=iobroker
-          export SENTRY_PROJECT=iobroker-matter-react
-          export SENTRY_VERSION=iobroker.matter-react@${{ env.VERSION }}
-          sentry-cli releases new $SENTRY_VERSION
-          sentry-cli releases finalize $SENTRY_VERSION
+#      - name: Notify Sentry.io about the release
+#        run: |
+#          npm i -g @sentry/cli
+#          export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+#          export SENTRY_URL=https://sentry.iobroker.net
+#          export SENTRY_ORG=iobroker
+#          export SENTRY_PROJECT=iobroker-kisshome-research
+#          export SENTRY_VERSION=iobroker.kisshome-research@${{ env.VERSION }}
+#          sentry-cli releases new $SENTRY_VERSION
+#          sentry-cli releases finalize $SENTRY_VERSION
 
         # Add the following line BEFORE finalize if repositories are connected in Sentry
         # sentry-cli releases set-commits $SENTRY_VERSION --auto
