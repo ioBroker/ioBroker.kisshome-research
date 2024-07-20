@@ -5,13 +5,13 @@
     "checkJs": false,
     "noEmit": false,
     "declaration": false,
-    "types": ["@iobroker/types"]
+    "types": ["@iobroker/types"],
+    "outDir": "../build"
   },
   "include": [
-    "src/**/*.ts"
+    "./**/*.ts"
   ],
   "exclude": [
-    "src/matter/ControllerNode.ts",
-    "src/**/*.test.ts"
+    "./**/*.test.ts"
   ]
 }

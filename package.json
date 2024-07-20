@@ -19,15 +19,19 @@
     "type": "git",
     "url": "https://github.com/ioBroker/ioBroker.kisshome-research"
   },
+  "optionalDependencies": {
+    "@network-utils/arp-lookup": "^2.0.2"
+  },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.1.6"
+    "@iobroker/adapter-core": "^3.1.6",
+    "network": "^0.7.0",
+    "@network-utils/vendor-lookup": "^1.0.8"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.7.3",
     "@alcalzone/release-script-plugin-iobroker": "^3.7.2",
     "@alcalzone/release-script-plugin-license": "^3.7.0",
     "@iobroker/types": "^6.0.8",
-    "@iobroker/dev-server": "^0.7.3",
     "@iobroker/legacy-testing": "^1.0.12",
     "@types/node": "^20.14.10",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
@@ -58,7 +62,7 @@
     "lint-frontend": "eslint src-admin/",
     "build": "npm run build:ts && npm run build:gui",
     "build:gui": "gulp",
-    "build:ts": "tsc -p tsconfig.build.json",
+    "build:ts": "tsc -p src/tsconfig.build.json",
     "release": "release-script",
     "release-patch": "release-script patch --yes",
     "release-minor": "release-script minor --yes",

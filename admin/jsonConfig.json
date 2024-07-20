@@ -36,20 +36,20 @@
                     "sm": 12,
                     "md": 3,
                     "lg": 3,
-                    "label": "Login"
+                    "label": "FritzBox Login"
                 },
                 "password": {
                     "type": "password",
                     "sm": 12,
                     "md": 6,
                     "lg": 6,
-                    "label": "Password"
+                    "label": "FritzBox Password"
                 }
             }
         },
         "_instances": {
             "type": "panel",
-            "label": "Known instances",
+            "label": "Known IP addresses",
             "items": {
                 "_custom": {
                     "newLine": true,
@@ -59,7 +59,7 @@
                     "lg": 6,
                     "i18n": true,
                     "url": "custom/customComponents.js",
-                    "name": "ConfigCustomInstancesSelector/Components/ConfigCustomInstancesSelector"
+                    "name": "ConfigCustomKissHomeResearchSet/Components/ConfigCustomInstancesSelector"
                 }
             }
         },
@@ -70,21 +70,27 @@
                 "customIPs": {
                     "type": "table",
                     "newLine": true,
+                    "compact": true,
+                    "sm": 12,
+                    "uniqueColumns": ["ip"],
                     "items": [
                         {
+                            "attr": "ip",
                             "type": "text",
-                            "sm": 3,
-                            "label": "IP address"
+                            "width": "33%",
+                            "title": "IP address"
                         },
                         {
+                            "attr": "mac",
                             "type": "text",
-                            "sm": 3,
-                            "label": "MAC address"
+                            "width": "33%",
+                            "title": "MAC address"
                         },
                         {
+                            "attr": "desc",
                             "type": "text",
-                            "sm": 3,
-                            "label": "Description"
+                            "width": "33%",
+                            "title": "Description"
                         }
                     ]
                 }

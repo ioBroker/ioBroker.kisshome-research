@@ -1,5 +1,5 @@
 {
-  "custom_easy_Instance": "Exemple",
-  "custom_easy_Config": "Configuration",
-  "custom_easy_Tab": "Languette"
+  "custom_kisshome_enabled": "Activé",
+  "custom_kisshome_ip": "adresse IP",
+  "custom_kisshome_name": "Nom de l'adaptateur"
 }

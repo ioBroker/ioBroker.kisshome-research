@@ -26,11 +26,54 @@ const styles = {
         fontSize: 16,
         fontWeight: 'bold',
     },
+    td: {
+        padding: '2px 16px',
+    },
 };
 
+const ADAPTERS = [
+    { adapter: 'alexa-2' },
+    { adapter: 'broadlink2', attr: 'additional' },
+//     { adapter: 'cameras' },
+    { adapter: 'harmony', attr: 'devices', arrayAttr: 'ip' },
+    { adapter: 'hm-rpc', attr: 'homematicAddress' },
+    // { adapter: 'hmip' }, not possible. It communicates with the cloud
+    { adapter: 'homeconnect' },
+    { adapter: 'homekit-controller', attr: 'discoverIp' },
+    { adapter: 'hue', attr: 'bridge' },
+    { adapter: 'knx', attr: 'bind' },
+    { adapter: 'lgtv', attr: 'ip' },
+    { adapter: 'loxone', attr: 'host' },
+//    { adapter: 'meross' }, not possible. It communicates with the cloud
+    { adapter: 'mihome-vacuum', attr: 'ip' },
+    { adapter: 'modbus', attr: 'params.bind' },
+    { adapter: 'mqtt', attr: 'bind' },
+    { adapter: 'mqtt-client', attr: 'host' },
+    { adapter: 'onvif' },
+    { adapter: 'openknx', attr: 'gwip' },
+    { adapter: 'proxmox', attr: 'ip' },
+    { adapter: 'samsung', attr: 'ip' },
+    { adapter: 'shelly', attr: 'bind' },
+    { adapter: 'sonoff', attr: 'bind' },
+    { adapter: 'sonos', attr: 'devices', arrayAttr: 'ip' },
+    { adapter: 'tr-064', attr: 'iporhost' },
+//    { adapter: 'tuya' }, not possible. It communicates with the cloud
+    { adapter: 'unify', attr: 'controllerIp' },
+    { adapter: 'upnp' },
+    { adapter: 'wled', attr: 'devices', arrayAttr: 'ip' },
+];
+
 class ConfigCustomInstancesSelector extends ConfigGeneric {
-    componentDidMount() {
+    async componentDidMount() {
         super.componentDidMount();
+
+        let address = [];
+        // get own ip address
+        const config = await this.props.socket.getObject(`system.adapter.kisshome-research.${this.props.instance}`);
+        if (config?.common.host) {
+            const host = await this.props.socket.getObject(`system.host.${config.common.host}`);
+            address = host.common.address;
+        }
 
         this.props.socket.getAdapterInstances()
             .then(instances => {
@@ -39,74 +82,138 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         instance?.common?.adminUI && (instance.common.adminUI.config !== 'none' || instance.common.adminUI.tab))
                     .map(instance => ({
                         id: instance._id.replace(/^system\.adapter\./, ''),
-                        config: instance.common.adminUI.config !== 'none',
-                        adminTab: instance.common.adminTab
+                        name: instance.common.name,
+                        native: instance.native,
                     }))
                     .sort((a, b) => a.id > b.id ? 1 : (a.id < b.id ? -1 : 0));
 
-                this.setState({instances});
+                const ips = this.collectIpAddresses(instances, address);
+
+                this.setState({ instances, ips });
             });
     }
 
-    renderItem(error, disabled, defaultValue) {
-        if (!this.state.instances) {
-            return null;
-        } else {
-            const accessAllowedConfigs = ConfigGeneric.getValue(this.props.data, 'accessAllowedConfigs') || [];
-            const accessAllowedTabs    = ConfigGeneric.getValue(this.props.data, 'accessAllowedTabs')    || [];
+    static getAttr(obj, attr) {
+        if (Array.isArray(attr)) {
+            const name = attr.shift();
+            if (typeof obj[name] === 'object') {
+                return ConfigCustomInstancesSelector.getAttr(obj[name], attr);
+            }
 
-            return <TableContainer>
-                <Table style={styles.table} size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell style={styles.header}>{i18n.t('custom_easy_Instance')}</TableCell>
-                            <TableCell style={styles.header}>{i18n.t('custom_easy_Config')}</TableCell>
-                            <TableCell style={styles.header}>{i18n.t('custom_easy_Tab')}</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {this.state.instances.map((row) => (
-                            <TableRow key={row.id}>
-                                <TableCell component="th" scope="row">{row.id}</TableCell>
-                                <TableCell>
-                                    {row.config ?
-                                        <Checkbox checked={accessAllowedConfigs.includes(row.id)}
-                                            onClick={() => {
-                                                const _accessAllowedConfigs = [...accessAllowedConfigs];
-                                                const pos = _accessAllowedConfigs.indexOf(row.id);
-                                                if (pos !== -1) {
-                                                    _accessAllowedConfigs.splice(pos, 1);
-                                                } else {
-                                                    _accessAllowedConfigs.push(row.id);
-                                                    _accessAllowedConfigs.sort();
-                                                }
-                                                this.onChange('accessAllowedConfigs', _accessAllowedConfigs);
-                                            }}
-                                        />
-                                    : null}</TableCell>
-                                <TableCell>
-                                    {row.adminTab ?
-                                        <Checkbox
-                                            checked={accessAllowedTabs.includes(row.id)}
-                                             onClick={() => {
-                                                 const _accessAllowedTabs = [...accessAllowedTabs];
-                                                 const pos = _accessAllowedTabs.indexOf(row.id);
-                                                 if (pos !== -1) {
-                                                     _accessAllowedTabs.splice(pos, 1);
-                                                 } else {
-                                                     _accessAllowedTabs.push(row.id);
-                                                     _accessAllowedTabs.sort();
-                                                 }
-                                                 this.onChange('accessAllowedTabs', _accessAllowedTabs);
-                                             }}
-                                        /> : null}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>;
+            return !attr.length ? obj[name] : null;
         }
+
+        return ConfigCustomInstancesSelector.getAttr(obj, attr.split('.'));
+    }
+
+    static isIp(ip) {
+        if (typeof ip === 'string') {
+            if (ip.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+                return 'ipv4';
+            }
+            if (ip.match(/^[\da-fA-F:]+$/)) {
+                return 'ipv6';
+            }
+        }
+        return null;
+    }
+
+    collectIpAddresses(instances, ownAddresses) {
+        let result = [];
+
+        instances = instances || this.state.instances;
+        for (let i = 0; i < instances.length; i++) {
+            const adapter = ADAPTERS.find(item => item.adapter === instances[i].name);
+            if (adapter && instances[i].native) {
+                const attr = adapter.attr;
+                if (instances[i].native[attr]) {
+                    if (adapter.arrayAttr) {
+                        if (Array.isArray(instances[i].native[attr])) {
+                            for (let j = 0; j < instances[i].native[attr].length; j++) {
+                                const item = instances[i].native[attr][j];
+                                const ip = ConfigCustomInstancesSelector.getAttr(item, adapter.arrayAttr);
+                                const type = ConfigCustomInstancesSelector.isIp(ip);
+                                if (type) {
+                                    result.push({
+                                        ip,
+                                        type,
+                                        name: instances[i].name,
+                                    });
+                                }
+                            }
+                        }
+                    } else {
+                        const ip = ConfigCustomInstancesSelector.getAttr(instances[i].native, attr);
+                        const type = ConfigCustomInstancesSelector.isIp(ip);
+                        if (type) {
+                            result.push({
+                                ip,
+                                type,
+                                name: instances[i].name,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        result = result.filter(item =>
+            !ownAddresses.includes(item.ip) ||
+            item.ip === '0.0.0.0' ||
+            item.ip === 'localhost' ||
+            item.ip === '127.0.0.1'
+        );
+
+        // filter duplicates
+        const unique = [];
+        for (let i = 0; i < result.length; i++) {
+            if (!unique.find(item => item.ip === result[i].ip)) {
+                unique.push(result[i]);
+            }
+        }
+
+        return unique;
+    }
+
+    renderItem(error, disabled, defaultValue) {
+        if (!this.state.ips) {
+            return null;
+        }
+        const instanceIPs = ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [];
+
+        return <TableContainer>
+            <Table style={styles.table} size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell style={styles.header}>{i18n.t('custom_kisshome_enabled')}</TableCell>
+                        <TableCell style={styles.header}>{i18n.t('custom_kisshome_ip')}</TableCell>
+                        <TableCell style={styles.header}>{i18n.t('custom_kisshome_name')}</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {this.state.ips.map((row, i) => <TableRow key={row.id}>
+                        <TableCell scope="row" style={styles.td}>
+                            <Checkbox
+                                checked={instanceIPs.includes(row.ip)}
+                                onClick={() => {
+                                    const _instanceIPs = [...instanceIPs];
+                                    const pos = _instanceIPs.indexOf(row.ip);
+                                    if (pos !== -1) {
+                                        _instanceIPs.splice(pos, 1);
+                                    } else {
+                                        _instanceIPs.push(row.ip);
+                                        _instanceIPs.sort();
+                                    }
+                                    this.onChange('instanceIPs', _instanceIPs);
+                                }}
+                            />
+                        </TableCell>
+                        <TableCell style={styles.td}>{row.ip}</TableCell>
+                        <TableCell style={styles.td}>{row.name}</TableCell>
+                    </TableRow>)}
+                </TableBody>
+            </Table>
+        </TableContainer>;
     }
 }
 

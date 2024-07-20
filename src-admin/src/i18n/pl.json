@@ -1,5 +1,5 @@
 {
-  "custom_easy_Instance": "Instancja",
-  "custom_easy_Config": "Konfiguracja",
-  "custom_easy_Tab": "Patka"
+  "custom_kisshome_enabled": "Włączony",
+  "custom_kisshome_ip": "adres IP",
+  "custom_kisshome_name": "Nazwa adaptera"
 }

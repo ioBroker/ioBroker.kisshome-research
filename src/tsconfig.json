@@ -38,12 +38,13 @@
     "useUnknownInCatchVariables": false,
   },
   "include": [
-    "src/**/*.ts",
+    "./**/*.ts",
     "./.eslintrc.js"
   ],
   "exclude": [
     "build/**",
     "node_modules/**",
+    "../node_modules/**",
     "src-admin/**"
   ]
 }

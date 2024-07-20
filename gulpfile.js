@@ -8,6 +8,8 @@ const gulp      = require('gulp');
 const fs        = require('node:fs');
 const cp        = require('node:child_process');
 
+const srcAdmin = `${__dirname}/src-admin/`;
+
 function deleteFoldersRecursive(path, exceptions) {
     if (fs.existsSync(path)) {
         const files = fs.readdirSync(path);
@@ -29,7 +31,7 @@ function deleteFoldersRecursive(path, exceptions) {
 }
 
 gulp.task('0-clean', done => {
-    deleteFoldersRecursive(`${__dirname}/admin`, ['kisshome-research.png', 'jsonConfig.json']);
+    deleteFoldersRecursive(`${__dirname}/admin`, ['kisshome-research.png', 'jsonConfig.json', 'i18n']);
     deleteFoldersRecursive(`${__dirname}/src-admin/build`);
     done();
 });

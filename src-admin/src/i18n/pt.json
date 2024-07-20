@@ -1,5 +1,5 @@
 {
-  "custom_easy_Instance": "Instância",
-  "custom_easy_Config": "Configuração",
-  "custom_easy_Tab": "Aba"
+  "custom_kisshome_enabled": "Habilitado",
+  "custom_kisshome_ip": "endereço de IP",
+  "custom_kisshome_name": "Nome do adaptador"
 }
