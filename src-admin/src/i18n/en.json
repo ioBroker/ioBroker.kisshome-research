@@ -2,5 +2,8 @@
   "custom_kisshome_enabled": "Enabled",
   "custom_kisshome_ip": "IP address",
   "custom_kisshome_name": "Adapter name",
-  "custom_kisshome_vendor": "Vendor"
+  "custom_kisshome_vendor": "Vendor",
+  "custom_kisshome_mac": "MAC-Address",
+  "custom_kisshome_unselect_all": "Disable all",
+  "custom_kisshome_select_all": "Enable all"
 }

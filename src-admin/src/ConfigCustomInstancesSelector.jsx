@@ -12,13 +12,14 @@ import {
     TextField, LinearProgress,
 } from '@mui/material';
 
+import { Delete } from '@mui/icons-material';
+
 // important to make from package and not from some children.
 // invalid
 // import ConfigGeneric from '@iobroker/adapter-react-v5/ConfigGeneric';
 // valid
 import { ConfigGeneric } from '@iobroker/json-config';
 import { i18n } from '@iobroker/adapter-react-v5';
-import {Delete} from "@mui/icons-material";
 
 const styles = {
     table: {
@@ -243,15 +244,47 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         /** @type {{mac: string; ip: string; desc: string; enabled: boolean}[]} */
         const instanceIPs = ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [];
 
-        const notFound = this.state.ips ? instanceIPs.filter(ip => !this.state.ips.find(item => item.ip === ip)) : instanceIPs;
+        const notFound = this.state.ips ?
+            instanceIPs.filter(iItem => !this.state.ips.find(item => item.ip === iItem.ip)) :
+            instanceIPs;
+
+        const allEnabled = instanceIPs.every(item => item.enabled) &&
+            (this.state.ips ? this.state.ips.every(item => instanceIPs.find(iItem => iItem.ip === item.ip)) : true);
 
         return <TableContainer>
             {this.state.runningRequest ? <LinearProgress /> : <div style={{ height: 2, width: '100%' }} />}
             <Table style={styles.table} size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell style={styles.header}>{i18n.t('custom_kisshome_enabled')}</TableCell>
+                        <TableCell style={styles.header}>
+                            <Checkbox
+                                title={allEnabled ? i18n.t('custom_kisshome_unselect_all') : i18n.t('custom_kisshome_select_all')}
+                                checked={allEnabled}
+                                indeterminate={!allEnabled && instanceIPs.length > 0}
+                                onClick={() => {
+                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                                    if (allEnabled) {
+                                        _instanceIPs.forEach(item => item.enabled = false);
+                                        for (let i = _instanceIPs.length - 1; i >= 0; i--) {
+                                            if (this.state.ips.find(item => item.ip === _instanceIPs[i].ip)) {
+                                                _instanceIPs.splice(i, 1);
+                                            }
+                                        }
+                                    } else {
+                                        _instanceIPs.forEach(item => item.enabled = true);
+                                        this.state.ips.forEach(item => {
+                                            if (!_instanceIPs.find(iItem => item.ip === iItem.ip)) {
+                                                _instanceIPs.push({ ip: item.ip, mac: item.mac, desc: item.desc, enabled: true });
+                                            }
+                                        });
+                                        _instanceIPs.forEach(item => item.enabled = true);
+                                    }
+                                    this.onChange('instanceIPs', _instanceIPs);
+                                }}
+                            />
+                        </TableCell>
                         <TableCell style={styles.header}>{i18n.t('custom_kisshome_ip')}</TableCell>
+                        <TableCell style={styles.header}>{i18n.t('custom_kisshome_mac')}</TableCell>
                         <TableCell style={styles.header}>{i18n.t('custom_kisshome_vendor')}</TableCell>
                         <TableCell style={styles.header}>{i18n.t('custom_kisshome_name')}</TableCell>
                         <TableCell style={styles.header} />
@@ -261,7 +294,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                     {this.state.ips?.map((row, i) => <TableRow key={i}>
                         <TableCell scope="row" style={styles.td}>
                             <Checkbox
-                                checked={!!row.enabled}
+                                checked={!!instanceIPs.find(item => item.ip === row.ip)?.enabled}
                                 onClick={() => {
                                     const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
                                     const pos = _instanceIPs.findIndex(item => item.ip === row.ip);
@@ -276,7 +309,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         </TableCell>
                         <TableCell style={styles.td}>{row.ip}</TableCell>
                         <TableCell style={styles.td}>{row.mac || ''}</TableCell>
-                        <TableCell style={styles.td}>{row.vendor || ''}</TableCell>
+                        <TableCell style={styles.td}>{this.state.vendors?.[row.mac] || ''}</TableCell>
                         <TableCell style={styles.td}>{row.desc}</TableCell>
                         <TableCell style={styles.td} />
                     </TableRow>)}
@@ -315,7 +348,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 variant="standard"
                             />
                         </TableCell>
-                        <TableCell style={styles.td}>{row.vendor || ''}</TableCell>
+                        <TableCell style={styles.td}>{this.state.vendors?.[row.mac] || ''}</TableCell>
                         <TableCell style={styles.td}>
                             <TextField
                                 fullWidth

@@ -1,5 +1,9 @@
 {
   "custom_kisshome_enabled": "Activé",
   "custom_kisshome_ip": "adresse IP",
-  "custom_kisshome_name": "Nom de l'adaptateur"
+  "custom_kisshome_name": "Nom de l'adaptateur",
+  "custom_kisshome_vendor": "Fournisseur",
+  "custom_kisshome_mac": "Adresse Mac",
+  "custom_kisshome_select_all": "Activer tout",
+  "custom_kisshome_unselect_all": "Désactiver tous les"
 }

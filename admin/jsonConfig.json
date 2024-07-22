@@ -88,8 +88,7 @@
                     "newLine": true,
                     "type": "custom",
                     "sm": 12,
-                    "md": 6,
-                    "lg": 6,
+                    "lg": 9,
                     "i18n": true,
                     "url": "custom/customComponents.js",
                     "name": "ConfigCustomKissHomeResearchSet/Components/ConfigCustomInstancesSelector"

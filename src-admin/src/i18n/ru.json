@@ -1,5 +1,9 @@
 {
   "custom_kisshome_enabled": "Включено",
   "custom_kisshome_ip": "айпи адрес",
-  "custom_kisshome_name": "Имя адаптера"
+  "custom_kisshome_name": "Имя адаптера",
+  "custom_kisshome_vendor": "Продавец",
+  "custom_kisshome_mac": "MAC-адрес",
+  "custom_kisshome_select_all": "Включить все",
+  "custom_kisshome_unselect_all": "Отключить все"
 }
