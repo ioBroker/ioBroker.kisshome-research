@@ -17,7 +17,7 @@ To use this adapter, you must first register on the [KISSHome research](https://
 
 To run this adapter, you need:
 - More than 3 smart home devices
-- Fritz!Box Router. Without Fritz!Box, the adapter will not work.
+- Fritz!Box Router. Without `Fritz!Box`, the adapter will not work.
 - iobroker must run on debian/raspbian (or at least on linux, where the following commands are available: `which`, `rsync`)
 
 <!--
