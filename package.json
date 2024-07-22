@@ -53,8 +53,7 @@
     "admin/",
     "io-package.json",
     "LICENSE",
-    "build/",
-    "data/"
+    "build/"
   ],
   "scripts": {
     "test": "mocha --exit",
