@@ -6,6 +6,7 @@ import axios from 'axios';
 import crypto from 'node:crypto';
 import http from 'node:http';
 import fs from 'node:fs';
+import { URL } from 'node:url';
 
 export async function getMacForIp(ip: string): Promise<{ mac: string; vendor?: string; ip: string } | null> {
     const mac = await toMAC(ip);
@@ -119,19 +120,21 @@ export function startRecordingOnFritzBox(
     ip: string,
     sid: string,
     iface: string,
-    IPs: { mac: string; ip: string; description: string }[],
+    MACs: string[],
     targetFile: string,
-    onEnd: (error: Error | null, packetCounter?: number) => void,
-    terminateContext?: { terminate: boolean } | undefined | null,
+    onEnd: ((error: Error | null, packetCounter?: number) => void) | null,
+    terminateContext?: {
+        terminate: boolean,
+        controller: AbortController | null,
+    } | undefined | null,
     progress?: (packets: number) => void,
 ) {
-    const filter = `ether host ${IPs.filter(ip => ip.mac).join(' || ')}`;
+    const filter = `ether host ${MACs.join(' || ')}`;
 
     const captureUrl = `http://${ip}/cgi-bin/capture_notimeout?ifaceorminor=${iface}&snaplen=${MAX_PACKET_LENGTH}&filter=${filter}&capture=Start&sid=${sid}`;
 
     let first = false;
-    // create empty file
-    fs.writeFileSync(targetFile, '');
+
     const context: {
         data: Buffer;
         packets: Buffer[];
@@ -151,7 +154,30 @@ export function startRecordingOnFritzBox(
         }
     };
 
-    const req = http.get(captureUrl, res => {
+    const executeOnEnd = (error: Error | null, packetCounter: number) => {
+        timeout && clearTimeout(timeout);
+        timeout = null;
+        if (context.packets.length) {
+            packetCounter += context.packets.length;
+            fs.appendFileSync(targetFile, Buffer.concat(context.packets));
+            context.packets = [];
+        }
+        onEnd && onEnd(error, packetCounter);
+        onEnd = null;
+    }
+
+    // parse URL address
+    const parsed = new URL(captureUrl);
+
+    const controller = terminateContext?.controller || new AbortController();
+
+    const req = http.request({
+        hostname: parsed.hostname,
+        port: parsed.port,
+        path: parsed.pathname,
+        method: 'GET',
+        signal: controller.signal,
+    }, res => {
         res.on('data', (chunk: Buffer) => {
             // add data to buffer
             context.data = Buffer.concat([context.data, chunk]);
@@ -189,37 +215,27 @@ export function startRecordingOnFritzBox(
                     informProgress(packetCounter);
                 }, 1000);
             }
+
+            if (terminateContext?.terminate) {
+                controller.abort()
+                executeOnEnd(null, packetCounter);
+                return;
+            }
         });
 
-        res.on('end', () => {
-            timeout && clearTimeout(timeout);
-            timeout = null;
-            if (context.packets.length) {
-                packetCounter += context.packets.length;
-                fs.appendFileSync(targetFile, Buffer.concat(context.packets));
-                context.packets = [];
-            }
-            onEnd && onEnd(null, packetCounter);
-        });
-        res.on('error', (error: Error) => {
-            timeout && clearTimeout(timeout);
-            timeout = null;
-            if (context.packets.length) {
-                packetCounter += context.packets.length;
-                fs.appendFileSync(targetFile, Buffer.concat(context.packets));
-                context.packets = [];
-            }
-            onEnd && onEnd(error, packetCounter);
-        });
+        res.on('end', () => executeOnEnd(null, packetCounter));
+
+        res.on('error', (error: Error) => executeOnEnd(error, packetCounter));
     });
 
-    req.on('error', error => {
-        timeout && clearTimeout(timeout);
-        timeout = null;
-        if (context.packets.length) {
-            fs.appendFileSync(targetFile, Buffer.concat(context.packets));
-            context.packets = [];
-        }
-        onEnd && onEnd(error, packetCounter);
+    req.on('error', error => executeOnEnd(error, packetCounter));
+}
+
+export function generateKeys(): { publicKey: string; privateKey: string } {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
+    return { publicKey, privateKey };
 }

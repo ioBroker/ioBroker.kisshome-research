@@ -18,7 +18,7 @@
                     "newLine": true,
                     "type": "staticLink",
                     "sm": 12,
-                    "href": "https://kisshome-feldversuch.if-is.net/register",
+                    "href": "https://kisshome-feldversuch.if-is.net/#register",
                     "text": "To participate in the KISSHome research, you need to register here."
                 },
                 "fritzbox": {

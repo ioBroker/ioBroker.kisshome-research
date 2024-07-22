@@ -1,8 +1,15 @@
 import * as utils from '@iobroker/adapter-core';
 import fs from 'node:fs';
-import { getDefaultGateway, getMacForIp } from './lib/utils';
+import axios from 'axios';
+import {
+    getDefaultGateway, getMacForIp,
+    generateKeys, startRecordingOnFritzBox,
+    getFritzBoxToken,
+} from './lib/utils';
 
 type KISSHomeResearchConfig = {
+    /** Registered email address */
+    email: string;
     /** Fritzbox IP address */
     fritzbox: string;
     /** Fritzbox login */
@@ -25,8 +32,25 @@ type KISSHomeResearchConfig = {
     }[];
 }
 
+interface KeysObject extends ioBroker.OtherObject {
+    native: {
+        publicKey: string;
+        privateKey: string;
+    };
+}
+
 export class KISSHomeResearchAdapter extends utils.Adapter {
     protected tempDir: string = '';
+
+    private uniqueMacs: string[] = [];
+
+    private sid: string = '';
+
+    private startTimeout: ioBroker.Timeout | undefined;
+
+    private stopContext: { terminate: boolean; controller: AbortController | null } = { terminate: false, controller: null };
+
+    private recordingRunning: boolean = false;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -34,8 +58,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             name: 'kisshome-research',
         });
         this.on('ready', () => this.onReady());
-        this.on('stateChange', (id, state) => this.onStateChange(id, state));
-        this.on('objectChange', (id /* , object */) => this.onObjectChange(id));
         this.on('unload', callback => this.onUnload(callback));
         this.on('message', this.onMessage.bind(this));
     }
@@ -90,9 +112,21 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             }
         }
 
+        // remove running flag
+        const runningState = await this.getStateAsync('info.connection');
+        if (runningState?.val) {
+            await this.setState('info.connection', false, true);
+        }
+
+        const captured = await this.getStateAsync('info.capturedPackets');
+        if (captured?.val) {
+            await this.setState('info.capturedPackets', 0, true);
+        }
+
         // try to get MAC addresses for all IPs
         const IPs = [...config.customIPs, ...config.instanceIPs];
         const tasks = IPs.filter(ip => !ip.mac);
+
         if (tasks.length) {
             try {
                 const macs = await KISSHomeResearchAdapter.getMacForIps(tasks.map(t => t.ip));
@@ -110,6 +144,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             }
         }
 
+        // take only unique MAC addresses
+        this.uniqueMacs = [];
+        IPs.forEach(item => !this.uniqueMacs.includes(item.mac) && this.uniqueMacs.push(item.mac));
+
         // detect temp directory
         this.tempDir = config.tempDir || '/run/shm';
         if (fs.existsSync(this.tempDir)) {
@@ -125,13 +163,166 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             return this.terminate(11);
         }
 
+        let privateKey: string;
+        let publicKey: string;
+
+        // retrieve public and private keys
+        let keysObj: KeysObject | null;
+        try {
+            keysObj = await this.getObjectAsync('info.keys') as KeysObject;
+        } catch (e) {
+            // ignore
+            keysObj = null;
+        }
+        if (!keysObj || !keysObj.native?.publicKey || !keysObj.native?.privateKey) {
+            this.log.info('Generating keys for first time');
+            const result = generateKeys();
+            privateKey = result.privateKey;
+            publicKey = result.publicKey;
+
+            keysObj = {
+                _id: 'info.keys',
+                type: 'config',
+                common: {
+                    name: {
+                        en: 'Public and private keys',
+                        de: 'Öffentliche und private Schlüssel',
+                        ru: 'Публичные и частные ключи',
+                        pt: 'Chaves públicas e privadas',
+                        nl: 'Openbare en privésleutels',
+                        fr: 'Clés publiques et privées',
+                        it: 'Chiavi pubbliche e private',
+                        es: 'Claves públicas y privadas',
+                        pl: 'Klucze publiczne i prywatne',
+                        uk: 'Публічні та приватні ключі',
+                        'zh-cn': '公钥和私钥'
+                    }
+                },
+                native: {
+                    publicKey,
+                    privateKey,
+                },
+            };
+            await this.setObjectAsync(keysObj._id, keysObj);
+        } else {
+            privateKey = keysObj.native.privateKey;
+            publicKey = keysObj.native.publicKey;
+        }
+
+        if (!publicKey || !privateKey) {
+            this.log.error('Cannot generate keys');
+            return;
+        }
+        if (!config.email) {
+            this.log.error('No email provided. Please provide an email address in the configuration');
+            this.log.error('You must register this email first on https://kisshome-feldversuch.if-is.net/#register');
+            return;
+        }
+        try {
+            // register on the cloud
+            const response = await axios.post(`https://kisshome-experiments.if-is.net/api/v1/registerKey/${config.email}`, {
+                publicKey,
+            });
+            if (response.status === 200) {
+                this.log.info('Successfully registered on the cloud');
+            } else {
+                if (response.status === 404) {
+                    this.log.error(`Cannot register on the cloud: unknown email address`);
+                } else if (response.status === 403) {
+                    this.log.error(`Cannot register on the cloud: public key changed`);
+                } else {
+                    this.log.error(`Cannot register on the cloud: ${response.data || response.statusText || response.status}`);
+                }
+                return;
+            }
+        } catch (e) {
+            this.log.error(`Cannot register on the cloud: ${e}`);
+            return;
+        }
+
         this.saveMetaFile(IPs);
+
+        // start the monitoring
+        this.startRecording(config)
+            .catch(e => this.log.error(`Cannot start recording: ${e}`));
+    }
+
+    restartRecording(config: KISSHomeResearchConfig): void {
+        this.startTimeout && clearTimeout(this.startTimeout);
+        this.startTimeout = this.setTimeout(() => {
+            this.startTimeout = undefined;
+            this.startRecording(config)
+                .catch(e => this.log.error(`Cannot start recording: ${e}`));
+        }, 10000);
+    }
+
+    async startRecording(config: KISSHomeResearchConfig) {
+        // take sid from fritzbox
+        if (!this.sid) {
+            try {
+                this.sid = await getFritzBoxToken(config.fritzbox, config.login, config.password);
+            } catch (e) {
+                this.log.error(`Cannot get SID from FritzBox: ${e}`);
+            }
+        }
+
+        if (this.sid) {
+            const fileName = `${this.tempDir}/${KISSHomeResearchAdapter.getTimestamp()}.pcap`;
+
+            const captured = await this.getStateAsync('info.capturedPackets');
+            if (captured?.val) {
+                await this.setState('info.capturedPackets', 0, true);
+            }
+            this.stopContext.controller = new AbortController();
+
+            startRecordingOnFritzBox(
+                config.fritzbox,
+                this.sid,
+                config.iface,
+                this.uniqueMacs,
+                fileName,
+                (error: Error | null, packets?: number) => {
+                    if (error?.message === 'not authenticated') {
+                        this.sid = '';
+                    }
+                    if (this.recordingRunning) {
+                        this.log.info(`Recording stopped`);
+                        this.recordingRunning = false;
+                        this.setState('info.connection', false, true);
+                    }
+
+                    if (packets !== undefined && packets !== null) {
+                        this.setState('info.capturedPackets', packets, true);
+                    }
+
+                    error && this.log.error(`Error while recording: ${error}`);
+                    if (!this.stopContext.terminate) {
+                        this.restartRecording(config);
+                    }
+                },
+                this.stopContext,
+                (packets: number) => {
+                    if (!this.recordingRunning) {
+                        this.recordingRunning = true;
+                        this.setState('info.connection', true, true);
+                    }
+                    this.setState('info.capturedPackets', packets, true);
+                },
+            );
+        } else {
+            // try to get the token in 10 seconds again. E.g., if fritzbox is rebooting
+            this.restartRecording(config);
+        }
+    }
+
+    static getTimestamp(): string {
+        const now = new Date();
+        return `${now.getUTCFullYear()}-${(now.getUTCMonth() + 1).toString().padStart(2, '0')}-${now.getUTCDate().toString().padStart(2, '0')}_${now.getUTCHours().toString().padStart(2, '0')}-${now.getUTCMinutes().toString().padStart(2, '0')}-${now.getUTCSeconds().toString().padStart(2, '0')}`;
     }
 
     saveMetaFile(IPs: { mac: string; ip: string; description: string }[]): void {
         const text = KISSHomeResearchAdapter.getDescriptionFile(IPs);
-        const now = new Date();
-        fs.writeFileSync(`${this.tempDir}/${now.getUTCFullYear()}-${(now.getUTCMonth() + 1).toString().padStart(2, '0')}-${now.getUTCDate().toString().padStart(2, '0')}_${now.getUTCHours().toString().padStart(2, '0')}-${now.getUTCMinutes().toString().padStart(2, '0')}-${now.getUTCSeconds().toString().padStart(2, '0')}_meta.json`, text);
+        fs.writeFileSync(`${this.tempDir}/${KISSHomeResearchAdapter.getTimestamp()}_meta.json`, text);
     }
 
     static getDescriptionFile(IPs: { mac: string; ip: string; description: string }[]): string {
@@ -163,19 +354,24 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
     }
 
     async onUnload(callback: () => void): Promise<void> {
+        if (this.recordingRunning) {
+            this.recordingRunning = false;
+            this.setState('info.connection', false, true);
+        }
+        this.startTimeout && clearTimeout(this.startTimeout);
+        this.startTimeout = undefined;
+
+        this.stopContext.terminate = true;
+        if (this.stopContext.controller) {
+            this.stopContext.controller.abort();
+            this.stopContext.controller = null;
+        }
+
         try {
             callback();
         } catch (e) {
             callback();
         }
-    }
-
-    async onObjectChange(id: string/*, obj: ioBroker.Object | null | undefined*/): Promise<void> {
-
-    }
-
-    async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
-
     }
 }
 
