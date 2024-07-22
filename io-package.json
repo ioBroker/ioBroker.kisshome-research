@@ -75,11 +75,14 @@
     "password"
   ],
   "native": {
-    "fritzbox": "192.168.1.1",
+    "fritzbox": "0.0.0.0",
+    "iface": "wlan_wan",
     "login": "",
     "password": "",
+    "tempDir": "",
     "customIPs": [],
-    "instanceIPs": []
+    "instanceIPs": [],
+    "recordingEnabled": false
   },
   "objects": [],
   "instanceObjects": [

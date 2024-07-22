@@ -1,8 +1,10 @@
 {
   "General settings": "General settings",
-  "Known instances": "Known instances",
+  "Known IP addresses": "Known IP addresses",
   "FritzBox IP": "FritzBox IP",
   "Email": "Email",
+  "Recording enabled": "Recording enabled",
+  "Recording": "Recording",
   "Description": "Description",
   "Custom IP addresses": "Custom IP addresses",
   "IP address": "IP address",

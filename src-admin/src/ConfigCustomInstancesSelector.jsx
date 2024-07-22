@@ -8,8 +8,9 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Checkbox,
-}  from '@mui/material';
+    Checkbox, IconButton,
+    TextField, LinearProgress,
+} from '@mui/material';
 
 // important to make from package and not from some children.
 // invalid
@@ -17,6 +18,7 @@ import {
 // valid
 import { ConfigGeneric } from '@iobroker/json-config';
 import { i18n } from '@iobroker/adapter-react-v5';
+import {Delete} from "@mui/icons-material";
 
 const styles = {
     table: {
@@ -89,7 +91,68 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
 
                 const ips = this.collectIpAddresses(instances, address);
 
-                this.setState({ instances, ips });
+                const newState = {
+                    instances,
+                    ips,
+                };
+                // get vendor and MAC-Address information
+                if (this.props.alive) {
+                    const instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                    const addresses = ips.map(item => item.ip);
+                    // add to detected IPs the IPs from saved configuration
+                    instanceIPs.forEach(item => {
+                        if (!addresses.includes(item.ip)) {
+                            addresses.push(item.ip);
+                        }
+                    });
+                    newState.runningRequest = true;
+
+                    this.props.socket.sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', addresses)
+                        .then(result => {
+                            let changedState = false;
+                            const vendors = {};
+                            result.forEach(item => {
+                                const ip = item.ip;
+                                const pos = ips.findIndex(i => i.ip === ip);
+                                if (pos !== -1) {
+                                    changedState = true;
+                                    ips[pos].mac = item.mac;
+                                    vendors[item.mac] = item.vendor;
+                                }
+                            });
+
+                            let changed = false;
+                            // detect changed MAC addresses in saved information
+                            instanceIPs.forEach(item => {
+                                const pos = ips.findIndex(i => i.ip === item.ip);
+                                if (pos !== -1) {
+                                    if (item.mac !== ips[pos].mac) {
+                                        changed = true;
+                                    }
+                                    if (!vendors[item.mac]) {
+                                        vendors[item.mac] = ips[pos].vendor;
+                                        changedState = true;
+                                    }
+                                }
+                            });
+                            if (changedState) {
+                                this.setState({ ips, vendors, runningRequest: false });
+                            } else {
+                                this.setState({ runningRequest: false });
+                            }
+                            if (changed) {
+                                this.onChange('instanceIPs', instanceIPs);
+                            }
+                        })
+                        .catch(e => {
+                            if (e.toString() !== 'no results') {
+                                window.alert(`Cannot get MAC addresses: ${e}`);
+                            }
+                            this.setState({ runningRequest: false });
+                        });
+                }
+
+                this.setState(newState);
             });
     }
 
@@ -137,7 +200,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                     result.push({
                                         ip,
                                         type,
-                                        name: instances[i].name,
+                                        desc: instances[i].name,
                                     });
                                 }
                             }
@@ -149,7 +212,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                             result.push({
                                 ip,
                                 type,
-                                name: instances[i].name,
+                                desc: instances[i].name,
                             });
                         }
                     }
@@ -158,10 +221,11 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         }
 
         result = result.filter(item =>
-            !ownAddresses.includes(item.ip) ||
-            item.ip === '0.0.0.0' ||
-            item.ip === 'localhost' ||
-            item.ip === '127.0.0.1'
+            !ownAddresses.includes(item.ip) &&
+            item.ip !== '0.0.0.0' &&
+            item.ip !== 'localhost' &&
+            item.ip !== '127.0.0.1' &&
+            item.ip !== '::1'
         );
 
         // filter duplicates
@@ -176,40 +240,105 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
     }
 
     renderItem(error, disabled, defaultValue) {
-        if (!this.state.ips) {
-            return null;
-        }
+        /** @type {{mac: string; ip: string; desc: string; enabled: boolean}[]} */
         const instanceIPs = ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [];
 
+        const notFound = this.state.ips ? instanceIPs.filter(ip => !this.state.ips.find(item => item.ip === ip)) : instanceIPs;
+
         return <TableContainer>
+            {this.state.runningRequest ? <LinearProgress /> : <div style={{ height: 2, width: '100%' }} />}
             <Table style={styles.table} size="small">
                 <TableHead>
                     <TableRow>
                         <TableCell style={styles.header}>{i18n.t('custom_kisshome_enabled')}</TableCell>
                         <TableCell style={styles.header}>{i18n.t('custom_kisshome_ip')}</TableCell>
+                        <TableCell style={styles.header}>{i18n.t('custom_kisshome_vendor')}</TableCell>
                         <TableCell style={styles.header}>{i18n.t('custom_kisshome_name')}</TableCell>
+                        <TableCell style={styles.header} />
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {this.state.ips.map((row, i) => <TableRow key={row.id}>
+                    {this.state.ips?.map((row, i) => <TableRow key={i}>
                         <TableCell scope="row" style={styles.td}>
                             <Checkbox
-                                checked={instanceIPs.includes(row.ip)}
+                                checked={!!row.enabled}
                                 onClick={() => {
-                                    const _instanceIPs = [...instanceIPs];
-                                    const pos = _instanceIPs.indexOf(row.ip);
-                                    if (pos !== -1) {
-                                        _instanceIPs.splice(pos, 1);
+                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                                    const pos = _instanceIPs.findIndex(item => item.ip === row.ip);
+                                    if (pos === -1) {
+                                        _instanceIPs.push({ ip: row.ip, mac: row.mac, desc: row.desc, enabled: true });
                                     } else {
-                                        _instanceIPs.push(row.ip);
-                                        _instanceIPs.sort();
+                                        _instanceIPs.splice(pos, 1);
                                     }
                                     this.onChange('instanceIPs', _instanceIPs);
                                 }}
                             />
                         </TableCell>
                         <TableCell style={styles.td}>{row.ip}</TableCell>
-                        <TableCell style={styles.td}>{row.name}</TableCell>
+                        <TableCell style={styles.td}>{row.mac || ''}</TableCell>
+                        <TableCell style={styles.td}>{row.vendor || ''}</TableCell>
+                        <TableCell style={styles.td}>{row.desc}</TableCell>
+                        <TableCell style={styles.td} />
+                    </TableRow>)}
+                    {notFound.map((row, i) => <TableRow key={i}>
+                        <TableCell scope="row" style={styles.td}>
+                            <Checkbox
+                                checked={instanceIPs.includes(row.ip)}
+                                onClick={() => {
+                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                                    _instanceIPs[i].enabled = !_instanceIPs[i].enabled;
+                                    this.onChange('instanceIPs', _instanceIPs);
+                                }}
+                            />
+                        </TableCell>
+                        <TableCell style={styles.td}>
+                            <TextField
+                                fullWidth
+                                value={row.ip}
+                                onChange={e => {
+                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                                    _instanceIPs[i].ip = e.target.value;
+                                    this.onChange('instanceIPs', _instanceIPs);
+                                }}
+                                variant="standard"
+                            />
+                        </TableCell>
+                        <TableCell style={styles.td}>
+                            <TextField
+                                fullWidth
+                                value={row.mac}
+                                onChange={e => {
+                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                                    _instanceIPs[i].mac = e.target.value;
+                                    this.onChange('instanceIPs', _instanceIPs);
+                                }}
+                                variant="standard"
+                            />
+                        </TableCell>
+                        <TableCell style={styles.td}>{row.vendor || ''}</TableCell>
+                        <TableCell style={styles.td}>
+                            <TextField
+                                fullWidth
+                                value={row.desc}
+                                onChange={e => {
+                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                                    _instanceIPs[i].desc = e.target.value;
+                                    this.onChange('instanceIPs', _instanceIPs);
+                                }}
+                                variant="standard"
+                            />
+                        </TableCell>
+                        <TableCell style={styles.td}>
+                            <IconButton
+                                onClick={() => {
+                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                                    _instanceIPs.splice(i, 1);
+                                    this.onChange('instanceIPs', _instanceIPs);
+                                }}
+                            >
+                                <Delete />
+                            </IconButton>
+                        </TableCell>
                     </TableRow>)}
                 </TableBody>
             </Table>

@@ -1,5 +1,6 @@
 {
   "custom_kisshome_enabled": "Enabled",
   "custom_kisshome_ip": "IP address",
-  "custom_kisshome_name": "Adapter name"
+  "custom_kisshome_name": "Adapter name",
+  "custom_kisshome_vendor": "Vendor"
 }

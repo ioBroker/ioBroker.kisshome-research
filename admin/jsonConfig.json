@@ -27,7 +27,6 @@
                     "sm": 12,
                     "md": 3,
                     "lg": 3,
-                    "default": "192.168.1.1",
                     "label": "FritzBox IP"
                 },
                 "login": {
@@ -44,6 +43,40 @@
                     "md": 6,
                     "lg": 6,
                     "label": "FritzBox Password"
+                },
+                "iface": {
+                    "newLine": true,
+                    "type": "text",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "label": "FritzBox Interface"
+                },
+                "tempDir": {
+                    "newLine": true,
+                    "type": "text",
+                    "sm": 12,
+                    "md": 3,
+                    "lg": 3,
+                    "label": "Working directory",
+                    "tooltip": "Directory for temporary files. Leave empty to use the system directory."
+                },
+                "_header": {
+                    "newLine": true,
+                    "type": "header",
+                    "size": 4,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "text": "Recording"
+                },
+                "recordingEnabled": {
+                    "type": "checkbox",
+                    "sm": 12,
+                    "md": 3,
+                    "lg": 3,
+                    "disabled": "!data.email || !data.fritzbox || data.fritzbox === '0.0.0.0' || !data.login || !data.password || !data.iface",
+                    "label": "Recording enabled"
                 }
             }
         },

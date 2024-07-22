@@ -3,15 +3,7 @@ node_modules
 tmp
 .DS_store
 iob_npm.done
-admin/i18n/flat.txt
-admin/static/media/*
-admin/static/js/*
-admin/i18n/*/flat.txt
-admin/index_m.html
-admin/favicon.ico
-admin/static/css/*
-admin/manifest.json
-admin/asset-manifest.json
+admin/custom/*
 nbproject
 /src-admin/package-lock.json
 package-lock.json
