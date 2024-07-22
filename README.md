@@ -1,5 +1,5 @@
 ![Logo](admin/kisshome-research.png)
-# ioBroker Matter Adapter
+# ioBroker KISSHome research
 
 ![Number of Installations](http://iobroker.live/badges/kisshome-research-installed.svg)
 ![Number of Installations](http://iobroker.live/badges/kisshome-research-stable.svg)
@@ -11,10 +11,14 @@
 
 **This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
 
-## Todo
-- [ ] Detect default gateway
-- [ ] ip to mac address resolution
+This special adapter was developed for the KISSHome research project. It is not intended for general use.
 
+To use this adapter, you must first register on the [KISSHome research](https://kisshome-feldversuch.if-is.net) website and get the confirmation email.
+
+To run this adapter, you need:
+- More than 3 smart home devices
+- Fritz!Box Router. Without Fritz!Box, the adapter will not work.
+- iobroker must run on debian/raspbian (or at least on linux, where the following commands are available: `which`, `rsync`)
 
 <!--
 	Placeholder for the next version (at the beginning of the line):

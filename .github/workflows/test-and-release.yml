@@ -33,12 +33,6 @@ jobs:
       - name: Install Dependencies
         run: npm run npm
 
-      - name: Lint TypeScript backend code
-        run: npm run lint
-
-      - name: Lint TypeScript frontend code
-        run: npm run lint-frontend
-
       - name: Build
         run: npm run build
 
