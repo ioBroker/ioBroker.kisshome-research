@@ -352,13 +352,19 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             // create PCAP header
             const byteArray = Buffer.alloc(6 * 4);
             // magic number
-            byteArray.writeUInt32BE(0xa1b2c3d4, 0);
-            // version
-            byteArray.writeUInt16BE(1, 4);
+            byteArray.writeUInt32LE(0xa1b2c3d4, 0);
+            // major version
+            byteArray.writeUInt16LE(2, 4);
+            // minor version
+            byteArray.writeUInt16LE(4, 6);
+            // reserved
+            byteArray.writeUInt32LE(0, 8);
+            // reserved
+            byteArray.writeUInt32LE(0, 12);
             // SnapLen
-            byteArray.writeUInt16BE(MAX_PACKET_LENGTH, 16);
+            byteArray.writeUInt16LE(MAX_PACKET_LENGTH, 16);
             // network type
-            byteArray.writeUInt32BE(2, 24);
+            byteArray.writeUInt32LE(1, 24);
 
             // get file descriptor of file
             const fd = fs.openSync(fileName, 'w');
