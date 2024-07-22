@@ -1,11 +1,17 @@
 import * as utils from '@iobroker/adapter-core';
 import fs from 'node:fs';
 import axios from 'axios';
+import { exec } from 'node:child_process';
+
 import {
     getDefaultGateway, getMacForIp,
     generateKeys, startRecordingOnFritzBox,
-    getFritzBoxToken,
+    getFritzBoxToken, getRsyncPath,
 } from './lib/utils';
+
+const PCAP_HOST = 'kisshome-experiments.if-is.net';
+// key of the kisshome-experiments.if-is.net host
+const SSH_KNOWN_KEY = 'AAAAB3NzaC1yc2EAAAADAQABAAABAQD3DvKfL9Sgjx+gWQ5L5b5Qz5vWiQpFK31B3SpbwJ0X9fJ5lX8KJx7nTt8RDD5oQdiukGgE48A1JqR/YPQp9CkHCx8bdbz3v3Ri7nEoP8YR2BaZ5j6Z8HkZdFgHnTAWzVb1Cj7M2ZQG1kLyN5B+gP';
 
 type KISSHomeResearchConfig = {
     /** Registered email address */
@@ -44,6 +50,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private uniqueMacs: string[] = [];
 
+    private __dirname: string = __dirname;
+
     private sid: string = '';
 
     private startTimeout: ioBroker.Timeout | undefined;
@@ -51,6 +59,14 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
     private stopContext: { terminate: boolean; controller: AbortController | null } = { terminate: false, controller: null };
 
     private recordingRunning: boolean = false;
+
+    private privateKeyPath: string = '';
+
+    private knownHostFile: string = '';
+
+    private workingDir: string = '';
+
+    private rsyncPath: string = '';
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -163,6 +179,14 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             return this.terminate(11);
         }
 
+        this.tempDir = this.tempDir.replace(/\\/g, '/');
+
+        if (this.tempDir.endsWith('/')) {
+            this.tempDir = this.tempDir.substring(0, this.tempDir.length - 1);
+        }
+
+        this.clearWorkingDir();
+
         let privateKey: string;
         let publicKey: string;
 
@@ -213,6 +237,44 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.log.error('Cannot generate keys');
             return;
         }
+
+        this.workingDir = `${this.tempDir}/hourly_pcaps`;
+
+        // create hourly directory
+        try {
+            if (!fs.existsSync(this.workingDir)) {
+                fs.mkdirSync(this.workingDir);
+            }
+        } catch (e) {
+            this.log.error(`Cannot create working directory: ${e}`);
+            return;
+        }
+
+        // update privateKey on disk
+        this.privateKeyPath = `${this.__dirname}/privateKey.pem`.replace(/\\/g, '/');
+        if (fs.existsSync(this.privateKeyPath)) {
+            const oldPrivateKey = fs.readFileSync(this.privateKeyPath, 'utf8');
+            if (oldPrivateKey !== privateKey) {
+                this.log.warn('Private key changed. Updating...');
+                fs.writeFileSync(this.privateKeyPath, privateKey);
+            }
+        } else {
+            fs.writeFileSync(this.privateKeyPath, privateKey);
+        }
+
+        // update known_hosts file
+        this.knownHostFile = `${this.__dirname}/kisshome_known_hosts`.replace(/\\/g, '/');
+
+        // create home known file
+        const text = `${PCAP_HOST} ssh-rsa ${SSH_KNOWN_KEY}`;
+        if (!fs.existsSync(this.knownHostFile)) {
+            this.log.debug(`Creating known_hosts file: ${this.knownHostFile}`);
+            fs.writeFileSync(this.knownHostFile, text);
+        } else if (fs.readFileSync(this.knownHostFile).toString('utf8') !== text) {
+            this.log.warn(`Updating known_hosts file: ${this.knownHostFile}`);
+            fs.appendFileSync(this.knownHostFile, text);
+        }
+
         if (!config.email) {
             this.log.error('No email provided. Please provide an email address in the configuration');
             this.log.error('You must register this email first on https://kisshome-feldversuch.if-is.net/#register');
@@ -220,7 +282,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
         try {
             // register on the cloud
-            const response = await axios.post(`https://kisshome-experiments.if-is.net/api/v1/registerKey/${config.email}`, {
+            const response = await axios.post(`https://${PCAP_HOST}/api/v1/registerKey/${config.email}`, {
                 publicKey,
             });
             if (response.status === 200) {
@@ -237,6 +299,14 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             }
         } catch (e) {
             this.log.error(`Cannot register on the cloud: ${e}`);
+            return;
+        }
+
+        // get rsync path
+        try {
+            this.rsyncPath = await getRsyncPath();
+        } catch (e) {
+            this.log.error(`Cannot get rsync path: ${e}`);
             return;
         }
 
@@ -273,6 +343,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             if (captured?.val) {
                 await this.setState('info.capturedPackets', 0, true);
             }
+
             this.stopContext.controller = new AbortController();
 
             startRecordingOnFritzBox(
@@ -322,7 +393,33 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     saveMetaFile(IPs: { mac: string; ip: string; description: string }[]): void {
         const text = KISSHomeResearchAdapter.getDescriptionFile(IPs);
-        fs.writeFileSync(`${this.tempDir}/${KISSHomeResearchAdapter.getTimestamp()}_meta.json`, text);
+        // find the latest file
+        const files = fs.readdirSync(this.workingDir);
+        files.sort((a, b) => b.localeCompare(a));
+        let latestFile = '';
+        // find the latest file and delete all other _meta.json files
+        for (const file of files) {
+            if (!latestFile && file.endsWith('_meta.json')) {
+                latestFile = file;
+            } else if (file.endsWith('_meta.json')) {
+                fs.unlinkSync(`${this.workingDir}/${file}`);
+            }
+        }
+
+        // if existing meta file found
+        if (latestFile) {
+            // compare the content
+            const oldFile = fs.readFileSync(`${this.workingDir}/${latestFile}`, 'utf8');
+            if (oldFile !== text) {
+                this.log.debug('Meta file updated');
+                fs.unlinkSync(`${this.workingDir}/${latestFile}`);
+                fs.writeFileSync(`${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}_meta.json`, text);
+            }
+        } else {
+            this.log.info('Meta file created');
+            // if not found => create new one
+            fs.writeFileSync(`${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}_meta.json`, text);
+        }
     }
 
     static getDescriptionFile(IPs: { mac: string; ip: string; description: string }[]): string {
@@ -373,6 +470,72 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             callback();
         }
     }
+
+    clearWorkingDir() {
+        try {
+            const files = fs.readdirSync(this.workingDir);
+            for (const file of files) {
+                if (file.endsWith('.pcap')) {
+                    try {
+                        fs.unlinkSync(`${this.workingDir}/${file}`);
+                    } catch (e) {
+                        this.log.error(`Cannot delete file ${this.workingDir}/${file}: ${e}`);
+                    }
+                } else if (file.endsWith('.json')) {
+                    // skip it
+                } else {
+                    // delete unknown files
+                    try {
+                        fs.unlinkSync(`${this.workingDir}/${file}`);
+                    } catch (e) {
+                        this.log.error(`Cannot delete file ${this.workingDir}/${file}: ${e}`);
+                    }
+                }
+            }
+        } catch (e) {
+            this.log.error(`Cannot read directory "${this.workingDir}": ${e}`);
+        }
+    }
+
+    startSynchronization(
+        cb?: ((error: string | null, logText?: string) => void) | null,
+    ): void {
+        const cmd = [
+            this.rsyncPath,
+            '-avr',
+            '-e',
+            `"ssh -o UserKnownHostsFile=${this.knownHostFile} -i ${this.privateKeyPath}"`,
+            this.workingDir,
+            // TODO: which user should be used here?
+            `pcaps1@${PCAP_HOST}:/dummyPath/to/remote/files/`,
+        ];
+
+        let error = '';
+        let logText = '';
+        let logError = '';
+
+        const cp = exec(cmd.join(' '), (_error, stdout, stderr) => {
+            logText = stdout || '';
+            logError = stderr || '';
+            error = _error ? _error.message : '';
+        });
+
+        cp.on('error', (error) => {
+            cb && cb(error.message, '');
+            cb = null;
+        });
+
+        cp.on('exit', (code) => {
+            // delete all pcap files if no error
+            if (!error) {
+                this.clearWorkingDir();
+            }
+
+            cb && cb(code === 0 && !error ? null : error ? error : `Exit code: ${code}`, logError + logText);
+            cb = null;
+        });
+    }
+
 }
 
 if (require.main !== module) {

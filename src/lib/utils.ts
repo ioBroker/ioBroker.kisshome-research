@@ -7,6 +7,8 @@ import crypto from 'node:crypto';
 import http from 'node:http';
 import fs from 'node:fs';
 import { URL } from 'node:url';
+import {exec} from "node:child_process";
+
 
 export async function getMacForIp(ip: string): Promise<{ mac: string; vendor?: string; ip: string } | null> {
     const mac = await toMAC(ip);
@@ -237,5 +239,22 @@ export function generateKeys(): { publicKey: string; privateKey: string } {
         publicKeyEncoding: { type: 'spki', format: 'pem' },
         privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
+
     return { publicKey, privateKey };
+}
+
+export function getRsyncPath(): Promise<string> {
+    return new Promise(resolve => {
+        if (process.platform === 'win32') {
+            resolve('rsync');
+            return;
+        }
+
+        exec('which rsync', (error, stdout, stderr) => {
+            if (error) {
+                resolve('/usr/bin/rsync');
+            }
+            resolve(stdout.trim());
+        })
+    });
 }
