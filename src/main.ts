@@ -5,9 +5,11 @@ import { exec } from 'node:child_process';
 
 import {
     getDefaultGateway, getMacForIp,
-    generateKeys, startRecordingOnFritzBox,
-    getFritzBoxToken, getRsyncPath,
+    generateKeys, getRsyncPath,
 } from './lib/utils';
+
+import {startRecordingOnFritzBox, type Context, MAX_PACKET_LENGTH} from './lib/recording';
+import { getFritzBoxToken } from './lib/fritzbox';
 
 const PCAP_HOST = 'kisshome-experiments.if-is.net';
 // key of the kisshome-experiments.if-is.net host
@@ -56,7 +58,14 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private startTimeout: ioBroker.Timeout | undefined;
 
-    private stopContext: { terminate: boolean; controller: AbortController | null } = { terminate: false, controller: null };
+    private context: Context = {
+        terminate: false,
+        controller: null,
+        packets: [],
+        totalBytes: 0,
+        totalPackets: 0,
+        buffer: Buffer.from([]),
+    };
 
     private recordingRunning: boolean = false;
 
@@ -67,6 +76,14 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
     private workingDir: string = '';
 
     private rsyncPath: string = '';
+
+    private syncRunning: boolean = false;
+
+    private saveAfterSync: boolean = false;
+
+    private recordStarted: number = 0;
+
+    private monitorInterval: ioBroker.Interval | undefined;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -85,9 +102,9 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     if (msg.callback) {
                         try {
                             const ip = await getDefaultGateway();
-                            this.sendTo(msg.from, msg.command, {result: ip}, msg.callback);
+                            this.sendTo(msg.from, msg.command, { result: ip }, msg.callback);
                         } catch (e) {
-                            this.sendTo(msg.from, msg.command, {error: e.message}, msg.callback);
+                            this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
                         }
                     }
                     break;
@@ -326,6 +343,36 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }, 10000);
     }
 
+    savePacketsToFile(){
+        if (this.context.packets.length) {
+            const packetsToSave = this.context.packets;
+            this.context.packets = [];
+
+            const fileName = `${this.tempDir}/${KISSHomeResearchAdapter.getTimestamp()}.pcap`;
+            // create PCAP header
+            const byteArray = Buffer.alloc(6 * 4);
+            // magic number
+            byteArray.writeUInt32BE(0xa1b2c3d4, 0);
+            // version
+            byteArray.writeUInt16BE(1, 4);
+            // SnapLen
+            byteArray.writeUInt16BE(MAX_PACKET_LENGTH, 16);
+            // network type
+            byteArray.writeUInt32BE(2, 24);
+
+            // get file descriptor of file
+            const fd = fs.openSync(fileName, 'w');
+            // write header
+            fs.writeSync(fd, byteArray, 0, byteArray.length, 0);
+            for (let i = 0; i < packetsToSave.length; i++) {
+                const packet = packetsToSave[i];
+                const packetBuffer = Buffer.from(packet);
+                fs.writeSync(fd, packetBuffer, 0, packetBuffer.length, 24 + i * packetBuffer.length);
+            }
+            fs.closeSync(fd);
+        }
+    }
+
     async startRecording(config: KISSHomeResearchConfig) {
         // take sid from fritzbox
         if (!this.sid) {
@@ -337,47 +384,76 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
 
         if (this.sid) {
-            const fileName = `${this.tempDir}/${KISSHomeResearchAdapter.getTimestamp()}.pcap`;
-
             const captured = await this.getStateAsync('info.capturedPackets');
             if (captured?.val) {
                 await this.setState('info.capturedPackets', 0, true);
             }
 
-            this.stopContext.controller = new AbortController();
+            this.context.controller = new AbortController();
+
+            this.context.packets = [];
+            this.context.totalBytes = 0;
+            this.context.totalPackets = 0;
+
+            this.recordStarted = Date.now();
 
             startRecordingOnFritzBox(
                 config.fritzbox,
                 this.sid,
                 config.iface,
                 this.uniqueMacs,
-                fileName,
-                (error: Error | null, packets?: number) => {
-                    if (error?.message === 'not authenticated') {
+                (error: Error | null) => {
+                    this.monitorInterval && this.clearInterval(this.monitorInterval);
+                    this.monitorInterval = undefined;
+
+                    this.savePacketsToFile();
+
+                    this.context.totalBytes = 0;
+                    this.context.totalPackets = 0;
+
+                    if (error?.message === 'Unauthorized') {
                         this.sid = '';
                     }
+
                     if (this.recordingRunning) {
                         this.log.info(`Recording stopped`);
                         this.recordingRunning = false;
                         this.setState('info.connection', false, true);
                     }
 
-                    if (packets !== undefined && packets !== null) {
-                        this.setState('info.capturedPackets', packets, true);
+                    if (this.context.packets?.length) {
+                        this.setState('info.capturedPackets', this.context.totalPackets, true);
                     }
 
                     error && this.log.error(`Error while recording: ${error}`);
-                    if (!this.stopContext.terminate) {
+                    if (!this.context.terminate) {
                         this.restartRecording(config);
                     }
                 },
-                this.stopContext,
-                (packets: number) => {
+                this.context,
+                () => {
                     if (!this.recordingRunning) {
                         this.recordingRunning = true;
                         this.setState('info.connection', true, true);
+
+                        this.monitorInterval = this.monitorInterval || this.setInterval(() => {
+                            // save if file is bigger than 50 Mb
+                            if (this.context.totalBytes > 50 * 1024 * 1024) {
+                                if (this.syncRunning) {
+                                    this.saveAfterSync = true;
+                                } else {
+                                    this.savePacketsToFile();
+                                }
+                            }
+
+                            if (Date.now() - this.recordStarted >= 3_600_0000) {
+                                this.recordStarted = Date.now();
+                                this.startSynchronization();
+                            }
+                        }, 10000);
                     }
-                    this.setState('info.capturedPackets', packets, true);
+
+                    this.setState('info.capturedPackets', this.context.totalPackets, true);
                 },
             );
         } else {
@@ -458,10 +534,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         this.startTimeout && clearTimeout(this.startTimeout);
         this.startTimeout = undefined;
 
-        this.stopContext.terminate = true;
-        if (this.stopContext.controller) {
-            this.stopContext.controller.abort();
-            this.stopContext.controller = null;
+        this.context.terminate = true;
+        if (this.context.controller) {
+            this.context.controller.abort();
+            this.context.controller = null;
         }
 
         try {
@@ -481,9 +557,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     } catch (e) {
                         this.log.error(`Cannot delete file ${this.workingDir}/${file}: ${e}`);
                     }
-                } else if (file.endsWith('.json')) {
-                    // skip it
-                } else {
+                } else if (!file.endsWith('.json')) {
                     // delete unknown files
                     try {
                         fs.unlinkSync(`${this.workingDir}/${file}`);
@@ -497,45 +571,77 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
     }
 
-    startSynchronization(
-        cb?: ((error: string | null, logText?: string) => void) | null,
-    ): void {
+    startSynchronization(): void {
+        // calculate the total number of bytes
+        let totalBytes = 0;
+        if (this.syncRunning) {
+            this.syncRunning = false;
+            this.setState('info.syncRunning', false, true);
+        }
+        try {
+            const files = fs.readdirSync(this.workingDir);
+            for (const file of files) {
+                totalBytes += fs.statSync(`${this.workingDir}/${file}`).size;
+            }
+        } catch (e) {
+            this.log.error(`Cannot read directory "${this.workingDir}": ${e}`);
+            return;
+        }
+
+        if (!totalBytes) {
+            return;
+        }
+
+        this.log.debug(`Syncing files to the cloud (${Math.round(totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
+
+        this.setState('info.syncRunning', true, true);
+
         const cmd = [
             this.rsyncPath,
             '-avr',
             '-e',
             `"ssh -o UserKnownHostsFile=${this.knownHostFile} -i ${this.privateKeyPath}"`,
             this.workingDir,
-            // TODO: which user should be used here?
-            `pcaps1@${PCAP_HOST}:/dummyPath/to/remote/files/`,
+            `${(this.config as KISSHomeResearchConfig).email.replace('@', '%40')}@${PCAP_HOST}:/dummyPath/to/remote/files/`,
         ];
 
         let error = '';
-        let logText = '';
-        let logError = '';
+
+        if (!this.syncRunning) {
+            this.syncRunning = true;
+            this.setState('info.syncRunning', true, true);
+        }
 
         const cp = exec(cmd.join(' '), (_error, stdout, stderr) => {
-            logText = stdout || '';
-            logError = stderr || '';
+            (stderr || _error) && this.log.warn(`Error by synchronization: ${stderr}, ${_error}`);
             error = _error ? _error.message : '';
         });
 
-        cp.on('error', (error) => {
-            cb && cb(error.message, '');
-            cb = null;
-        });
+        cp.on('error', (_error) => error = _error.message);
 
         cp.on('exit', (code) => {
             // delete all pcap files if no error
-            if (!error) {
+            if (!error && code === 0) {
                 this.clearWorkingDir();
             }
 
-            cb && cb(code === 0 && !error ? null : error ? error : `Exit code: ${code}`, logError + logText);
-            cb = null;
+            if (this.syncRunning) {
+                this.syncRunning = false;
+                this.setState('info.syncRunning', false, true);
+            }
+
+            if (this.saveAfterSync) {
+                this.saveAfterSync = false;
+                this.savePacketsToFile();
+            }
+
+            if (code !== 0) {
+                this.log.warn(`Cannot sync files. rsync returned ${code}, error: ${error}`);
+            } else {
+                this.log.debug(`Syncing files done with code ${code}`);
+            }
         });
     }
-
 }
 
 if (require.main !== module) {

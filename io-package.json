@@ -157,6 +157,31 @@
             "native": {}
         },
         {
+            "_id": "info.syncRunning",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "RSync is running",
+                    "de": "RSync läuft",
+                    "ru": "RSync работает",
+                    "pt": "RSync está em execução",
+                    "nl": "RSync is aan het lopen",
+                    "fr": "RSync est en cours d'exécution",
+                    "it": "RSync è in esecuzione",
+                    "es": "RSync está corriendo",
+                    "pl": "RSync działa",
+                    "uk": "RSync працює",
+                    "zh-cn": "RSync正在运行"
+                },
+                "type": "boolean",
+                "role": "state",
+                "read": true,
+                "write": false,
+                "def": 0
+            },
+            "native": {}
+        },
+        {
             "_id": "info.keys",
             "type": "config",
             "common": {
