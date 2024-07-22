@@ -23,7 +23,7 @@
 
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.0.2 (2024-07-22)
 * (bluefox) Initial commit
 
 ## License
