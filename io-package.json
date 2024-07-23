@@ -89,7 +89,7 @@
   ],
   "native": {
     "fritzbox": "0.0.0.0",
-    "iface": "wlan_wan",
+    "iface": "1-guest",
     "login": "",
     "password": "",
     "tempDir": "",

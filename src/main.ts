@@ -8,12 +8,12 @@ import {
     generateKeys, getRsyncPath,
 } from './lib/utils';
 
-import {startRecordingOnFritzBox, type Context, MAX_PACKET_LENGTH} from './lib/recording';
+import { startRecordingOnFritzBox, type Context, MAX_PACKET_LENGTH } from './lib/recording';
 import { getFritzBoxToken } from './lib/fritzbox';
 
 const PCAP_HOST = 'kisshome-experiments.if-is.net';
 // key of the kisshome-experiments.if-is.net host
-const SSH_KNOWN_KEY = 'AAAAB3NzaC1yc2EAAAADAQABAAABAQD3DvKfL9Sgjx+gWQ5L5b5Qz5vWiQpFK31B3SpbwJ0X9fJ5lX8KJx7nTt8RDD5oQdiukGgE48A1JqR/YPQp9CkHCx8bdbz3v3Ri7nEoP8YR2BaZ5j6Z8HkZdFgHnTAWzVb1Cj7M2ZQG1kLyN5B+gP';
+const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:PesPlH50RqbZUVsJ36pht255bUudtwKPcjcTCyqeel4';
 
 type KISSHomeResearchConfig = {
     /** Registered email address */
@@ -283,7 +283,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         this.knownHostFile = `${this.__dirname}/kisshome_known_hosts`.replace(/\\/g, '/');
 
         // create home known file
-        const text = `${PCAP_HOST} ssh-rsa ${SSH_KNOWN_KEY}`;
+        const text = `${PCAP_HOST} ${SSH_KNOWN_KEY}`;
         if (!fs.existsSync(this.knownHostFile)) {
             this.log.debug(`Creating known_hosts file: ${this.knownHostFile}`);
             fs.writeFileSync(this.knownHostFile, text);
@@ -608,7 +608,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             '-e',
             `"ssh -o UserKnownHostsFile=${this.knownHostFile} -i ${this.privateKeyPath}"`,
             this.workingDir,
-            `${(this.config as KISSHomeResearchConfig).email.replace('@', '%40')}@${PCAP_HOST}:/dummyPath/to/remote/files/`,
+            `pcaprecv@${PCAP_HOST}:/dummyPath/`,
         ];
 
         let error = '';

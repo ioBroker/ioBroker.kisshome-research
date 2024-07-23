@@ -42,7 +42,9 @@ function analyzePacket(context: Context): boolean {
     // If IPv4
     if (ethType === 0x0800) {
         maxBytes = 20;
+        // TODO: TCP and UDP
     }
+
     // todo: which more protocols to collect?
     // If ICMP
     // if (ethType === 1) {
