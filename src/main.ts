@@ -28,12 +28,8 @@ type KISSHomeResearchConfig = {
     tempDir: string;
     /** Fritzbox interface */
     iface: string;
-    customIPs: {
-        mac: string;
-        ip: string;
-        description: string;
-    }[];
-    instanceIPs: {
+    devices: {
+        enabled: boolean;
         mac: string;
         ip: string;
         description: string;
@@ -157,7 +153,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
 
         // try to get MAC addresses for all IPs
-        const IPs = [...config.customIPs, ...config.instanceIPs];
+        const IPs = config.devices.filter(item => item.enabled && (item.ip || item.mac));
         const tasks = IPs.filter(ip => !ip.mac);
 
         if (tasks.length) {

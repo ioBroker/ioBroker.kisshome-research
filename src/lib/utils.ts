@@ -8,7 +8,7 @@ import { exec } from "node:child_process";
 export async function getMacForIp(ip: string): Promise<{ mac: string; vendor?: string; ip: string } | null> {
     const mac = await toMAC(ip);
     if (mac) {
-        return { mac, vendor: toVendor(mac), ip };
+        return { mac: mac.toUpperCase(), vendor: toVendor(mac), ip };
     }
     return null
 }

@@ -84,47 +84,13 @@
             "type": "panel",
             "label": "Known IP addresses",
             "items": {
-                "_custom": {
+                "_devices": {
                     "newLine": true,
                     "type": "custom",
                     "sm": 12,
-                    "lg": 9,
                     "i18n": true,
                     "url": "custom/customComponents.js",
                     "name": "ConfigCustomKissHomeResearchSet/Components/ConfigCustomInstancesSelector"
-                }
-            }
-        },
-        "_custom": {
-            "type": "panel",
-            "label": "Custom IP addresses",
-            "items": {
-                "customIPs": {
-                    "type": "table",
-                    "newLine": true,
-                    "compact": true,
-                    "sm": 12,
-                    "uniqueColumns": ["ip"],
-                    "items": [
-                        {
-                            "attr": "ip",
-                            "type": "text",
-                            "width": "33%",
-                            "title": "IP address"
-                        },
-                        {
-                            "attr": "mac",
-                            "type": "text",
-                            "width": "33%",
-                            "title": "MAC address"
-                        },
-                        {
-                            "attr": "desc",
-                            "type": "text",
-                            "width": "33%",
-                            "title": "Description"
-                        }
-                    ]
                 }
             }
         }

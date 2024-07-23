@@ -9,10 +9,10 @@ import {
     TableHead,
     TableRow,
     Checkbox, IconButton,
-    TextField, LinearProgress,
+    TextField, LinearProgress, Fab,
 } from '@mui/material';
 
-import { Delete } from '@mui/icons-material';
+import { Add, Delete } from '@mui/icons-material';
 
 // important to make from package and not from some children.
 // invalid
@@ -66,6 +66,52 @@ const ADAPTERS = [
     { adapter: 'wled', attr: 'devices', arrayAttr: 'ip' },
 ];
 
+function validateMacAddress(mac) {
+    if (typeof mac !== 'string') {
+        return false;
+    }
+    mac = mac.trim().toUpperCase().replace(/\s/g, '');
+    if (!mac) {
+        return true;
+    }
+    if (mac.match(/^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/)) {
+        return true;
+    }
+    return !!mac.match(/^([0-9A-F]{12})$/);
+}
+
+function normalizeMacAddress(mac) {
+    if (!validateMacAddress(mac)) {
+        return mac;
+    }
+    mac = mac.toUpperCase().trim().replace(/[\s:-]/g, '');
+    // convert to 00:11:22:33:44:55
+    return mac.replace(/(..)(..)(..)(..)(..)(..)/, '$1:$2:$3:$4:$5:$6');
+}
+
+function validateIpAddress(ip) {
+    if (typeof ip !== 'string') {
+        return false;
+    }
+    ip = ip.trim();
+    if (!ip) {
+        return true;
+    }
+    if (!ip.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+        return false;
+    }
+    const parts = ip.trim().split('.').map(part => parseInt(part, 10));
+    return !parts.find(part => part < 0 || part > 0xFF);
+}
+
+function normalizeIpAddress(ip) {
+    if (!validateIpAddress(ip)) {
+        return ip;
+    }
+    const parts = ip.trim().split('.');
+    return parts.map(part => parseInt(part, 10)).join('.');
+}
+
 class ConfigCustomInstancesSelector extends ConfigGeneric {
     async componentDidMount() {
         super.componentDidMount();
@@ -98,10 +144,10 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                 };
                 // get vendor and MAC-Address information
                 if (this.props.alive) {
-                    const instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                    const devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
                     const addresses = ips.map(item => item.ip);
                     // add to detected IPs the IPs from saved configuration
-                    instanceIPs.forEach(item => {
+                    devices.forEach(item => {
                         if (!addresses.includes(item.ip)) {
                             addresses.push(item.ip);
                         }
@@ -124,7 +170,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
 
                             let changed = false;
                             // detect changed MAC addresses in saved information
-                            instanceIPs.forEach(item => {
+                            devices.forEach(item => {
                                 const pos = ips.findIndex(i => i.ip === item.ip);
                                 if (pos !== -1) {
                                     if (item.mac !== ips[pos].mac) {
@@ -142,7 +188,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 this.setState({ runningRequest: false });
                             }
                             if (changed) {
-                                this.onChange('instanceIPs', instanceIPs);
+                                this.onChange('devices', devices);
                             }
                         })
                         .catch(e => {
@@ -180,6 +226,21 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             }
         }
         return null;
+    }
+
+    componentWillUnmount() {
+        super.componentWillUnmount();
+        this.validateTimeout && clearTimeout(this.validateTimeout);
+        this.validateTimeout = null;
+    }
+
+    validateAddresses() {
+        this.validateTimeout && clearTimeout(this.validateTimeout);
+
+        this.validateTimeout = setTimeout(() => {
+            this.validateTimeout = null;
+            // read MACs for all IPs
+        }, 1000);
     }
 
     collectIpAddresses(instances, ownAddresses) {
@@ -242,46 +303,56 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
 
     renderItem(error, disabled, defaultValue) {
         /** @type {{mac: string; ip: string; desc: string; enabled: boolean}[]} */
-        const instanceIPs = ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [];
+        const devices = ConfigGeneric.getValue(this.props.data, 'devices') || [];
 
         const notFound = this.state.ips ?
-            instanceIPs.filter(iItem => !this.state.ips.find(item => item.ip === iItem.ip)) :
-            instanceIPs;
+            devices.filter(iItem => !this.state.ips.find(item => item.ip === iItem.ip)) :
+            devices;
 
-        const allEnabled = instanceIPs.every(item => item.enabled) &&
-            (this.state.ips ? this.state.ips.every(item => instanceIPs.find(iItem => iItem.ip === item.ip)) : true);
+        const allEnabled = devices.every(item => item.enabled) &&
+            (this.state.ips ? this.state.ips.every(item => devices.find(iItem => iItem.ip === item.ip)) : true);
 
         return <TableContainer>
             {this.state.runningRequest ? <LinearProgress /> : <div style={{ height: 2, width: '100%' }} />}
             <Table style={styles.table} size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell style={styles.header}>
+                        <TableCell style={{ ...styles.header, width: 120 }}>
                             <Checkbox
                                 title={allEnabled ? i18n.t('custom_kisshome_unselect_all') : i18n.t('custom_kisshome_select_all')}
                                 checked={allEnabled}
-                                indeterminate={!allEnabled && instanceIPs.length > 0}
+                                indeterminate={!allEnabled && devices.length > 0}
                                 onClick={() => {
-                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
+                                    const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
                                     if (allEnabled) {
-                                        _instanceIPs.forEach(item => item.enabled = false);
-                                        for (let i = _instanceIPs.length - 1; i >= 0; i--) {
-                                            if (this.state.ips.find(item => item.ip === _instanceIPs[i].ip)) {
-                                                _instanceIPs.splice(i, 1);
+                                        _devices.forEach(item => item.enabled = false);
+                                        for (let i = _devices.length - 1; i >= 0; i--) {
+                                            if (this.state.ips.find(item => item.ip === _devices[i].ip)) {
+                                                _devices.splice(i, 1);
                                             }
                                         }
                                     } else {
-                                        _instanceIPs.forEach(item => item.enabled = true);
+                                        _devices.forEach(item => item.enabled = true);
                                         this.state.ips.forEach(item => {
-                                            if (!_instanceIPs.find(iItem => item.ip === iItem.ip)) {
-                                                _instanceIPs.push({ ip: item.ip, mac: item.mac, desc: item.desc, enabled: true });
+                                            if (!_devices.find(iItem => item.ip === iItem.ip)) {
+                                                _devices.push({ ip: item.ip, mac: item.mac, desc: item.desc, enabled: true });
                                             }
                                         });
-                                        _instanceIPs.forEach(item => item.enabled = true);
+                                        _devices.forEach(item => item.enabled = true);
                                     }
-                                    this.onChange('instanceIPs', _instanceIPs);
+                                    this.onChange('devices', _devices);
                                 }}
                             />
+                            <Fab
+                                onClick={() => {
+                                    const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                    _devices.push({ ip: '0.0.0.0', mac: '', desc: '', enabled: true });
+                                    this.onChange('devices', _devices);
+                                }}
+                                size="small"
+                            >
+                                <Add />
+                            </Fab>
                         </TableCell>
                         <TableCell style={styles.header}>{i18n.t('custom_kisshome_ip')}</TableCell>
                         <TableCell style={styles.header}>{i18n.t('custom_kisshome_mac')}</TableCell>
@@ -294,16 +365,16 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                     {this.state.ips?.map((row, i) => <TableRow key={i}>
                         <TableCell scope="row" style={styles.td}>
                             <Checkbox
-                                checked={!!instanceIPs.find(item => item.ip === row.ip)?.enabled}
+                                checked={!!devices.find(item => item.ip === row.ip)?.enabled}
                                 onClick={() => {
-                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
-                                    const pos = _instanceIPs.findIndex(item => item.ip === row.ip);
+                                    const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                    const pos = _devices.findIndex(item => item.ip === row.ip);
                                     if (pos === -1) {
-                                        _instanceIPs.push({ ip: row.ip, mac: row.mac, desc: row.desc, enabled: true });
+                                        _devices.push({ ip: row.ip, mac: row.mac, desc: row.desc, enabled: true });
                                     } else {
-                                        _instanceIPs.splice(pos, 1);
+                                        _devices.splice(pos, 1);
                                     }
-                                    this.onChange('instanceIPs', _instanceIPs);
+                                    this.onChange('devices', _devices);
                                 }}
                             />
                         </TableCell>
@@ -316,22 +387,34 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                     {notFound.map((row, i) => <TableRow key={i}>
                         <TableCell scope="row" style={styles.td}>
                             <Checkbox
-                                checked={instanceIPs.includes(row.ip)}
+                                checked={devices.includes(row.ip)}
                                 onClick={() => {
-                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
-                                    _instanceIPs[i].enabled = !_instanceIPs[i].enabled;
-                                    this.onChange('instanceIPs', _instanceIPs);
+                                    const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                    _devices[i].enabled = !_devices[i].enabled;
+                                    this.onChange('devices', _devices);
                                 }}
                             />
                         </TableCell>
                         <TableCell style={styles.td}>
                             <TextField
                                 fullWidth
+                                error={!validateIpAddress(row.ip)}
                                 value={row.ip}
                                 onChange={e => {
-                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
-                                    _instanceIPs[i].ip = e.target.value;
-                                    this.onChange('instanceIPs', _instanceIPs);
+                                    const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                    _devices[i].ip = e.target.value;
+                                    this.onChange('devices', _devices);
+                                    this.validateAddresses();
+                                }}
+                                onBlur={() => {
+                                    if (row.ip.trim()) {
+                                        const normalized = normalizeIpAddress(row.ip);
+                                        if (normalized !== row.ip) {
+                                            const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                            _devices[i].ip = normalized;
+                                            this.onChange('devices', _devices);
+                                        }
+                                    }
                                 }}
                                 variant="standard"
                             />
@@ -340,23 +423,35 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                             <TextField
                                 fullWidth
                                 value={row.mac}
+                                error={!validateMacAddress(row.mac)}
                                 onChange={e => {
-                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
-                                    _instanceIPs[i].mac = e.target.value;
-                                    this.onChange('instanceIPs', _instanceIPs);
+                                    const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                    _devices[i].mac = e.target.value;
+                                    this.onChange('devices', _devices);
+                                    this.validateAddresses();
+                                }}
+                                onBlur={() => {
+                                    if (row.mac.trim()) {
+                                        const normalized = normalizeMacAddress(row.mac);
+                                        if (normalized !== row.mac) {
+                                            const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                            _devices[i].mac = normalized;
+                                            this.onChange('devices', _devices);
+                                        }
+                                    }
                                 }}
                                 variant="standard"
                             />
                         </TableCell>
-                        <TableCell style={styles.td}>{this.state.vendors?.[row.mac] || ''}</TableCell>
+                        <TableCell style={styles.td}>{this.state.vendors?.[normalizeMacAddress(row.mac)] || ''}</TableCell>
                         <TableCell style={styles.td}>
                             <TextField
                                 fullWidth
                                 value={row.desc}
                                 onChange={e => {
-                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
-                                    _instanceIPs[i].desc = e.target.value;
-                                    this.onChange('instanceIPs', _instanceIPs);
+                                    const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                    _devices[i].desc = e.target.value;
+                                    this.onChange('devices', _devices);
                                 }}
                                 variant="standard"
                             />
@@ -364,9 +459,9 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         <TableCell style={styles.td}>
                             <IconButton
                                 onClick={() => {
-                                    const _instanceIPs = [...(ConfigGeneric.getValue(this.props.data, 'instanceIPs') || [])];
-                                    _instanceIPs.splice(i, 1);
-                                    this.onChange('instanceIPs', _instanceIPs);
+                                    const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+                                    _devices.splice(i, 1);
+                                    this.onChange('devices', _devices);
                                 }}
                             >
                                 <Delete />

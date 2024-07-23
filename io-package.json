@@ -93,8 +93,7 @@
     "login": "",
     "password": "",
     "tempDir": "",
-    "customIPs": [],
-    "instanceIPs": [],
+    "devices": [],
     "recordingEnabled": false
   },
   "objects": [],
