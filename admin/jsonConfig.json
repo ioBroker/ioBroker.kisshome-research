@@ -23,7 +23,7 @@
                 },
                 "fritzbox": {
                     "newLine": true,
-                    "type": "ip",
+                    "type": "text",
                     "sm": 12,
                     "md": 3,
                     "lg": 3,
@@ -56,8 +56,8 @@
                     "newLine": true,
                     "type": "text",
                     "sm": 12,
-                    "md": 3,
-                    "lg": 3,
+                    "md": 6,
+                    "lg": 6,
                     "label": "Working directory",
                     "tooltip": "Directory for temporary files. Leave empty to use the system directory."
                 },
