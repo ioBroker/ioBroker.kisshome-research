@@ -189,7 +189,7 @@
         "role": "state",
         "read": true,
         "write": false,
-        "def": 0
+        "def": false
       },
       "native": {}
     },

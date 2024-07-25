@@ -15,6 +15,13 @@ const PCAP_HOST = 'kisshome-experiments.if-is.net';
 // key of the kisshome-experiments.if-is.net host
 const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:PesPlH50RqbZUVsJ36pht255bUudtwKPcjcTCyqeel4';
 
+type Device = {
+    enabled: boolean;
+    mac: string;
+    ip: string;
+    desc: string;
+}
+
 type KISSHomeResearchConfig = {
     /** Registered email address */
     email: string;
@@ -28,12 +35,7 @@ type KISSHomeResearchConfig = {
     tempDir: string;
     /** Fritzbox interface */
     iface: string;
-    devices: {
-        enabled: boolean;
-        mac: string;
-        ip: string;
-        description: string;
-    }[];
+    devices: Device[];
 }
 
 interface KeysObject extends ioBroker.OtherObject {
@@ -81,6 +83,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private monitorInterval: ioBroker.Interval | undefined;
 
+    private static macCache: { [ip: string]: { mac: string; vendor?: string } } = {};
+
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
             ...options,
@@ -108,7 +112,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 case 'getMacForIps':
                     if (msg.callback) {
                         try {
-                            const result = await KISSHomeResearchAdapter.getMacForIps(msg.message.ips);
+                            const devices: Device[] = msg.message as Device[];
+                            const result = await KISSHomeResearchAdapter.getMacForIps(devices.map(d => d.ip));
                             this.sendTo(msg.from, msg.command, { result }, msg.callback);
                         } catch (e) {
                             this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
@@ -198,8 +203,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.tempDir = this.tempDir.substring(0, this.tempDir.length - 1);
         }
 
-        this.clearWorkingDir();
-
         let privateKey: string;
         let publicKey: string;
 
@@ -263,6 +266,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             return;
         }
 
+        this.clearWorkingDir();
+
         // update privateKey on disk
         this.privateKeyPath = `${this.__dirname}/privateKey.pem`.replace(/\\/g, '/');
         if (fs.existsSync(this.privateKeyPath)) {
@@ -296,7 +301,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         try {
             // register on the cloud
             const response = await axios.post(`https://${PCAP_HOST}/api/v1/registerKey/${config.email}`, {
-                publicKey,
+                publicKey: `ssh-ed25519 ${publicKey}`,
             });
             if (response.status === 200) {
                 this.log.info('Successfully registered on the cloud');
@@ -469,7 +474,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         return `${now.getUTCFullYear()}-${(now.getUTCMonth() + 1).toString().padStart(2, '0')}-${now.getUTCDate().toString().padStart(2, '0')}_${now.getUTCHours().toString().padStart(2, '0')}-${now.getUTCMinutes().toString().padStart(2, '0')}-${now.getUTCSeconds().toString().padStart(2, '0')}`;
     }
 
-    saveMetaFile(IPs: { mac: string; ip: string; description: string }[]): void {
+    saveMetaFile(IPs: Device[]): void {
         const text = KISSHomeResearchAdapter.getDescriptionFile(IPs);
         // find the latest file
         const files = fs.readdirSync(this.workingDir);
@@ -500,10 +505,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
     }
 
-    static getDescriptionFile(IPs: { mac: string; ip: string; description: string }[]): string {
+    static getDescriptionFile(IPs: Device[]): string {
         const desc: Record<string, { ip: string; desc: string }>= {};
         IPs.sort((a, b) => a.ip.localeCompare(b.ip)).forEach(ip => {
-            desc[ip.ip] = { ip: ip.ip, desc: ip.description };
+            desc[ip.ip] = { ip: ip.ip, desc: ip.desc };
         });
         return JSON.stringify(desc, null, 2);
     }
@@ -512,10 +517,15 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         const result: { mac: string; vendor?: string, ip: string }[] = [];
         let error: string = '';
         for (let ip of ips) {
+            if (KISSHomeResearchAdapter.macCache[ip]) {
+                result.push({ ...KISSHomeResearchAdapter.macCache[ip], ip });
+                continue;
+            }
             try {
                 const mac = await getMacForIp(ip);
                 if (mac) {
                     result.push(mac);
+                    KISSHomeResearchAdapter.macCache[ip] = { mac: mac.mac, vendor: mac.vendor };
                 }
             } catch (e) {
                 error = e.message;
@@ -569,7 +579,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 }
             }
         } catch (e) {
-            this.log.error(`Cannot read directory "${this.workingDir}": ${e}`);
+            this.log.error(`Cannot read working directory "${this.workingDir}": ${e}`);
         }
     }
 
@@ -586,7 +596,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 totalBytes += fs.statSync(`${this.workingDir}/${file}`).size;
             }
         } catch (e) {
-            this.log.error(`Cannot read directory "${this.workingDir}": ${e}`);
+            this.log.error(`Cannot read working directory for sync "${this.workingDir}": ${e}`);
             return;
         }
 

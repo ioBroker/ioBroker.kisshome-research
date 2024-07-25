@@ -145,20 +145,14 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                 // get vendor and MAC-Address information
                 if (this.props.alive) {
                     const devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
-                    const addresses = ips.map(item => item.ip);
-                    // add to detected IPs the IPs from saved configuration
-                    devices.forEach(item => {
-                        if (!addresses.includes(item.ip)) {
-                            addresses.push(item.ip);
-                        }
-                    });
                     newState.runningRequest = true;
 
-                    this.props.socket.sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', addresses)
+                    this.props.socket.sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', devices)
                         .then(result => {
+                            // result: { result: { mac: string; vendor?: string, ip: string }[] }
                             let changedState = false;
                             const vendors = {};
-                            result.forEach(item => {
+                            result?.result?.forEach(item => {
                                 const ip = item.ip;
                                 const pos = ips.findIndex(i => i.ip === ip);
                                 if (pos !== -1) {
@@ -182,6 +176,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                     }
                                 }
                             });
+
                             if (changedState) {
                                 this.setState({ ips, vendors, runningRequest: false });
                             } else {
@@ -322,6 +317,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 title={allEnabled ? i18n.t('custom_kisshome_unselect_all') : i18n.t('custom_kisshome_select_all')}
                                 checked={allEnabled}
                                 indeterminate={!allEnabled && devices.length > 0}
+                                disabled={this.state.runningRequest}
                                 onClick={() => {
                                     const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
                                     if (allEnabled) {
@@ -350,6 +346,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                     this.onChange('devices', _devices);
                                 }}
                                 size="small"
+                                disabled={this.state.runningRequest}
                             >
                                 <Add />
                             </Fab>
@@ -366,6 +363,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         <TableCell scope="row" style={styles.td}>
                             <Checkbox
                                 checked={!!devices.find(item => item.ip === row.ip)?.enabled}
+                                disabled={this.state.runningRequest}
                                 onClick={() => {
                                     const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
                                     const pos = _devices.findIndex(item => item.ip === row.ip);
@@ -388,6 +386,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         <TableCell scope="row" style={styles.td}>
                             <Checkbox
                                 checked={devices.includes(row.ip)}
+                                disabled={this.state.runningRequest}
                                 onClick={() => {
                                     const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
                                     _devices[i].enabled = !_devices[i].enabled;
@@ -400,6 +399,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 fullWidth
                                 error={!validateIpAddress(row.ip)}
                                 value={row.ip}
+                                disabled={this.state.runningRequest}
                                 onChange={e => {
                                     const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
                                     _devices[i].ip = e.target.value;
@@ -423,6 +423,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                             <TextField
                                 fullWidth
                                 value={row.mac}
+                                disabled={this.state.runningRequest}
                                 error={!validateMacAddress(row.mac)}
                                 onChange={e => {
                                     const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
@@ -448,6 +449,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                             <TextField
                                 fullWidth
                                 value={row.desc}
+                                disabled={this.state.runningRequest}
                                 onChange={e => {
                                     const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
                                     _devices[i].desc = e.target.value;
@@ -458,6 +460,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         </TableCell>
                         <TableCell style={styles.td}>
                             <IconButton
+                                disabled={this.state.runningRequest}
                                 onClick={() => {
                                     const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
                                     _devices.splice(i, 1);

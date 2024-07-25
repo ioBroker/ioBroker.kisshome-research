@@ -23,13 +23,15 @@ export function getDefaultGateway(): Promise<string> {
 }
 
 export function generateKeys(): { publicKey: string; privateKey: string } {
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519', {
         modulusLength: 2048,
         publicKeyEncoding: { type: 'spki', format: 'pem' },
         privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
 
-    return { publicKey, privateKey };
+    const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
+
+    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.toString() };
 }
 
 export function getRsyncPath(): Promise<string> {

@@ -41,6 +41,7 @@
                     "type": "password",
                     "sm": 12,
                     "md": 6,
+                    "repeat": true,
                     "lg": 6,
                     "label": "FritzBox Password"
                 },
@@ -82,7 +83,7 @@
         },
         "_instances": {
             "type": "panel",
-            "label": "Known IP addresses",
+            "label": "Addresses",
             "items": {
                 "_devices": {
                     "newLine": true,
