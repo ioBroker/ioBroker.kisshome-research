@@ -43,7 +43,7 @@
     "eslint-plugin-promise": "^6.4.0",
     "gulp": "^4.0.2",
     "mocha": "^10.6.0",
-    "typescript": "~5.5.3"
+    "typescript": "~5.5.4"
   },
   "bugs": {
     "url": "https://github.com/ioBroker/iobroker.kisshome-research/issues"
