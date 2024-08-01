@@ -20,7 +20,7 @@
     "url": "https://github.com/ioBroker/ioBroker.kisshome-research"
   },
   "optionalDependencies": {
-    "@network-utils/arp-lookup": "^2.0.2"
+    "@network-utils/arp-lookup": "^2.1.0"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.1.6",
