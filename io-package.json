@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "news": {
+      "0.0.3": {
+        "en": "Added the recording enabled option",
+        "de": "Option für die Aufnahme aktiviert",
+        "ru": "Добавлена возможность записи",
+        "pt": "Adicionado a opção ativada de gravação",
+        "nl": "De optie opname toegevoegd",
+        "fr": "Ajout de l'option d'enregistrement activée",
+        "it": "Aggiunto l'opzione di registrazione abilitata",
+        "es": "Añadido la opción habilitada para la grabación",
+        "pl": "Dodano opcję nagrywania",
+        "uk": "Додана можливість запису",
+        "zh-cn": "添加已启用的记录选项"
+      },
       "0.0.2": {
         "en": "Initial commit",
         "de": "Ursprüngliche Verpflichtung",

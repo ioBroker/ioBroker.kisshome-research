@@ -26,7 +26,7 @@ To run this adapter, you need:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.0.3 (2024-08-14)
 * (bluefox) Added the recording enabled option
 
 ### 0.0.2 (2024-07-22)
