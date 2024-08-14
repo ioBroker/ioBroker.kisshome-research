@@ -36,7 +36,7 @@
     "@iobroker/legacy-testing": "^1.0.12",
     "@types/node": "^20.14.10",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "chai": "^4.5.0",
+    "chai": "^5.1.1",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^17.10.2",
