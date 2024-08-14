@@ -36,6 +36,8 @@ type KISSHomeResearchConfig = {
     /** Fritzbox interface */
     iface: string;
     devices: Device[];
+    /** if recording is enabled */
+    recordingEnabled: boolean;
 }
 
 interface KeysObject extends ioBroker.OtherObject {
@@ -298,6 +300,11 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.log.error('You must register this email first on https://kisshome-feldversuch.if-is.net/#register');
             return;
         }
+        if (!config.recordingEnabled) {
+            this.log.warn('Recording is not enabled. Do nothing');
+            return;
+        }
+
         try {
             // register on the cloud
             const response = await axios.post(`https://${PCAP_HOST}/api/v1/registerKey/${config.email}`, {
