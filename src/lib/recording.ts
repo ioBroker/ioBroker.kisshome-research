@@ -10,10 +10,12 @@ export type Context = {
     buffer?: Buffer;
     modifiedMagic: boolean;
     networkType: number;
+    lastSaved: number;
 };
 
-export const MAX_PACKET_LENGTH = 1600;//68;
-const debug = true;
+export const MAX_PACKET_LENGTH = 96;
+const debug = false;
+const NO_FILTER = false;
 
 function analyzePacket(context: Context): boolean {
     if (!context.buffer) {
@@ -113,7 +115,6 @@ function analyzePacket(context: Context): boolean {
         // if (ethType === 0x86DD) {
         //     return offset + 40;
         // }
-
     }
 
     if (maxBytes) {
@@ -222,7 +223,7 @@ export function startRecordingOnFritzBox(
             // add data to buffer
             context.buffer = context.buffer ? Buffer.concat([context.buffer, chunkBuffer]) : chunkBuffer;
 
-            if (true) {
+            if (!NO_FILTER) {
                 // if the header of PCAP file is not written yet
                 if (!first) {
                     // check if we have at least 6 * 4 bytes

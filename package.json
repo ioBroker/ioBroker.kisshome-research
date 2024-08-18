@@ -26,7 +26,8 @@
     "@iobroker/adapter-core": "^3.1.6",
     "@network-utils/vendor-lookup": "^1.0.8",
     "axios": "^1.7.4",
-    "network": "^0.7.0"
+    "network": "^0.7.0",
+    "terminate": "^2.8.0"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.8.0",

@@ -1,20 +1,35 @@
 import * as utils from '@iobroker/adapter-core';
 import fs from 'node:fs';
 import axios from 'axios';
-import { exec } from 'node:child_process';
+import terminate from 'terminate/promise';
+import { exec, type ChildProcess } from 'node:child_process';
 
 import {
     getDefaultGateway, getMacForIp,
     generateKeys, getRsyncPath,
 } from './lib/utils';
 
-import {startRecordingOnFritzBox, type Context, MAX_PACKET_LENGTH, stopAllRecordingsOnFritzBox} from './lib/recording';
-import {getFritzBoxInterfaces, getFritzBoxToken, getFritzBoxUsers} from './lib/fritzbox';
+import {
+    startRecordingOnFritzBox, type Context,
+    MAX_PACKET_LENGTH, stopAllRecordingsOnFritzBox,
+} from './lib/recording';
+import {
+    getFritzBoxInterfaces,
+    getFritzBoxToken,
+    getFritzBoxUsers,
+} from './lib/fritzbox';
 
 // const PCAP_HOST = 'kisshome-experiments.if-is.net';
 const PCAP_HOST = 'iobroker.link:8444';
 // key of the kisshome-experiments.if-is.net host
 const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:PesPlH50RqbZUVsJ36pht255bUudtwKPcjcTCyqeel4';
+
+// save files every 10 minutes
+const SAVE_DATA_EVERY_MS = 600_000;
+// save files if bigger than 50 Mb
+const SAVE_DATA_IF_BIGGER = 50 * 1024 * 1024;
+
+const SYNC_INTERVAL = 120_000; // 3_600_000;
 
 type Device = {
     enabled: boolean;
@@ -61,6 +76,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private startTimeout: ioBroker.Timeout | undefined;
 
+    private syncProcess: ChildProcess | null = null;
+
     private context: Context = {
         terminate: false,
         controller: null,
@@ -70,6 +87,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         buffer: Buffer.from([]),
         modifiedMagic: false,
         networkType: 1,
+        lastSaved: 0,
     };
 
     private recordingRunning: boolean = false;
@@ -86,7 +104,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private saveAfterSync: boolean = false;
 
-    private recordStarted: number = 0;
+    private syncTimer: NodeJS.Timeout | null = null;
 
     private monitorInterval: ioBroker.Interval | undefined;
 
@@ -393,6 +411,30 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         // start the monitoring
         this.startRecording(config)
             .catch(e => this.log.error(`Cannot start recording: ${e}`));
+
+        // Send the data every hour to the cloud
+        this.syncTimer = setTimeout(() => {
+            this.syncTimer = null;
+            this.syncJob();
+        }, SYNC_INTERVAL);
+    }
+
+    syncJob(): void {
+        // Send the data every hour to the cloud
+        if (this.syncTimer) {
+            clearTimeout(this.syncTimer);
+            this.syncTimer = null;
+        }
+
+        const started = Date.now();
+
+        this.startSynchronization(() => {
+            const duration = Date.now() - started;
+            this.syncTimer = setTimeout(() => {
+                this.syncTimer = null;
+                this.syncJob();
+            }, SYNC_INTERVAL - duration > 0 ? SYNC_INTERVAL - duration : 0);
+        });
     }
 
     onStateChange(id: string, state: ioBroker.State | null | undefined): void {
@@ -497,8 +539,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.context.packets = [];
             this.context.totalBytes = 0;
             this.context.totalPackets = 0;
-
-            this.recordStarted = Date.now();
+            this.context.lastSaved = Date.now();
 
             // stop all recordings
             const response = await stopAllRecordingsOnFritzBox(config.fritzbox, this.sid);
@@ -550,17 +591,16 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
                         this.monitorInterval = this.monitorInterval || this.setInterval(() => {
                             // save if a file is bigger than 50 Mb
-                            if (this.context.totalBytes > 50 * 1024 * 1024) {
+                            if (this.context.totalBytes > SAVE_DATA_IF_BIGGER ||
+                                // save every 10 minutes
+                                Date.now() - this.context.lastSaved >= SAVE_DATA_EVERY_MS
+                            ) {
                                 if (this.syncRunning) {
                                     this.saveAfterSync = true;
                                 } else {
                                     this.savePacketsToFile();
+                                    this.context.lastSaved = Date.now();
                                 }
-                            }
-
-                            if (Date.now() - this.recordStarted >= 3_600_0000) {
-                                this.recordStarted = Date.now();
-                                this.startSynchronization();
                             }
                         }, 10000);
                     }
@@ -656,8 +696,24 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.setState('info.connection', false, true);
             this.setState('info.recordingRunning', false, true);
         }
-        this.startTimeout && clearTimeout(this.startTimeout);
-        this.startTimeout = undefined;
+        if (this.syncTimer) {
+            clearTimeout(this.syncTimer);
+            this.syncTimer = null;
+        }
+
+        if (this.syncProcess?.pid) {
+            try {
+                await terminate(this.syncProcess.pid);
+            } catch (err) {
+                this.log.error(`Cannot terminate sync process: ${err}`);
+            }
+            this.syncProcess = null;
+        }
+
+        if (this.startTimeout) {
+            clearTimeout(this.startTimeout);
+            this.startTimeout = undefined;
+        }
 
         this.context.terminate = true;
         if (this.context.controller) {
@@ -696,30 +752,47 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
     }
 
-    startSynchronization(): void {
+    startSynchronization(cb?: () => void): void {
         // calculate the total number of bytes
         let totalBytes = 0;
-        if (this.syncRunning) {
-            this.syncRunning = false;
-            this.setState('info.syncRunning', false, true);
-        }
+        this.log.debug(`[RSYNC] Start synchronization...`);
+
+        // calculate the total number of bytes in pcap files
         try {
             const files = fs.readdirSync(this.workingDir);
             for (const file of files) {
-                totalBytes += fs.statSync(`${this.workingDir}/${file}`).size;
+                if (file.endsWith('.pcap')) {
+                    totalBytes += fs.statSync(`${this.workingDir}/${file}`).size;
+                }
             }
         } catch (e) {
-            this.log.error(`Cannot read working directory for sync "${this.workingDir}": ${e}`);
+            this.log.error(`[RSYNC] Cannot read working directory for sync "${this.workingDir}": ${e}`);
+            if (cb) {
+                cb();
+            }
             return;
         }
 
         if (!totalBytes) {
+            this.log.debug(`[RSYNC] No files to sync`);
+            if (cb) {
+                cb();
+            }
             return;
         }
 
-        this.log.debug(`Syncing files to the cloud (${Math.round(totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
+        if (this.syncRunning) {
+            this.log.warn(`[RSYNC] Synchronization still running...`);
+            if (cb) {
+                cb();
+            }
+            return;
+        }
 
+        this.syncRunning = true;
         this.setState('info.syncRunning', true, true);
+
+        this.log.debug(`[RSYNC] Syncing files to the cloud (${Math.round(totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
 
         const cmd = [
             this.rsyncPath,
@@ -732,19 +805,18 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         let error = '';
 
-        if (!this.syncRunning) {
-            this.syncRunning = true;
-            this.setState('info.syncRunning', true, true);
-        }
+        this.log.debug(`[RSYNC] cmd: "${cmd.join(' ')}"`);
 
-        const cp = exec(cmd.join(' '), (_error, stdout, stderr) => {
-            (stderr || _error) && this.log.warn(`Error by synchronization: ${stderr}, ${_error}`);
+        this.syncProcess = exec(cmd.join(' '), (_error, stdout, stderr) => {
+            (stderr || _error) && this.log.warn(`[RSYNC] Error by synchronization: ${stderr}, ${_error}`);
             error = _error ? _error.message : '';
         });
 
-        cp.on('error', (_error) => error = _error.message);
+        this.syncProcess.on('error', (_error) => error = _error.message);
 
-        cp.on('exit', (code) => {
+        this.syncProcess.on('exit', (code) => {
+            this.syncProcess = null;
+
             // delete all pcap files if no error
             if (!error && code === 0) {
                 this.clearWorkingDir();
@@ -761,9 +833,13 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             }
 
             if (code !== 0) {
-                this.log.warn(`Cannot sync files. rsync returned ${code}, error: ${error}`);
+                this.log.warn(`[RSYNC] Cannot sync files. rsync returned ${code}, error: ${error}`);
             } else {
-                this.log.debug(`Syncing files done with code ${code}`);
+                this.log.debug(`[RSYNC] Syncing files done with code ${code}`);
+            }
+
+            if (cb) {
+                cb();
             }
         });
     }
