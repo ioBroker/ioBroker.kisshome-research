@@ -8,10 +8,11 @@ import {
     generateKeys, getRsyncPath,
 } from './lib/utils';
 
-import { startRecordingOnFritzBox, type Context, MAX_PACKET_LENGTH } from './lib/recording';
-import { getFritzBoxToken } from './lib/fritzbox';
+import {startRecordingOnFritzBox, type Context, MAX_PACKET_LENGTH, stopAllRecordingsOnFritzBox} from './lib/recording';
+import {getFritzBoxInterfaces, getFritzBoxToken, getFritzBoxUsers} from './lib/fritzbox';
 
-const PCAP_HOST = 'kisshome-experiments.if-is.net';
+// const PCAP_HOST = 'kisshome-experiments.if-is.net';
+const PCAP_HOST = 'iobroker.link:8444';
 // key of the kisshome-experiments.if-is.net host
 const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:PesPlH50RqbZUVsJ36pht255bUudtwKPcjcTCyqeel4';
 
@@ -56,6 +57,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private sid: string = '';
 
+    private sidCreated: number = 0;
+
     private startTimeout: ioBroker.Timeout | undefined;
 
     private context: Context = {
@@ -98,6 +101,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
     }
 
     async onMessage(msg: ioBroker.Message): Promise<void> {
+        const config: KISSHomeResearchConfig = this.config as unknown as KISSHomeResearchConfig;
         if (typeof msg === 'object' && msg.message) {
             switch (msg.command) {
                 case 'getDefaultGateway':
@@ -110,6 +114,46 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         }
                     }
                     break;
+
+                case 'getUsers': {
+                    if (msg.callback) {
+                        try {
+                            if (msg.message?.ip || config.fritzbox) {
+                                const users = await getFritzBoxUsers(msg.message?.ip || config.fritzbox);
+                                this.sendTo(msg.from, msg.command, users, msg.callback);
+                            } else {
+                                this.sendTo(msg.from, msg.command, [], msg.callback);
+                            }
+                        } catch (e) {
+                            this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
+                        }
+                    }
+                    break;
+                }
+
+                case 'getInterfaces': {
+                    if (msg.callback) {
+                        try {
+                            if (msg.message?.ip || config.fritzbox &&
+                                msg.message?.login || config.login &&
+                                msg.message?.password || config.password
+                            ) {
+                                const ifaces = await getFritzBoxInterfaces(
+                                    msg.message?.ip || config.fritzbox,
+                                    msg.message?.login,
+                                    msg.message?.password,
+                                    msg.message?.login === config.login && msg.message.password === config.password ? this.sid : undefined,
+                                );
+                                this.sendTo(msg.from, msg.command, ifaces, msg.callback);
+                            } else {
+                                this.sendTo(msg.from, msg.command, [], msg.callback);
+                            }
+                        } catch (e) {
+                            this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
+                        }
+                    }
+                    break;
+                }
 
                 case 'getMacForIps':
                     if (msg.callback) {
@@ -307,8 +351,9 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         try {
             // register on the cloud
-            const response = await axios.post(`https://${PCAP_HOST}/api/v1/registerKey/${config.email}`, {
+            const response = await axios.post(`https://${PCAP_HOST}/api/v1/registerKey`, {
                 publicKey: `ssh-ed25519 ${publicKey}`,
+                email: config.email,
             });
             if (response.status === 200) {
                 this.log.info('Successfully registered on the cloud');
@@ -372,16 +417,17 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             // SnapLen
             byteArray.writeUInt16LE(MAX_PACKET_LENGTH, 16);
             // network type
-            byteArray.writeUInt32LE(1, 24);
+            byteArray.writeUInt32LE(1, 20);
 
             // get file descriptor of file
             const fd = fs.openSync(fileName, 'w');
             // write header
             fs.writeSync(fd, byteArray, 0, byteArray.length, 0);
+            let offset = byteArray.length
             for (let i = 0; i < packetsToSave.length; i++) {
                 const packet = packetsToSave[i];
-                const packetBuffer = Buffer.from(packet);
-                fs.writeSync(fd, packetBuffer, 0, packetBuffer.length, 24 + i * packetBuffer.length);
+                fs.writeSync(fd, packet, 0, packet.length, offset);
+                offset += packet.length;
             }
             fs.closeSync(fd);
         }
@@ -389,15 +435,20 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     async startRecording(config: KISSHomeResearchConfig) {
         // take sid from fritzbox
-        if (!this.sid) {
+        if (!this.sid || !this.sidCreated || Date.now() - this.sidCreated >= 3_600_000) {
             try {
-                this.sid = await getFritzBoxToken(config.fritzbox, config.login, config.password);
+                this.sid = await getFritzBoxToken(config.fritzbox, config.login, config.password, (text: string) => this.log.warn(text));
+                this.sidCreated = Date.now();
             } catch (e) {
+                this.sid = '';
+                this.sidCreated = 0;
                 this.log.error(`Cannot get SID from FritzBox: ${e}`);
             }
         }
 
         if (this.sid) {
+            this.log.debug(`Use SID: ${this.sid}`);
+
             const captured = await this.getStateAsync('info.capturedPackets');
             if (captured?.val) {
                 await this.setState('info.capturedPackets', 0, true);
@@ -410,6 +461,12 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.context.totalPackets = 0;
 
             this.recordStarted = Date.now();
+
+            // stop all recordings
+            const response = await stopAllRecordingsOnFritzBox(config.fritzbox, this.sid);
+            if (response) {
+                this.log.info(`Stopped all recordings on FritzBox: ${response}`);
+            }
 
             startRecordingOnFritzBox(
                 config.fritzbox,
@@ -427,6 +484,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
                     if (error?.message === 'Unauthorized') {
                         this.sid = '';
+                        this.sidCreated = 0;
                     }
 
                     if (this.recordingRunning) {
@@ -451,7 +509,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.setState('info.connection', true, true);
 
                         this.monitorInterval = this.monitorInterval || this.setInterval(() => {
-                            // save if file is bigger than 50 Mb
+                            // save if a file is bigger than 50 Mb
                             if (this.context.totalBytes > 50 * 1024 * 1024) {
                                 if (this.syncRunning) {
                                     this.saveAfterSync = true;
@@ -471,6 +529,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 },
             );
         } else {
+            this.log.warn('Cannot login into FritzBox. Maybe wrong credentials or fritzbox is not available');
             // try to get the token in 10 seconds again. E.g., if fritzbox is rebooting
             this.restartRecording(config);
         }
@@ -483,39 +542,45 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     saveMetaFile(IPs: Device[]): void {
         const text = KISSHomeResearchAdapter.getDescriptionFile(IPs);
-        // find the latest file
-        const files = fs.readdirSync(this.workingDir);
-        files.sort((a, b) => b.localeCompare(a));
-        let latestFile = '';
-        // find the latest file and delete all other _meta.json files
-        for (const file of files) {
-            if (!latestFile && file.endsWith('_meta.json')) {
-                latestFile = file;
-            } else if (file.endsWith('_meta.json')) {
-                fs.unlinkSync(`${this.workingDir}/${file}`);
+        let newFile = `${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}_meta.json`;
+        try {
+            // find the latest file
+            const files = fs.readdirSync(this.workingDir);
+            files.sort((a, b) => b.localeCompare(a));
+            let latestFile = '';
+            // find the latest file and delete all other _meta.json files
+            for (const file of files) {
+                if (!latestFile && file.endsWith('_meta.json')) {
+                    latestFile = file;
+                } else if (file.endsWith('_meta.json')) {
+                    fs.unlinkSync(`${this.workingDir}/${file}`);
+                }
             }
-        }
-
-        // if existing meta file found
-        if (latestFile) {
-            // compare the content
-            const oldFile = fs.readFileSync(`${this.workingDir}/${latestFile}`, 'utf8');
-            if (oldFile !== text) {
-                this.log.debug('Meta file updated');
-                fs.unlinkSync(`${this.workingDir}/${latestFile}`);
-                fs.writeFileSync(`${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}_meta.json`, text);
+            // if existing meta file found
+            if (latestFile) {
+                // compare the content
+                const oldFile = fs.readFileSync(`${this.workingDir}/${latestFile}`, 'utf8');
+                if (oldFile !== text) {
+                    this.log.debug('Meta file updated');
+                    fs.unlinkSync(`${this.workingDir}/${latestFile}`);
+                    fs.writeFileSync(newFile, text);
+                }
+            } else {
+                this.log.info('Meta file created');
+                // if not found => create new one
+                fs.writeFileSync(newFile, text);
             }
-        } else {
-            this.log.info('Meta file created');
-            // if not found => create new one
-            fs.writeFileSync(`${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}_meta.json`, text);
+        } catch (e) {
+            this.log.warn(`Cannot save meta file "${newFile}": ${e}`);
         }
     }
 
     static getDescriptionFile(IPs: Device[]): string {
         const desc: Record<string, { ip: string; desc: string }>= {};
         IPs.sort((a, b) => a.ip.localeCompare(b.ip)).forEach(ip => {
-            desc[ip.ip] = { ip: ip.ip, desc: ip.desc };
+            if (ip.mac) {
+                desc[ip.mac] = { ip: ip.ip, desc: ip.desc };
+            }
         });
         return JSON.stringify(desc, null, 2);
     }
