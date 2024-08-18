@@ -182,6 +182,31 @@
       "native": {}
     },
     {
+      "_id": "info.recordingRunning",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Is recording is running",
+          "de": "Wird aufgezeichnet",
+          "ru": "Идет запись",
+          "pt": "A gravação está em execução",
+          "nl": "Wordt opgenomen",
+          "fr": "L'enregistrement est en cours",
+          "it": "La registrazione è in corso",
+          "es": "La grabación está en curso",
+          "pl": "Nagrywanie jest w toku",
+          "uk": "Запис виконується",
+          "zh-cn": "录制正在进行中"
+        },
+        "type": "boolean",
+        "role": "state",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
       "_id": "info.syncRunning",
       "type": "state",
       "common": {

@@ -68,6 +68,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         totalBytes: 0,
         totalPackets: 0,
         buffer: Buffer.from([]),
+        modifiedMagic: false,
+        networkType: 1,
     };
 
     private recordingRunning: boolean = false;
@@ -98,6 +100,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         this.on('ready', () => this.onReady());
         this.on('unload', callback => this.onUnload(callback));
         this.on('message', this.onMessage.bind(this));
+        this.on('stateChange', this.onStateChange.bind(this));
     }
 
     async onMessage(msg: ioBroker.Message): Promise<void> {
@@ -196,6 +199,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         const runningState = await this.getStateAsync('info.connection');
         if (runningState?.val) {
             await this.setState('info.connection', false, true);
+            await this.setState('info.recordingRunning', false, true);
         }
 
         const captured = await this.getStateAsync('info.capturedPackets');
@@ -312,7 +316,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             return;
         }
 
-        this.clearWorkingDir();
+        // this.clearWorkingDir();
 
         // update privateKey on disk
         this.privateKeyPath = `${this.__dirname}/privateKey.pem`.replace(/\\/g, '/');
@@ -329,7 +333,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         // update known_hosts file
         this.knownHostFile = `${this.__dirname}/kisshome_known_hosts`.replace(/\\/g, '/');
 
-        // create home known file
+        // create a home known file
         const text = `${PCAP_HOST} ${SSH_KNOWN_KEY}`;
         if (!fs.existsSync(this.knownHostFile)) {
             this.log.debug(`Creating known_hosts file: ${this.knownHostFile}`);
@@ -382,9 +386,33 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         this.saveMetaFile(IPs);
 
+        await this.setState('info.recordingRunning', false, true);
+
+        this.subscribeStates('info.recordingRunning');
+
         // start the monitoring
         this.startRecording(config)
             .catch(e => this.log.error(`Cannot start recording: ${e}`));
+    }
+
+    onStateChange(id: string, state: ioBroker.State | null | undefined): void {
+        if (state) {
+            if (id === `${this.namespace}.info.recordingRunning` && !state.ack) {
+                if (state.val) {
+                    if (!this.recordingRunning) {
+                        const config: KISSHomeResearchConfig = this.config as unknown as KISSHomeResearchConfig;
+                        this.startRecording(config)
+                            .catch(e => this.log.error(`Cannot start recording: ${e}`));
+                    }
+                } else if (this.recordingRunning) {
+                    this.context.terminate = true;
+                    if (this.context.controller) {
+                        this.context.controller.abort();
+                        this.context.controller = null;
+                    }
+                }
+            }
+        }
     }
 
     restartRecording(config: KISSHomeResearchConfig): void {
@@ -401,35 +429,45 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             const packetsToSave = this.context.packets;
             this.context.packets = [];
 
-            const fileName = `${this.tempDir}/${KISSHomeResearchAdapter.getTimestamp()}.pcap`;
-            // create PCAP header
-            const byteArray = Buffer.alloc(6 * 4);
-            // magic number
-            byteArray.writeUInt32LE(0xa1b2c3d4, 0);
-            // major version
-            byteArray.writeUInt16LE(2, 4);
-            // minor version
-            byteArray.writeUInt16LE(4, 6);
-            // reserved
-            byteArray.writeUInt32LE(0, 8);
-            // reserved
-            byteArray.writeUInt32LE(0, 12);
-            // SnapLen
-            byteArray.writeUInt16LE(MAX_PACKET_LENGTH, 16);
-            // network type
-            byteArray.writeUInt32LE(1, 20);
-
-            // get file descriptor of file
+            const fileName = `${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}.pcap`;
+            // get file descriptor of a file
             const fd = fs.openSync(fileName, 'w');
+            let offset = 0;
+            const magic = packetsToSave[0].readUInt32LE(0);
+            const STANDARD_MAGIC = 0xa1b2c3d4;
+            // https://wiki.wireshark.org/Development/LibpcapFileFormat
+            const MODIFIED_MAGIC = 0xa1b2cd34;
+
+            // do not save a header if it is already present
+            if (magic !== STANDARD_MAGIC && magic !== MODIFIED_MAGIC) {
+                // create PCAP header
+                const byteArray = Buffer.alloc(6 * 4);
+                // magic number
+                byteArray.writeUInt32LE(this.context.modifiedMagic ? MODIFIED_MAGIC : STANDARD_MAGIC, 0);
+                // major version
+                byteArray.writeUInt16LE(2, 4);
+                // minor version
+                byteArray.writeUInt16LE(4, 6);
+                // reserved
+                byteArray.writeUInt32LE(0, 8);
+                // reserved
+                byteArray.writeUInt32LE(0, 12);
+                // SnapLen
+                byteArray.writeUInt16LE(MAX_PACKET_LENGTH, 16);
+                // network type
+                byteArray.writeUInt32LE(this.context.networkType, 20);
+                fs.writeSync(fd, byteArray, 0, byteArray.length, 0);
+                offset = byteArray.length;
+            }
+
             // write header
-            fs.writeSync(fd, byteArray, 0, byteArray.length, 0);
-            let offset = byteArray.length
             for (let i = 0; i < packetsToSave.length; i++) {
                 const packet = packetsToSave[i];
                 fs.writeSync(fd, packet, 0, packet.length, offset);
                 offset += packet.length;
             }
             fs.closeSync(fd);
+            this.log.debug(`Saved file ${fileName} with ${offset} bytes`);
         }
     }
 
@@ -491,6 +529,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.log.info(`Recording stopped`);
                         this.recordingRunning = false;
                         this.setState('info.connection', false, true);
+                        this.setState('info.recordingRunning', false, true);
                     }
 
                     if (this.context.packets?.length) {
@@ -507,6 +546,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     if (!this.recordingRunning) {
                         this.recordingRunning = true;
                         this.setState('info.connection', true, true);
+                        this.setState('info.recordingRunning', true, true);
 
                         this.monitorInterval = this.monitorInterval || this.setInterval(() => {
                             // save if a file is bigger than 50 Mb
@@ -614,6 +654,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         if (this.recordingRunning) {
             this.recordingRunning = false;
             this.setState('info.connection', false, true);
+            this.setState('info.recordingRunning', false, true);
         }
         this.startTimeout && clearTimeout(this.startTimeout);
         this.startTimeout = undefined;
