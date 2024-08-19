@@ -26,6 +26,9 @@ To run this adapter, you need:
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (bluefox) File upload was implemented
+
 ### 0.0.3 (2024-08-14)
 * (bluefox) Added the recording enabled option
 
