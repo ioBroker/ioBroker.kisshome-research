@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "news": {
+      "0.1.0": {
+        "en": "File upload was implemented",
+        "de": "Datei-Upload wurde implementiert",
+        "ru": "Загрузка файлов была реализована",
+        "pt": "O upload de arquivos foi implementado",
+        "nl": "Bestandsupload is geïmplementeerd",
+        "fr": "Le téléchargement de fichier a été implémenté",
+        "it": "Il caricamento dei file è stato implementato",
+        "es": "Se implementó la carga de archivos",
+        "pl": "Wysłano plik",
+        "uk": "Завантажено файл",
+        "zh-cn": "文件上传已执行"
+      },
       "0.0.3": {
         "en": "Added the recording enabled option",
         "de": "Option für die Aufnahme aktiviert",

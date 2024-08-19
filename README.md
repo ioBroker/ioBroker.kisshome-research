@@ -26,7 +26,7 @@ To run this adapter, you need:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.0 (2024-08-19)
 * (bluefox) File upload was implemented
 
 ### 0.0.3 (2024-08-14)
