@@ -83,14 +83,19 @@
     "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.kisshome-research/master/admin/kisshome-research.png",
     "type": "misc-data",
     "messagebox": true,
-    "plugins1": {
+    "plugins": {
       "sentry": {
-        "dsn": "https://de38f4a20c964ce395d2e236c64aa075@sentry.iobroker.net/234"
+        "dsn": "https://10a9528535e3bbbf99f4282a20ff43d1@sentry.iobroker.net/248"
       }
     },
     "licenseInformation": {
       "type": "free",
       "license": "MIT"
+    },
+    "osDependencies": {
+      "linux": [
+          "rsync"
+      ]
     }
   },
   "protectedNative": [
@@ -197,6 +202,31 @@
           "pl": "Nagrywanie jest w toku",
           "uk": "Запис виконується",
           "zh-cn": "录制正在进行中"
+        },
+        "type": "boolean",
+        "role": "state",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.recordingWrite",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Triggers the creation of PCAP file",
+          "de": "Startet die Erstellung der PCAP-Datei",
+          "ru": "Запускает создание файла PCAP",
+          "pt": "Dispara a criação do arquivo PCAP",
+          "nl": "Start de creatie van het PCAP-bestand",
+          "fr": "Déclenche la création du fichier PCAP",
+          "it": "Avvia la creazione del file PCAP",
+          "es": "Desencadena la creación del archivo PCAP",
+          "pl": "Uruchamia tworzenie pliku PCAP",
+          "uk": "Запускає створення файлу PCAP",
+          "zh-cn": "触发PCAP文件的创建"
         },
         "type": "boolean",
         "role": "state",

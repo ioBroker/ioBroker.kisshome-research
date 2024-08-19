@@ -12,6 +12,7 @@ import {
 import {
     startRecordingOnFritzBox, type Context,
     MAX_PACKET_LENGTH, stopAllRecordingsOnFritzBox,
+    getRecordURL,
 } from './lib/recording';
 import {
     getFritzBoxInterfaces,
@@ -22,7 +23,16 @@ import {
 // const PCAP_HOST = 'kisshome-experiments.if-is.net';
 const PCAP_HOST = 'iobroker.link:8444';
 // key of the kisshome-experiments.if-is.net host
-const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:PesPlH50RqbZUVsJ36pht255bUudtwKPcjcTCyqeel4';
+// const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:PesPlH50RqbZUVsJ36pht255bUudtwKPcjcTCyqeel4';
+const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:r9KW3um9+d/8C1URZcwyDQTviw8hKY9+E0SawnlqQKE';
+const SSH_KNOW_KEYS = [
+    `${PCAP_HOST.replace(/:\d+$/, '')} ${SSH_KNOWN_KEY}`,
+    '|1|V9t4eHtO+266YRGnqjskEx2a57o=|QvdHODP5Z/ZDnNZfHdcTBVMs1Bk= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKOV2iFvC8q5/lL7UpMu1mdp9wrUkiDHoCa3+fINm8geLdoegkxr4vjDJycs69hUfewisnYu/lxtD7T0O3iKC9I=',
+    '|1|2EilM+qITJLZPysUUIz2FsPuwHQ=|bmay+fCwgQ1KhS1Zx8DPSoqiDH4= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKOV2iFvC8q5/lL7UpMu1mdp9wrUkiDHoCa3+fINm8geLdoegkxr4vjDJycs69hUfewisnYu/lxtD7T0O3iKC9I=',
+    '|1|HNvT9qw+bEa2AyslNFtm1ImDHv0=|UuHC2sQofsmm6avv6V9VB92J4fo= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOTUqewIb9mHH4U8RH8gqAMUuCHX7Oxr4IJFz/YO9mlO',
+    '|1|nsUIhpml4biLln7RIiwOIiljrdg=|CqWiS+rNGfTcyz6EjCZ06SldUXY= ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDF5TUPDocObD6CM+Q/t0+73cg7Jl+mXpOwjn+PgzTbIczNDP4ZTDe3E3c8uJsspFeE6sc8ps5/41dfn9AmaaLIXuCPSBV2E296f9tiXVXtuD4chadNsXOhxuXY3cW9Wv32vvkwDr4wE/LZZ+ABNa0stzRVWz51wQbTBUf0Btc3xrdecb85f6GAXQ7lJWWcrDiHL5tWh5oK8VejzU4oPP529GYZAlQREJahpMkVJ6zjJLKd7YbC//lVMnPxBu0Ydejt1CVWVhP5xIEyn1bRC8nXazaTNM4ZndUEW15uy5JXPIja/k5iG6OT/kMn6d088fpnjy3P9zeC4p3k02lN65DEum8sVUbGUFn9FTLN1Jj7e/aivXs2fdJoT9a8YcHHRyCkpk1AERX+advI3+5sbLmmYzBYNPt2WILmQQp4Rq/gNBu8kEFt4mlA3lMd5Fcov88b6nP1xfq8L9mJ59DUHlE+HlS5zCyuxch5TRTzqjKF1XlVEI2qVED3223dS5IvIxE=',
+    '|1|UV6zb/i+DLBjbwNgzyY/h2K0mWI=|j2tYqmVxtohj5fihPhMr+4EopqY= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBGeRfEXHAqtmvEg3OLm0RmvdMIkdimYuMwe/vEi1dlDz86K2PsmfhPA16eN7vF+T29gFW1zwwyRPti5kTCKmmTQ=',
+];
 
 // save files every 10 minutes
 const SAVE_DATA_EVERY_MS = 600_000;
@@ -282,7 +292,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             // ignore
             keysObj = null;
         }
-        if (!keysObj || !keysObj.native?.publicKey || !keysObj.native?.privateKey) {
+        if (!keysObj || !keysObj?.native?.publicKey || !keysObj.native?.privateKey) {
             this.log.info('Generating keys for first time');
             const result = generateKeys();
             privateKey = result.privateKey;
@@ -352,13 +362,13 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         this.knownHostFile = `${this.__dirname}/kisshome_known_hosts`.replace(/\\/g, '/');
 
         // create a home known file
-        const text = `${PCAP_HOST} ${SSH_KNOWN_KEY}`;
+        const text = SSH_KNOW_KEYS.join('\n');
         if (!fs.existsSync(this.knownHostFile)) {
             this.log.debug(`Creating known_hosts file: ${this.knownHostFile}`);
             fs.writeFileSync(this.knownHostFile, text);
         } else if (fs.readFileSync(this.knownHostFile).toString('utf8') !== text) {
             this.log.warn(`Updating known_hosts file: ${this.knownHostFile}`);
-            fs.appendFileSync(this.knownHostFile, text);
+            fs.writeFileSync(this.knownHostFile, text);
         }
 
         if (!config.email) {
@@ -399,18 +409,27 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.rsyncPath = await getRsyncPath();
         } catch (e) {
             this.log.error(`Cannot get rsync path: ${e}`);
+            if (process.platform === 'linux') {
+                this.log.error(`Install rsync on your system: "sudo apt-get install rsync"`);
+            }
             return;
         }
+
+        this.log.debug(`[RSYNC] rsync path: ${this.rsyncPath}`);
 
         this.saveMetaFile(IPs);
 
         await this.setState('info.recordingRunning', false, true);
+        await this.setState('info.recordingWrite', false, true);
 
         this.subscribeStates('info.recordingRunning');
+        this.subscribeStates('info.recordingWrite');
 
         // start the monitoring
         this.startRecording(config)
-            .catch(e => this.log.error(`Cannot start recording: ${e}`));
+            .catch(e => this.log.error(`[PCAP] Cannot start recording: ${e}`));
+
+        this.log.debug(`[RSYNC] command: ${this.getRSyncCommand()}`);
 
         // Send the data every hour to the cloud
         this.syncTimer = setTimeout(() => {
@@ -424,6 +443,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         if (this.syncTimer) {
             clearTimeout(this.syncTimer);
             this.syncTimer = null;
+        }
+
+        if (this.context.terminate) {
+            return;
         }
 
         const started = Date.now();
@@ -451,6 +474,13 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     if (this.context.controller) {
                         this.context.controller.abort();
                         this.context.controller = null;
+                    }
+                }
+            } else if (id === `${this.namespace}.info.recordingWrite` && !state.ack) {
+                if (state.val) {
+                    if (this.recordingRunning) {
+                        this.setState('info.recordingWrite', false, true);
+                        this.savePacketsToFile();
                     }
                 }
             }
@@ -511,6 +541,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             fs.closeSync(fd);
             this.log.debug(`Saved file ${fileName} with ${offset} bytes`);
         }
+        this.context.lastSaved = Date.now();
     }
 
     async startRecording(config: KISSHomeResearchConfig) {
@@ -522,12 +553,12 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             } catch (e) {
                 this.sid = '';
                 this.sidCreated = 0;
-                this.log.error(`Cannot get SID from FritzBox: ${e}`);
+                this.log.error(`[PCAP] Cannot get SID from FritzBox: ${e}`);
             }
         }
 
         if (this.sid) {
-            this.log.debug(`Use SID: ${this.sid}`);
+            this.log.debug(`[PCAP] Use SID: ${this.sid}`);
 
             const captured = await this.getStateAsync('info.capturedPackets');
             if (captured?.val) {
@@ -544,8 +575,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             // stop all recordings
             const response = await stopAllRecordingsOnFritzBox(config.fritzbox, this.sid);
             if (response) {
-                this.log.info(`Stopped all recordings on FritzBox: ${response}`);
+                this.log.info(`[PCAP] Stopped all recordings on FritzBox: ${response}`);
             }
+            this.log.debug(`[PCAP] starting recording on ${config.fritzbox}/"${config.iface}"...`);
+            this.log.debug(`[PCAP] ${getRecordURL(config.fritzbox, this.sid, config.iface, this.uniqueMacs)}`);
 
             startRecordingOnFritzBox(
                 config.fritzbox,
@@ -567,7 +600,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     }
 
                     if (this.recordingRunning) {
-                        this.log.info(`Recording stopped`);
+                        this.log.info(`[PCAP] Recording stopped`);
                         this.recordingRunning = false;
                         this.setState('info.connection', false, true);
                         this.setState('info.recordingRunning', false, true);
@@ -577,7 +610,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.setState('info.capturedPackets', this.context.totalPackets, true);
                     }
 
-                    error && this.log.error(`Error while recording: ${error}`);
+                    error && this.log.error(`[PCAP] Error while recording: ${error}`);
                     if (!this.context.terminate) {
                         this.restartRecording(config);
                     }
@@ -585,11 +618,13 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 this.context,
                 () => {
                     if (!this.recordingRunning) {
+                        this.log.debug('[PCAP] Recording started!');
                         this.recordingRunning = true;
                         this.setState('info.connection', true, true);
                         this.setState('info.recordingRunning', true, true);
 
                         this.monitorInterval = this.monitorInterval || this.setInterval(() => {
+                            this.log.debug(`[PCAP] Captured ${this.context.totalPackets} packets (${Math.round(this.context.totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
                             // save if a file is bigger than 50 Mb
                             if (this.context.totalBytes > SAVE_DATA_IF_BIGGER ||
                                 // save every 10 minutes
@@ -599,7 +634,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                                     this.saveAfterSync = true;
                                 } else {
                                     this.savePacketsToFile();
-                                    this.context.lastSaved = Date.now();
                                 }
                             }
                         }, 10000);
@@ -609,7 +643,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 },
             );
         } else {
-            this.log.warn('Cannot login into FritzBox. Maybe wrong credentials or fritzbox is not available');
+            this.log.warn('[PCAP] Cannot login into FritzBox. Maybe wrong credentials or fritzbox is not available');
             // try to get the token in 10 seconds again. E.g., if fritzbox is rebooting
             this.restartRecording(config);
         }
@@ -691,6 +725,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
     }
 
     async onUnload(callback: () => void): Promise<void> {
+        this.context.terminate = true;
+
         if (this.recordingRunning) {
             this.recordingRunning = false;
             this.setState('info.connection', false, true);
@@ -715,7 +751,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.startTimeout = undefined;
         }
 
-        this.context.terminate = true;
         if (this.context.controller) {
             this.context.controller.abort();
             this.context.controller = null;
@@ -750,6 +785,19 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         } catch (e) {
             this.log.error(`Cannot read working directory "${this.workingDir}": ${e}`);
         }
+    }
+
+    getRSyncCommand(): string {
+        const cmd: string[] = [
+            this.rsyncPath,
+            '-avr',
+            '-e',
+            `"ssh -o UserKnownHostsFile=${this.knownHostFile} -i ${this.privateKeyPath}"`,
+            this.workingDir,
+            `pcaprecv@${PCAP_HOST.replace(/:\d+$/, '')}:/dummyPath/`,
+        ];
+
+        return cmd.join(' ');
     }
 
     startSynchronization(cb?: () => void): void {
@@ -794,20 +842,13 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         this.log.debug(`[RSYNC] Syncing files to the cloud (${Math.round(totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
 
-        const cmd = [
-            this.rsyncPath,
-            '-avr',
-            '-e',
-            `"ssh -o UserKnownHostsFile=${this.knownHostFile} -i ${this.privateKeyPath}"`,
-            this.workingDir,
-            `pcaprecv@${PCAP_HOST}:/dummyPath/`,
-        ];
+        const cmd = this.getRSyncCommand();
 
         let error = '';
 
-        this.log.debug(`[RSYNC] cmd: "${cmd.join(' ')}"`);
+        this.log.debug(`[RSYNC] cmd: "${cmd}"`);
 
-        this.syncProcess = exec(cmd.join(' '), (_error, stdout, stderr) => {
+        this.syncProcess = exec(cmd, (_error, stdout, stderr) => {
             (stderr || _error) && this.log.warn(`[RSYNC] Error by synchronization: ${stderr}, ${_error}`);
             error = _error ? _error.message : '';
         });

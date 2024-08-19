@@ -23,19 +23,26 @@ export function getDefaultGateway(): Promise<string> {
 }
 
 export function generateKeys(): { publicKey: string; privateKey: string } {
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519', {
-        modulusLength: 2048,
-        publicKeyEncoding: { type: 'spki', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 4096, // bits - standard for RSA keys
+        publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
     });
+    const sshKeyBodyPublic = publicKey.toString();
 
-    const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
+    // const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519', {
+    //     modulusLength: 4096,
+    //     publicKeyEncoding: { type: 'spki', format: 'pem' },
+    //     privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    // });
+
+    //const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
 
     return { publicKey: sshKeyBodyPublic, privateKey: privateKey.toString() };
 }
 
 export function getRsyncPath(): Promise<string> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         if (process.platform === 'win32') {
             resolve('rsync');
             return;
@@ -43,7 +50,9 @@ export function getRsyncPath(): Promise<string> {
 
         exec('which rsync', (error, stdout, stderr) => {
             if (error) {
-                resolve('/usr/bin/rsync');
+                // resolve('/usr/bin/rsync');
+                reject(error);
+                return;
             }
             resolve(stdout.trim());
         })

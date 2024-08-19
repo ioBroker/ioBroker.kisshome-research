@@ -153,6 +153,17 @@ export async function stopAllRecordingsOnFritzBox(
     return response.data;
 }
 
+export function getRecordURL(
+    ip: string,
+    sid: string,
+    iface: string,
+    MACs: string[],
+) {
+    const filter = MACs.length ?`ether host ${MACs.join(' || ')}` : '';
+
+    return `http://${ip.trim()}/cgi-bin/capture_notimeout?ifaceorminor=${encodeURIComponent(iface.trim())}&snaplen=${MAX_PACKET_LENGTH}${filter ? `&filter=${encodeURIComponent(filter)}` : ''}&capture=Start&sid=${sid}`;
+}
+
 export function startRecordingOnFritzBox(
     ip: string,
     sid: string,
@@ -162,11 +173,7 @@ export function startRecordingOnFritzBox(
     context: Context,
     progress?: () => void,
 ) {
-    let filter = `ether host ${MACs.join(' || ')}`;
-    // enable all for tests
-    filter = '';
-
-    const captureUrl = `http://${ip.trim()}/cgi-bin/capture_notimeout?ifaceorminor=${encodeURIComponent(iface.trim())}&snaplen=${MAX_PACKET_LENGTH}${filter ? `&filter=${encodeURIComponent(filter)}` : ''}&capture=Start&sid=${sid}`;
+    const captureUrl = getRecordURL(ip, sid, iface, MACs);
 
     let first = false;
 
@@ -184,7 +191,9 @@ export function startRecordingOnFritzBox(
     };
 
     const executeOnEnd = (error: Error | null) => {
-        console.log(`FINISH receiving of data...: ${error}`);
+        if (debug) {
+            console.log(`FINISH receiving of data...: ${error}`);
+        }
         timeout && clearTimeout(timeout);
         timeout = null;
         onEnd && onEnd(error);
@@ -215,11 +224,18 @@ export function startRecordingOnFritzBox(
             return;
         }
         res.setEncoding('binary');
-        console.log(`Starting receiving of data...: ${JSON.stringify(res.headers)}`);
+
+        if (debug) {
+            console.log(`Starting receiving of data...: ${JSON.stringify(res.headers)}`);
+        }
+
+        informProgress();
 
         res.on('data', (chunk: string) => {
             const chunkBuffer = Buffer.from(chunk, 'binary');
-            console.log(`Received ${chunkBuffer.length}`);
+            if (debug) {
+                console.log(`Received x${chunkBuffer.length}`);
+            }
             // add data to buffer
             context.buffer = context.buffer ? Buffer.concat([context.buffer, chunkBuffer]) : chunkBuffer;
 
@@ -279,7 +295,6 @@ export function startRecordingOnFritzBox(
                     // ignore
                 }
                 executeOnEnd(null);
-                return;
             }
         });
 
