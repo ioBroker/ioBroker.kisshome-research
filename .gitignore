@@ -15,3 +15,6 @@ main.js
 
 .dev-server
 .vscode
+*.zip
+/*.html
+/test.js
