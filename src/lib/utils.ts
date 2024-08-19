@@ -3,7 +3,6 @@ import { get_gateway_ip } from 'network';
 import { toMAC } from '@network-utils/arp-lookup';
 import { toVendor } from '@network-utils/vendor-lookup';
 import crypto from 'node:crypto';
-import { exec } from "node:child_process";
 
 export async function getMacForIp(ip: string): Promise<{ mac: string; vendor?: string; ip: string } | null> {
     const mac = await toMAC(ip);
@@ -23,38 +22,20 @@ export function getDefaultGateway(): Promise<string> {
 }
 
 export function generateKeys(): { publicKey: string; privateKey: string } {
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-        modulusLength: 4096, // bits - standard for RSA keys
-        publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
-    });
-    const sshKeyBodyPublic = publicKey.toString();
-
-    // const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519', {
-    //     modulusLength: 4096,
-    //     publicKeyEncoding: { type: 'spki', format: 'pem' },
-    //     privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    // const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    //     modulusLength: 4096, // bits - standard for RSA keys
+    //     publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
+    //     privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
     // });
+    // const sshKeyBodyPublic = publicKey.toString();
 
-    //const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    });
+
+    const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
 
     return { publicKey: sshKeyBodyPublic, privateKey: privateKey.toString() };
-}
-
-export function getRsyncPath(): Promise<string> {
-    return new Promise((resolve, reject) => {
-        if (process.platform === 'win32') {
-            resolve('rsync');
-            return;
-        }
-
-        exec('which rsync', (error, stdout, stderr) => {
-            if (error) {
-                // resolve('/usr/bin/rsync');
-                reject(error);
-                return;
-            }
-            resolve(stdout.trim());
-        })
-    });
 }

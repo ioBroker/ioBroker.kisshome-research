@@ -1,12 +1,11 @@
 import * as utils from '@iobroker/adapter-core';
 import fs from 'node:fs';
 import axios from 'axios';
-import terminate from 'terminate/promise';
-import { exec, type ChildProcess } from 'node:child_process';
+import AdmZip from 'adm-zip';
 
 import {
     getDefaultGateway, getMacForIp,
-    generateKeys, getRsyncPath,
+    generateKeys,
 } from './lib/utils';
 
 import {
@@ -19,21 +18,10 @@ import {
     getFritzBoxToken,
     getFritzBoxUsers,
 } from './lib/fritzbox';
+import path from 'node:path';
 
 // const PCAP_HOST = 'kisshome-experiments.if-is.net';
 const PCAP_HOST = 'iobroker.link:8444';
-// key of the kisshome-experiments.if-is.net host
-// const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:PesPlH50RqbZUVsJ36pht255bUudtwKPcjcTCyqeel4';
-const SSH_KNOWN_KEY = 'ssh-ed25519 255 SHA256:r9KW3um9+d/8C1URZcwyDQTviw8hKY9+E0SawnlqQKE';
-const SSH_KNOW_KEYS = [
-    `${PCAP_HOST.replace(/:\d+$/, '')} ${SSH_KNOWN_KEY}`,
-    '|1|V9t4eHtO+266YRGnqjskEx2a57o=|QvdHODP5Z/ZDnNZfHdcTBVMs1Bk= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKOV2iFvC8q5/lL7UpMu1mdp9wrUkiDHoCa3+fINm8geLdoegkxr4vjDJycs69hUfewisnYu/lxtD7T0O3iKC9I=',
-    '|1|2EilM+qITJLZPysUUIz2FsPuwHQ=|bmay+fCwgQ1KhS1Zx8DPSoqiDH4= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKOV2iFvC8q5/lL7UpMu1mdp9wrUkiDHoCa3+fINm8geLdoegkxr4vjDJycs69hUfewisnYu/lxtD7T0O3iKC9I=',
-    '|1|HNvT9qw+bEa2AyslNFtm1ImDHv0=|UuHC2sQofsmm6avv6V9VB92J4fo= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOTUqewIb9mHH4U8RH8gqAMUuCHX7Oxr4IJFz/YO9mlO',
-    '|1|nsUIhpml4biLln7RIiwOIiljrdg=|CqWiS+rNGfTcyz6EjCZ06SldUXY= ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDF5TUPDocObD6CM+Q/t0+73cg7Jl+mXpOwjn+PgzTbIczNDP4ZTDe3E3c8uJsspFeE6sc8ps5/41dfn9AmaaLIXuCPSBV2E296f9tiXVXtuD4chadNsXOhxuXY3cW9Wv32vvkwDr4wE/LZZ+ABNa0stzRVWz51wQbTBUf0Btc3xrdecb85f6GAXQ7lJWWcrDiHL5tWh5oK8VejzU4oPP529GYZAlQREJahpMkVJ6zjJLKd7YbC//lVMnPxBu0Ydejt1CVWVhP5xIEyn1bRC8nXazaTNM4ZndUEW15uy5JXPIja/k5iG6OT/kMn6d088fpnjy3P9zeC4p3k02lN65DEum8sVUbGUFn9FTLN1Jj7e/aivXs2fdJoT9a8YcHHRyCkpk1AERX+advI3+5sbLmmYzBYNPt2WILmQQp4Rq/gNBu8kEFt4mlA3lMd5Fcov88b6nP1xfq8L9mJ59DUHlE+HlS5zCyuxch5TRTzqjKF1XlVEI2qVED3223dS5IvIxE=',
-    '|1|UV6zb/i+DLBjbwNgzyY/h2K0mWI=|j2tYqmVxtohj5fihPhMr+4EopqY= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBGeRfEXHAqtmvEg3OLm0RmvdMIkdimYuMwe/vEi1dlDz86K2PsmfhPA16eN7vF+T29gFW1zwwyRPti5kTCKmmTQ=',
-];
-
 // save files every 10 minutes
 const SAVE_DATA_EVERY_MS = 600_000;
 // save files if bigger than 50 Mb
@@ -86,8 +74,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private startTimeout: ioBroker.Timeout | undefined;
 
-    private syncProcess: ChildProcess | null = null;
-
     private context: Context = {
         terminate: false,
         controller: null,
@@ -112,11 +98,11 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private syncRunning: boolean = false;
 
-    private saveAfterSync: boolean = false;
-
     private syncTimer: NodeJS.Timeout | null = null;
 
     private monitorInterval: ioBroker.Interval | undefined;
+
+    private publicKey: string = '';
 
     private static macCache: { [ip: string]: { mac: string; vendor?: string } } = {};
 
@@ -282,7 +268,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
 
         let privateKey: string;
-        let publicKey: string;
 
         // retrieve public and private keys
         let keysObj: KeysObject | null;
@@ -296,7 +281,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.log.info('Generating keys for first time');
             const result = generateKeys();
             privateKey = result.privateKey;
-            publicKey = result.publicKey;
+            this.publicKey = result.publicKey;
 
             keysObj = {
                 _id: 'info.keys',
@@ -317,17 +302,17 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     }
                 },
                 native: {
-                    publicKey,
+                    publicKey: this.publicKey,
                     privateKey,
                 },
             };
             await this.setObjectAsync(keysObj._id, keysObj);
         } else {
             privateKey = keysObj.native.privateKey;
-            publicKey = keysObj.native.publicKey;
+            this.publicKey = keysObj.native.publicKey;
         }
 
-        if (!publicKey || !privateKey) {
+        if (!this.publicKey || !privateKey) {
             this.log.error('Cannot generate keys');
             return;
         }
@@ -358,19 +343,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             fs.writeFileSync(this.privateKeyPath, privateKey);
         }
 
-        // update known_hosts file
-        this.knownHostFile = `${this.__dirname}/kisshome_known_hosts`.replace(/\\/g, '/');
-
-        // create a home known file
-        const text = SSH_KNOW_KEYS.join('\n');
-        if (!fs.existsSync(this.knownHostFile)) {
-            this.log.debug(`Creating known_hosts file: ${this.knownHostFile}`);
-            fs.writeFileSync(this.knownHostFile, text);
-        } else if (fs.readFileSync(this.knownHostFile).toString('utf8') !== text) {
-            this.log.warn(`Updating known_hosts file: ${this.knownHostFile}`);
-            fs.writeFileSync(this.knownHostFile, text);
-        }
-
         if (!config.email) {
             this.log.error('No email provided. Please provide an email address in the configuration');
             this.log.error('You must register this email first on https://kisshome-feldversuch.if-is.net/#register');
@@ -384,7 +356,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         try {
             // register on the cloud
             const response = await axios.post(`https://${PCAP_HOST}/api/v1/registerKey`, {
-                publicKey: `ssh-ed25519 ${publicKey}`,
+                publicKey: this.publicKey,
+                // publicKey: `ssh-ed25519 ${this.publicKey}`,
                 email: config.email,
             });
             if (response.status === 200) {
@@ -404,19 +377,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             return;
         }
 
-        // get rsync path
-        try {
-            this.rsyncPath = await getRsyncPath();
-        } catch (e) {
-            this.log.error(`Cannot get rsync path: ${e}`);
-            if (process.platform === 'linux') {
-                this.log.error(`Install rsync on your system: "sudo apt-get install rsync"`);
-            }
-            return;
-        }
-
-        this.log.debug(`[RSYNC] rsync path: ${this.rsyncPath}`);
-
         this.saveMetaFile(IPs);
 
         await this.setState('info.recordingRunning', false, true);
@@ -428,8 +388,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         // start the monitoring
         this.startRecording(config)
             .catch(e => this.log.error(`[PCAP] Cannot start recording: ${e}`));
-
-        this.log.debug(`[RSYNC] command: ${this.getRSyncCommand()}`);
 
         // Send the data every hour to the cloud
         this.syncTimer = setTimeout(() => {
@@ -451,13 +409,15 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         const started = Date.now();
 
-        this.startSynchronization(() => {
-            const duration = Date.now() - started;
-            this.syncTimer = setTimeout(() => {
-                this.syncTimer = null;
-                this.syncJob();
-            }, SYNC_INTERVAL - duration > 0 ? SYNC_INTERVAL - duration : 0);
-        });
+        this.startSynchronization()
+            .catch(e => this.log.error(`[RSYNC] Cannot synchronize: ${e}`))
+            .then(() => {
+                const duration = Date.now() - started;
+                this.syncTimer = setTimeout(() => {
+                    this.syncTimer = null;
+                    this.syncJob();
+                }, SYNC_INTERVAL - duration > 0 ? SYNC_INTERVAL - duration : 0);
+            });
     }
 
     onStateChange(id: string, state: ioBroker.State | null | undefined): void {
@@ -481,6 +441,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     if (this.recordingRunning) {
                         this.setState('info.recordingWrite', false, true);
                         this.savePacketsToFile();
+                        setTimeout(() => {
+                            this.startSynchronization()
+                                .catch(e => this.log.error(`[RSYNC] Cannot synchronize: ${e}`));
+                        }, 2000)
                     }
                 }
             }
@@ -501,7 +465,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             const packetsToSave = this.context.packets;
             this.context.packets = [];
 
-            const fileName = `${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}.pcap`;
+            const timeStamp = KISSHomeResearchAdapter.getTimestamp();
+            const fileName = `${this.workingDir}/${timeStamp}.zip`;
             // get file descriptor of a file
             const fd = fs.openSync(fileName, 'w');
             let offset = 0;
@@ -511,6 +476,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             const MODIFIED_MAGIC = 0xa1b2cd34;
 
             // do not save a header if it is already present
+            const content: Buffer[] = [];
+            // write header
             if (magic !== STANDARD_MAGIC && magic !== MODIFIED_MAGIC) {
                 // create PCAP header
                 const byteArray = Buffer.alloc(6 * 4);
@@ -529,16 +496,17 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 // network type
                 byteArray.writeUInt32LE(this.context.networkType, 20);
                 fs.writeSync(fd, byteArray, 0, byteArray.length, 0);
-                offset = byteArray.length;
+                content.push(byteArray);
             }
 
-            // write header
             for (let i = 0; i < packetsToSave.length; i++) {
-                const packet = packetsToSave[i];
-                fs.writeSync(fd, packet, 0, packet.length, offset);
-                offset += packet.length;
+                content.push(packetsToSave[i]);
             }
-            fs.closeSync(fd);
+
+            const zip = new AdmZip();
+            zip.addFile(`${timeStamp}.pcap`, Buffer.concat(content));
+            zip.writeZip(fileName);
+
             this.log.debug(`Saved file ${fileName} with ${offset} bytes`);
         }
         this.context.lastSaved = Date.now();
@@ -630,11 +598,9 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                                 // save every 10 minutes
                                 Date.now() - this.context.lastSaved >= SAVE_DATA_EVERY_MS
                             ) {
-                                if (this.syncRunning) {
-                                    this.saveAfterSync = true;
-                                } else {
-                                    this.savePacketsToFile();
-                                }
+                                this.savePacketsToFile();
+                                this.startSynchronization()
+                                    .catch(e => this.log.error(`[RSYNC] Cannot synchronize: ${e}`));
                             }
                         }, 10000);
                     }
@@ -737,14 +703,14 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.syncTimer = null;
         }
 
-        if (this.syncProcess?.pid) {
-            try {
-                await terminate(this.syncProcess.pid);
-            } catch (err) {
-                this.log.error(`Cannot terminate sync process: ${err}`);
-            }
-            this.syncProcess = null;
-        }
+        // if (this.syncProcess?.pid) {
+        //     try {
+        //         await terminate(this.syncProcess.pid);
+        //     } catch (err) {
+        //         this.log.error(`Cannot terminate sync process: ${err}`);
+        //     }
+        //     this.syncProcess = null;
+        // }
 
         if (this.startTimeout) {
             clearTimeout(this.startTimeout);
@@ -767,7 +733,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         try {
             const files = fs.readdirSync(this.workingDir);
             for (const file of files) {
-                if (file.endsWith('.pcap')) {
+                if (file.endsWith('.pcap') || file.endsWith('.zip')) {
                     try {
                         fs.unlinkSync(`${this.workingDir}/${file}`);
                     } catch (e) {
@@ -787,102 +753,141 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
     }
 
-    getRSyncCommand(): string {
-        const cmd: string[] = [
-            this.rsyncPath,
-            '-avr',
-            '-e',
-            `"ssh -o UserKnownHostsFile=${this.knownHostFile} -i ${this.privateKeyPath}"`,
-            this.workingDir,
-            `pcaprecv@${PCAP_HOST.replace(/:\d+$/, '')}:/dummyPath/`,
-        ];
+    async sendOneFileToCloud(fileName: string): Promise<void> {
+        const config: KISSHomeResearchConfig = this.config as unknown as KISSHomeResearchConfig;
+        try {
+            const data = fs.readFileSync(fileName);
+            const name = path.basename(fileName);
+            const len = data.length;
 
-        return cmd.join(' ');
+            // check if the file was sent successfully
+            try {
+                const responseCheck = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}`);
+                if (responseCheck.status === 200 && responseCheck.data.toString() === len.toString()) {
+                    // file already uploaded, do not upload it again
+                    if (name.endsWith('.zip') || name.endsWith('.pcap')) {
+                        fs.unlinkSync(fileName);
+                    }
+                    return;
+                }
+            } catch {
+                // ignore
+            }
+
+            const responsePost = await axios({
+                method: 'post',
+                url: `https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}`,
+                data: data,
+                headers: { 'Content-Type': 'application/zip', }
+            });
+
+            // check if the file was sent successfully
+            const response = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}`);
+            if (response.status === 200 && response.data.toString() === len.toString()) {
+                if (name.endsWith('.zip') || name.endsWith('.pcap')) {
+                    fs.unlinkSync(fileName);
+                }
+                this.log.debug(`[RSYNC] Sent file ${fileName}(${Math.round(len / 1024)}kB) to the cloud: ${responsePost.status}`);
+            } else {
+                this.log.warn(`[RSYNC] File sent to server, but check fails ${fileName} to the cloud: status=${responsePost.status}, len=${len}, response=${response.data}`);
+            }
+        } catch (e) {
+            this.log.error(`[RSYNC] Cannot send file ${fileName} to the cloud: ${e}`);
+        }
     }
 
-    startSynchronization(cb?: () => void): void {
+    async startSynchronization(): Promise<void> {
         // calculate the total number of bytes
         let totalBytes = 0;
         this.log.debug(`[RSYNC] Start synchronization...`);
 
         // calculate the total number of bytes in pcap files
+        let zipFiles: string[];
+        let allFiles: string[];
         try {
-            const files = fs.readdirSync(this.workingDir);
-            for (const file of files) {
-                if (file.endsWith('.pcap')) {
-                    totalBytes += fs.statSync(`${this.workingDir}/${file}`).size;
-                }
+            allFiles = fs.readdirSync(this.workingDir);
+            zipFiles = allFiles.filter(f => f.endsWith('.zip'));
+            for (const file of zipFiles) {
+                totalBytes += fs.statSync(`${this.workingDir}/${file}`).size;
             }
         } catch (e) {
             this.log.error(`[RSYNC] Cannot read working directory for sync "${this.workingDir}": ${e}`);
-            if (cb) {
-                cb();
-            }
             return;
         }
 
         if (!totalBytes) {
             this.log.debug(`[RSYNC] No files to sync`);
-            if (cb) {
-                cb();
-            }
             return;
         }
 
         if (this.syncRunning) {
             this.log.warn(`[RSYNC] Synchronization still running...`);
-            if (cb) {
-                cb();
-            }
             return;
         }
 
         this.syncRunning = true;
-        this.setState('info.syncRunning', true, true);
+        await this.setState('info.syncRunning', true, true);
 
         this.log.debug(`[RSYNC] Syncing files to the cloud (${Math.round(totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
 
-        const cmd = this.getRSyncCommand();
+        // const cmd = this.getRSyncCommand();
+        //
+        // let error = '';
+        //
+        // this.log.debug(`[RSYNC] cmd: "${cmd}"`);
+        //
+        // this.syncProcess = exec(cmd, (_error, stdout, stderr) => {
+        //     (stderr || _error) && this.log.warn(`[RSYNC] Error by synchronization: ${stderr}, ${_error}`);
+        //     error = _error ? _error.message : '';
+        // });
+        //
+        // this.syncProcess.on('error', (_error) => error = _error.message);
+        //
+        // this.syncProcess.on('exit', (code) => {
+        //     this.syncProcess = null;
+        //
+        //     // delete all pcap files if no error
+        //     if (!error && code === 0) {
+        //         this.clearWorkingDir();
+        //     }
+        //
+        //     if (this.syncRunning) {
+        //         this.syncRunning = false;
+        //         this.setState('info.syncRunning', false, true);
+        //     }
+        //
+        //     if (this.saveAfterSync) {
+        //         this.saveAfterSync = false;
+        //         this.savePacketsToFile();
+        //     }
+        //
+        //     if (code !== 0) {
+        //         this.log.warn(`[RSYNC] Cannot sync files. rsync returned ${code}, error: ${error}`);
+        //     } else {
+        //         this.log.debug(`[RSYNC] Syncing files done with code ${code}`);
+        //     }
+        //
+        //     if (cb) {
+        //         cb();
+        //     }
+        // });
+        // send files to the cloud
 
-        let error = '';
-
-        this.log.debug(`[RSYNC] cmd: "${cmd}"`);
-
-        this.syncProcess = exec(cmd, (_error, stdout, stderr) => {
-            (stderr || _error) && this.log.warn(`[RSYNC] Error by synchronization: ${stderr}, ${_error}`);
-            error = _error ? _error.message : '';
-        });
-
-        this.syncProcess.on('error', (_error) => error = _error.message);
-
-        this.syncProcess.on('exit', (code) => {
-            this.syncProcess = null;
-
-            // delete all pcap files if no error
-            if (!error && code === 0) {
-                this.clearWorkingDir();
+        // first send meta files
+        for (let i = 0; i < allFiles.length; i++) {
+            const file = allFiles[i];
+            if (file.endsWith('.json')) {
+                await this.sendOneFileToCloud(`${this.workingDir}/${file}`);
             }
+        }
 
-            if (this.syncRunning) {
-                this.syncRunning = false;
-                this.setState('info.syncRunning', false, true);
-            }
-
-            if (this.saveAfterSync) {
-                this.saveAfterSync = false;
-                this.savePacketsToFile();
-            }
-
-            if (code !== 0) {
-                this.log.warn(`[RSYNC] Cannot sync files. rsync returned ${code}, error: ${error}`);
-            } else {
-                this.log.debug(`[RSYNC] Syncing files done with code ${code}`);
-            }
-
-            if (cb) {
-                cb();
-            }
-        });
+        // send all zip files
+        for (let i = 0; i < zipFiles.length; i++) {
+            const file = zipFiles[i];
+            await this.sendOneFileToCloud(`${this.workingDir}/${file}`);
+        }
+        this.syncRunning = false;
+        await this.setState('info.syncRunning', false, true);
     }
 }
 
