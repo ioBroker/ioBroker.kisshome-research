@@ -61,6 +61,16 @@ interface KeysObject extends ioBroker.OtherObject {
     };
 }
 
+function size2text(size: number): string {
+    if (size < 1024) {
+        return `${size} B`;
+    }
+    if (size < 1024 * 1024) {
+        return `${Math.round(size * 10 / 1024) / 10} kB`;
+    }
+    return `${Math.round(size * 10 / (1024 * 1024) / 10)} MB`;
+}
+
 export class KISSHomeResearchAdapter extends utils.Adapter {
     protected tempDir: string = '';
 
@@ -603,7 +613,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.setState('info.recordingRunning', true, true);
 
                         this.monitorInterval = this.monitorInterval || this.setInterval(() => {
-                            this.log.debug(`[PCAP] Captured ${this.context.totalPackets} packets (${Math.round(this.context.totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
+                            this.log.debug(`[PCAP] Captured ${this.context.totalPackets} packets (${size2text(this.context.totalBytes)})`);
                             // save if a file is bigger than 50 Mb
                             if (this.context.totalBytes > SAVE_DATA_IF_BIGGER ||
                                 // save every 20 minutes
@@ -809,7 +819,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 if (name.endsWith('.zip') || name.endsWith('.pcap')) {
                     fs.unlinkSync(fileName);
                 }
-                this.log.debug(`[RSYNC] Sent file ${fileName}(${Math.round(len / 1024)}kB) to the cloud: ${responsePost.status}`);
+                this.log.debug(`[RSYNC] Sent file ${fileName}(${size2text(len)}) to the cloud: ${responsePost.status}`);
             } else {
                 this.log.warn(`[RSYNC] File sent to server, but check fails ${fileName} to the cloud: status=${responsePost.status}, len=${len}, response=${response.data}`);
             }
@@ -854,7 +864,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         this.syncRunning = true;
         await this.setState('info.syncRunning', true, true);
 
-        this.log.debug(`[RSYNC] Syncing files to the cloud (${Math.round(totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
+        this.log.debug(`[RSYNC] Syncing files to the cloud (${size2text(totalBytes)})`);
 
         // const cmd = this.getRSyncCommand();
         //
