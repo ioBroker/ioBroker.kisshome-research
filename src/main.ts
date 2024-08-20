@@ -399,10 +399,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             .catch(e => this.log.error(`[PCAP] Cannot start recording: ${e}`));
 
         // Send the data every hour to the cloud
-        this.syncTimer = setTimeout(() => {
-            this.syncTimer = null;
-            this.syncJob();
-        }, SYNC_INTERVAL);
+        this.syncJob();
     }
 
     syncJob(): void {
