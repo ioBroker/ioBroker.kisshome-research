@@ -234,7 +234,7 @@ export function startRecordingOnFritzBox(
         res.on('data', (chunk: string) => {
             const chunkBuffer = Buffer.from(chunk, 'binary');
             if (debug) {
-                console.log(`Received x${chunkBuffer.length}`);
+                console.log(`Received ${chunkBuffer.length} bytes`);
             }
             // add data to buffer
             context.buffer = context.buffer ? Buffer.concat([context.buffer, chunkBuffer]) : chunkBuffer;

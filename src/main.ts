@@ -588,7 +588,11 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.setState('info.capturedPackets', this.context.totalPackets, true);
                     }
 
-                    error && this.log.error(`[PCAP] Error while recording: ${error}`);
+                    if (error) {
+                        if (!this.context.terminate || !error.toString().includes('aborted')) {
+                            this.log.error(`[PCAP] Error while recording: ${error}`);
+                        }
+                    }
                     if (!this.context.terminate) {
                         this.restartRecording(config);
                     }
@@ -609,8 +613,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                                 Date.now() - this.context.lastSaved >= SAVE_DATA_EVERY_MS
                             ) {
                                 this.savePacketsToFile();
-                                this.startSynchronization()
-                                    .catch(e => this.log.error(`[RSYNC] Cannot synchronize: ${e}`));
+                                if (!this.context.terminate) {
+                                    this.startSynchronization()
+                                        .catch(e => this.log.error(`[RSYNC] Cannot synchronize: ${e}`));
+                                }
                             }
                         }, 10000);
                     }
@@ -816,6 +822,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
     }
 
     async startSynchronization(): Promise<void> {
+        if (this.context.terminate) {
+            this.log.debug(`[RSYNC] Requested termination. No synchronization`);
+            return;
+        }
         // calculate the total number of bytes
         let totalBytes = 0;
         this.log.debug(`[RSYNC] Start synchronization...`);
