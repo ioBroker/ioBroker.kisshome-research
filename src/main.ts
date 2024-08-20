@@ -1,7 +1,8 @@
 import * as utils from '@iobroker/adapter-core';
 import fs from 'node:fs';
 import axios from 'axios';
-import AdmZip from 'adm-zip';
+import path from 'node:path';
+import crypto from 'node:crypto';
 
 import {
     getDefaultGateway, getMacForIp,
@@ -18,12 +19,11 @@ import {
     getFritzBoxToken,
     getFritzBoxUsers,
 } from './lib/fritzbox';
-import path from 'node:path';
 
 // const PCAP_HOST = 'kisshome-experiments.if-is.net';
 const PCAP_HOST = 'iobroker.link:8444';
-// save files every 30 minutes
-const SAVE_DATA_EVERY_MS = 1_800_000;
+// save files every 60 minutes
+const SAVE_DATA_EVERY_MS = 3_600_000;
 // save files if bigger than 50 Mb
 const SAVE_DATA_IF_BIGGER = 50 * 1024 * 1024;
 
@@ -112,6 +112,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private publicKey: string = '';
 
+    private uuid: string = '';
+
     private static macCache: { [ip: string]: { mac: string; vendor?: string } } = {};
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
@@ -197,6 +199,16 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     async onReady(): Promise<void> {
         const config: KISSHomeResearchConfig = this.config as unknown as KISSHomeResearchConfig;
+
+        // read UUID
+        const uuidObj = await this.getForeignObjectAsync('system.meta.uuid');
+        if (uuidObj?.native?.uuid) {
+            this.uuid = uuidObj.native.uuid;
+        } else {
+            this.log.error('Cannot read UUID');
+            return;
+        }
+
         // first, try to detect the default gateway
         if (config.fritzbox === '0.0.0.0') {
             try {
@@ -365,8 +377,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             // register on the cloud
             const response = await axios.post(`https://${PCAP_HOST}/api/v1/registerKey`, {
                 publicKey: this.publicKey,
-                // publicKey: `ssh-ed25519 ${this.publicKey}`,
                 email: config.email,
+                uuid: this.uuid,
             });
             if (response.status === 200) {
                 if (response.data?.command === 'terminate') {
@@ -481,7 +493,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.context.totalBytes = 0;
 
             const timeStamp = KISSHomeResearchAdapter.getTimestamp();
-            const fileName = `${this.workingDir}/${timeStamp}.zip`;
+            const fileName = `${this.workingDir}/${timeStamp}.pcap`;
             // get file descriptor of a file
             const fd = fs.openSync(fileName, 'w');
             let offset = 0;
@@ -491,7 +503,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             const MODIFIED_MAGIC = 0xa1b2cd34;
 
             // do not save a header if it is already present
-            const content: Buffer[] = [];
             // write header
             if (magic !== STANDARD_MAGIC && magic !== MODIFIED_MAGIC) {
                 // create PCAP header
@@ -511,20 +522,27 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 // network type
                 byteArray.writeUInt32LE(this.context.networkType, 20);
                 fs.writeSync(fd, byteArray, 0, byteArray.length, 0);
-                content.push(byteArray);
+                offset = byteArray.length;
             }
 
             for (let i = 0; i < packetsToSave.length; i++) {
-                content.push(packetsToSave[i]);
+                const packet = packetsToSave[i];
+                fs.writeSync(fd, packet, 0, packet.length, offset);
+                offset += packet.length;
             }
 
-            const zip = new AdmZip();
-            zip.addFile(`${timeStamp}.pcap`, Buffer.concat(content));
-            zip.writeZip(fileName);
+            fs.closeSync(fd);
 
-            this.log.debug(`Saved file ${fileName} with ${offset} bytes`);
+            this.log.debug(`Saved file ${fileName} with ${size2text(offset)}`);
         }
+
         this.context.lastSaved = Date.now();
+    }
+
+    calculateMd5(content: Buffer): string {
+        const hash = crypto.createHash('md5');
+        hash.update(content);
+        return hash.digest('hex');
     }
 
     async startRecording(config: KISSHomeResearchConfig) {
@@ -757,7 +775,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         try {
             const files = fs.readdirSync(this.workingDir);
             for (const file of files) {
-                if (file.endsWith('.pcap') || file.endsWith('.zip')) {
+                if (file.endsWith('.pcap')) {
                     try {
                         fs.unlinkSync(`${this.workingDir}/${file}`);
                     } catch (e) {
@@ -784,9 +802,11 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             const name = path.basename(fileName);
             const len = data.length;
 
+            const md5 = this.calculateMd5(data);
+
             // check if the file was sent successfully
             try {
-                const responseCheck = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}`);
+                const responseCheck = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`);
                 if (responseCheck.data?.command === 'terminate') {
                     const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
                     if (obj?.common?.enabled) {
@@ -796,9 +816,9 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     return;
                 }
 
-                if (responseCheck.status === 200 && responseCheck.data.toString() === len.toString()) {
+                if (responseCheck.status === 200 && responseCheck.data === md5) {
                     // file already uploaded, do not upload it again
-                    if (name.endsWith('.zip') || name.endsWith('.pcap')) {
+                    if (name.endsWith('.pcap')) {
                         fs.unlinkSync(fileName);
                     }
                     return;
@@ -809,15 +829,15 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
             const responsePost = await axios({
                 method: 'post',
-                url: `https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}`,
+                url: `https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`,
                 data: data,
-                headers: { 'Content-Type': 'application/zip', }
+                headers: { 'Content-Type': 'application/vnd.tcpdump.pcap', }
             });
 
             // check if the file was sent successfully
-            const response = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}`);
-            if (response.status === 200 && response.data.toString() === len.toString()) {
-                if (name.endsWith('.zip') || name.endsWith('.pcap')) {
+            const response = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`);
+            if (response.status === 200 && response.data === md5) {
+                if (name.endsWith('.pcap')) {
                     fs.unlinkSync(fileName);
                 }
                 this.log.debug(`[RSYNC] Sent file ${fileName}(${size2text(len)}) to the cloud: ${responsePost.status}`);
@@ -839,12 +859,12 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         this.log.debug(`[RSYNC] Start synchronization...`);
 
         // calculate the total number of bytes in pcap files
-        let zipFiles: string[];
+        let pcapFiles: string[];
         let allFiles: string[];
         try {
             allFiles = fs.readdirSync(this.workingDir);
-            zipFiles = allFiles.filter(f => f.endsWith('.zip'));
-            for (const file of zipFiles) {
+            pcapFiles = allFiles.filter(f => f.endsWith('.pcap'));
+            for (const file of pcapFiles) {
                 totalBytes += fs.statSync(`${this.workingDir}/${file}`).size;
             }
         } catch (e) {
@@ -918,9 +938,9 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             }
         }
 
-        // send all zip files
-        for (let i = 0; i < zipFiles.length; i++) {
-            const file = zipFiles[i];
+        // send all pcap files
+        for (let i = 0; i < pcapFiles.length; i++) {
+            const file = pcapFiles[i];
             await this.sendOneFileToCloud(`${this.workingDir}/${file}`);
         }
         this.syncRunning = false;
