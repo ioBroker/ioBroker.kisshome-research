@@ -26,7 +26,7 @@ To run this adapter, you need:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.1 (2024-08-20)
 * (bluefox) Used MD5 for the file consistency check
 
 ### 0.1.0 (2024-08-19)

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "news": {
+      "0.1.1": {
+        "en": "Used MD5 for the file consistency check",
+        "de": "Gebrauchte MD5 für die Dateikonsistenzprüfung",
+        "ru": "Использованный MD5 для проверки последовательности файла",
+        "pt": "Usado MD5 para verificação de consistência de arquivo",
+        "nl": "Gebruikte MD5 voor de controle op bestandsconsistentie",
+        "fr": "MD5 utilisé pour la vérification de la cohérence des fichiers",
+        "it": "Usato MD5 per il controllo della consistenza del file",
+        "es": "MD5 usado para el control de consistencia del archivo",
+        "pl": "Używany MD5 do sprawdzania spójności plików",
+        "uk": "Використовується MD5 для перевірки відповідності файлів",
+        "zh-cn": "用于文件一致性检查的 MD5"
+      },
       "0.1.0": {
         "en": "File upload was implemented",
         "de": "Datei-Upload wurde implementiert",
