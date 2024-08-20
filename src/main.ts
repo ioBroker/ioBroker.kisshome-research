@@ -22,7 +22,7 @@ import path from 'node:path';
 
 // const PCAP_HOST = 'kisshome-experiments.if-is.net';
 const PCAP_HOST = 'iobroker.link:8444';
-// save files every 10 minutes
+// save files every 20 minutes
 const SAVE_DATA_EVERY_MS = 1_200_000;
 // save files if bigger than 50 Mb
 const SAVE_DATA_IF_BIGGER = 50 * 1024 * 1024;
