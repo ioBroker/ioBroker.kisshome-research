@@ -10,6 +10,7 @@ export async function getFritzBoxInterfaces(ip: string, login?: string, password
     }
 
     const response = await axios(`http://${ip}/capture.lua?sid=${sid}`);
+
     if (response.data) {
         let text = response.data;
         let result = [];
@@ -46,6 +47,20 @@ export async function getFritzBoxInterfaces(ip: string, login?: string, password
         }
 
         return result;
+    }
+}
+
+export async function getFritzBoxFilter(ip: string, login?: string, password?: string, sid?: string) {
+    if (!sid && login && password) {
+        sid = await getFritzBoxToken(ip, login, password, console.log);
+    }
+    if (!sid) {
+        return null;
+    }
+
+    const response = await axios(`http://${ip}/capture.lua?sid=${sid}`);
+    if (response.data) {
+        return response.data.includes('id="uiFilter"');
     }
 }
 

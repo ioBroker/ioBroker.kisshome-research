@@ -85,7 +85,18 @@
                     "lg": 3,
                     "disabled": "!data.email || !data.fritzbox || data.fritzbox === '0.0.0.0' || !data.login || !data.password || !data.iface",
                     "label": "Recording enabled"
-                }
+                },
+                "_filter": {
+                    "newLine": true,
+                    "type": "textSendTo",
+                    "command": "getFilter",
+                    "jsonData": "{\"ip\": \"${data.fritzbox}\", \"login\": \"${data.login}\", \"password\": \"${data.password}\"}",
+                    "alsoDependsOn": ["fritzbox", "login", "password"],
+                    "size": 4,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12
+                },
             }
         },
         "_instances": {

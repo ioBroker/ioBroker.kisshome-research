@@ -15,6 +15,7 @@ import {
     getRecordURL,
 } from './lib/recording';
 import {
+    getFritzBoxFilter,
     getFritzBoxInterfaces,
     getFritzBoxToken,
     getFritzBoxUsers,
@@ -150,6 +151,34 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                                 this.sendTo(msg.from, msg.command, users, msg.callback);
                             } else {
                                 this.sendTo(msg.from, msg.command, [], msg.callback);
+                            }
+                        } catch (e) {
+                            this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
+                        }
+                    }
+                    break;
+                }
+
+                case 'getFilter': {
+                    if (msg.callback) {
+                        try {
+                            if (msg.message?.ip || config.fritzbox &&
+                                msg.message?.login || config.login &&
+                                msg.message?.password || config.password
+                            ) {
+                                const filter = await getFritzBoxFilter(
+                                    msg.message?.ip || config.fritzbox,
+                                    msg.message?.login || config.login,
+                                    msg.message?.password || config.password,
+                                );
+                                this.sendTo(msg.from, msg.command, {
+                                    text: filter ? 'Filter ist auf dem Fritz!Box unterstützt' : 'Filter ist nicht auf dem Fritz!Box unterstützt',
+                                    style: {
+                                        color: filter ? 'green' : 'red',
+                                    },
+                                }, msg.callback);
+                            } else {
+                                this.sendTo(msg.from, msg.command, false, msg.callback);
                             }
                         } catch (e) {
                             this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
