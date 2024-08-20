@@ -22,7 +22,7 @@ import path from 'node:path';
 
 // const PCAP_HOST = 'kisshome-experiments.if-is.net';
 const PCAP_HOST = 'iobroker.link:8444';
-// save files every 20 minutes
+// save files every 30 minutes
 const SAVE_DATA_EVERY_MS = 1_800_000;
 // save files if bigger than 50 Mb
 const SAVE_DATA_IF_BIGGER = 50 * 1024 * 1024;
@@ -361,7 +361,16 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 email: config.email,
             });
             if (response.status === 200) {
-                this.log.info('Successfully registered on the cloud');
+                if (response.data?.command === 'terminate') {
+                    this.log.warn('Server requested to terminate the adapter');
+                    const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
+                    if (obj?.common?.enabled) {
+                        obj.common.enabled = false;
+                        await this.setForeignObjectAsync(obj._id, obj);
+                    }
+                } else {
+                    this.log.info('Successfully registered on the cloud');
+                }
             } else {
                 if (response.status === 404) {
                     this.log.error(`Cannot register on the cloud: unknown email address`);
@@ -764,6 +773,15 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             // check if the file was sent successfully
             try {
                 const responseCheck = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}`);
+                if (responseCheck.data?.command === 'terminate') {
+                    const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
+                    if (obj?.common?.enabled) {
+                        obj.common.enabled = false;
+                        await this.setForeignObjectAsync(obj._id, obj);
+                    }
+                    return;
+                }
+
                 if (responseCheck.status === 200 && responseCheck.data.toString() === len.toString()) {
                     // file already uploaded, do not upload it again
                     if (name.endsWith('.zip') || name.endsWith('.pcap')) {
