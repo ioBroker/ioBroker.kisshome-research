@@ -23,7 +23,7 @@ import path from 'node:path';
 // const PCAP_HOST = 'kisshome-experiments.if-is.net';
 const PCAP_HOST = 'iobroker.link:8444';
 // save files every 20 minutes
-const SAVE_DATA_EVERY_MS = 1_200_000;
+const SAVE_DATA_EVERY_MS = 1_800_000;
 // save files if bigger than 50 Mb
 const SAVE_DATA_IF_BIGGER = 50 * 1024 * 1024;
 
@@ -596,7 +596,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                             this.log.debug(`[PCAP] Captured ${this.context.totalPackets} packets (${Math.round(this.context.totalBytes / (1024 * 1024) * 100) / 100} Mb)`);
                             // save if a file is bigger than 50 Mb
                             if (this.context.totalBytes > SAVE_DATA_IF_BIGGER ||
-                                // save every 10 minutes
+                                // save every 20 minutes
                                 Date.now() - this.context.lastSaved >= SAVE_DATA_EVERY_MS
                             ) {
                                 this.savePacketsToFile();
