@@ -100,11 +100,9 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private privateKeyPath: string = '';
 
-    private knownHostFile: string = '';
-
     private workingDir: string = '';
 
-    private rsyncPath: string = '';
+    private lastDebug: number = 0;
 
     private syncRunning: boolean = false;
 
@@ -613,7 +611,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.setState('info.recordingRunning', true, true);
 
                         this.monitorInterval = this.monitorInterval || this.setInterval(() => {
-                            this.log.debug(`[PCAP] Captured ${this.context.totalPackets} packets (${size2text(this.context.totalBytes)})`);
+                            if (Date.now() - this.lastDebug > 60000) {
+                                this.log.debug(`[PCAP] Captured ${this.context.totalPackets} packets (${size2text(this.context.totalBytes)})`);
+                                this.lastDebug = Date.now();
+                            }
                             // save if a file is bigger than 50 Mb
                             if (this.context.totalBytes > SAVE_DATA_IF_BIGGER ||
                                 // save every 20 minutes
