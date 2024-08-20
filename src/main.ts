@@ -464,6 +464,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         if (this.context.packets.length) {
             const packetsToSave = this.context.packets;
             this.context.packets = [];
+            this.context.totalBytes = 0;
 
             const timeStamp = KISSHomeResearchAdapter.getTimestamp();
             const fileName = `${this.workingDir}/${timeStamp}.zip`;
