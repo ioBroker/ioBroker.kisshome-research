@@ -26,6 +26,9 @@ To run this adapter, you need:
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (bluefox) Used MD5 for the file consistency check
+
 ### 0.1.0 (2024-08-19)
 * (bluefox) File upload was implemented
 
