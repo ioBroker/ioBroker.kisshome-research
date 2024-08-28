@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "news": {
+      "0.2.0": {
+        "en": "used valid URL address",
+        "de": "verwendete gültige URL-Adresse",
+        "ru": "использованный адрес",
+        "pt": "endereço URL válido usado",
+        "nl": "gebruikt geldig URL-adres",
+        "fr": "adresse URL valide utilisée",
+        "it": "indirizzo URL valido",
+        "es": "dirección URL válida",
+        "pl": "używany poprawny adres URL",
+        "uk": "використовується вірна адреса URL",
+        "zh-cn": "使用有效的 URL 地址"
+      },
       "0.1.1": {
         "en": "Used MD5 for the file consistency check",
         "de": "Gebrauchte MD5 für die Dateikonsistenzprüfung",
