@@ -35,7 +35,6 @@ const styles = {
 };
 
 const ADAPTERS = [
-    { adapter: 'alexa-2' },
     { adapter: 'broadlink2', attr: 'additional' },
 //     { adapter: 'cameras' },
     { adapter: 'harmony', attr: 'devices', arrayAttr: 'ip' },
@@ -50,13 +49,13 @@ const ADAPTERS = [
 //    { adapter: 'meross' }, not possible. It communicates with the cloud
     { adapter: 'mihome-vacuum', attr: 'ip' },
     { adapter: 'modbus', attr: 'params.bind' },
-    { adapter: 'mqtt', attr: 'bind' },
+//    { adapter: 'mqtt', attr: 'bind' }, // read clients IP addresses
     { adapter: 'mqtt-client', attr: 'host' },
     { adapter: 'onvif' },
     { adapter: 'openknx', attr: 'gwip' },
     { adapter: 'proxmox', attr: 'ip' },
     { adapter: 'samsung', attr: 'ip' },
-    { adapter: 'shelly', attr: 'bind' },
+//    { adapter: 'shelly', attr: 'bind' },
     { adapter: 'sonoff', attr: 'bind' },
     { adapter: 'sonos', attr: 'devices', arrayAttr: 'ip' },
     { adapter: 'tr-064', attr: 'iporhost' },

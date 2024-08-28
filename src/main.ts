@@ -21,8 +21,7 @@ import {
     getFritzBoxUsers,
 } from './lib/fritzbox';
 
-// const PCAP_HOST = 'kisshome-experiments.if-is.net';
-const PCAP_HOST = 'iobroker.link:8444';
+const PCAP_HOST = 'kisshome-experiments.if-is.net';
 // save files every 60 minutes
 const SAVE_DATA_EVERY_MS = 3_600_000;
 // save files if bigger than 50 Mb

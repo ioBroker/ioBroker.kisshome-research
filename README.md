@@ -20,12 +20,49 @@ To run this adapter, you need:
 - Fritz!Box Router. Without `Fritz!Box`, the adapter will not work.
 - iobroker must run on debian/raspbian (or at least on linux, where the following commands are available: `which`, `rsync`)
 
+## Todo
+Detect IP addresses from:
+- [X] hm-rpc (Homematic CCU),
+- [X] loxone,
+- [X] shelly,
+- [ ] mqtt
+- [X] tr-064,
+- [-] alexa-2 - not possible, as alexa reads no IP addresses
+- [ ] sonoff,
+- [ ] modbus,
+- [ ] hue (philips hue),
+- [ ] tuya - not possible, It communicates with the cloud
+- [ ] mqtt-client,
+- [ ] synology?,
+- [ ] sonos,
+- [ ] mihome-vacuum,
+- [ ] hmip (Homematic Cloud),
+- [ ] homeconnect,
+- [ ] wled (ESP8266/ESP32),
+- [ ] unify,
+- [X] harmony,
+- [ ] samsung (TV),
+- [ ] onvif (Webkameras),
+- [ ] kameras (URL oder IP-Kameras),
+- [ ] proxmox,
+- [ ] broadlink2,
+- [ ] lgtv,
+- [ ] knx (KNX-Gateway),
+- [ ] lcn,
+- [ ] homekit-controller,
+- [ ] upnp,
+- [ ] openknx,
+- [ ] meross
+
 <!--
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (bluefox) used valid URL address
+
 ### 0.1.1 (2024-08-20)
 * (bluefox) Used MD5 for the file consistency check
 
