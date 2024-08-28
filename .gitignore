@@ -9,7 +9,6 @@ nbproject
 package-lock.json
 /src-admin/build
 *.map
-main.js
 *.tgz
 *.pcap
 
