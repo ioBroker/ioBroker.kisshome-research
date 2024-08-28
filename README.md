@@ -60,7 +60,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### 0.2.0 (2024-08-28)
+### **WORK IN PROGRESS**
 * (bluefox) used valid URL address
 
 ### 0.1.1 (2024-08-20)

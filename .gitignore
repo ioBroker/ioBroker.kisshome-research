@@ -7,7 +7,7 @@ admin/custom/*
 nbproject
 /src-admin/package-lock.json
 package-lock.json
-build
+/src-admin/build
 *.map
 main.js
 *.tgz
