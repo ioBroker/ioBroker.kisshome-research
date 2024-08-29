@@ -1,0 +1,9 @@
+{
+  "custom_kisshome_enabled": "Увімкнено",
+  "custom_kisshome_ip": "IP-адреса",
+  "custom_kisshome_name": "Назва адаптера",
+  "custom_kisshome_vendor": "Продавець",
+  "custom_kisshome_mac": "MAC-адреса",
+  "custom_kisshome_select_all": "Увімкнути всі",
+  "custom_kisshome_unselect_all": "Відключити все"
+}

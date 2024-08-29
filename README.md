@@ -25,17 +25,17 @@ Detect IP addresses from:
 - [X] hm-rpc (Homematic CCU),
 - [X] loxone,
 - [X] shelly,
-- [ ] mqtt
+- [X] mqtt
 - [X] tr-064,
 - [-] alexa-2 - not possible, as alexa reads no IP addresses
-- [ ] sonoff,
-- [ ] modbus,
-- [ ] hue (philips hue),
-- [ ] tuya - not possible, It communicates with the cloud
-- [ ] mqtt-client,
-- [ ] synology?,
-- [ ] sonos,
-- [ ] mihome-vacuum,
+- [X] sonoff,
+- [X] modbus,
+- [X] hue (philips hue),
+- [-] tuya - not possible, It communicates with the cloud
+- [X] mqtt-client,
+- [-] synology - it is a multifunctional device - ignore it,
+- [X] sonos,
+- [X] mihome-vacuum,
 - [ ] hmip (Homematic Cloud),
 - [ ] homeconnect,
 - [ ] wled (ESP8266/ESP32),
@@ -60,6 +60,9 @@ Detect IP addresses from:
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (bluefox) Added detection of some IPs
+
 ### 0.2.1 (2024-08-28)
 * (bluefox) used valid URL address
 

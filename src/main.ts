@@ -834,7 +834,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
             // check if the file was sent successfully
             try {
-                const responseCheck = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`);
+                const responseCheck = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`);
                 if (responseCheck.data?.command === 'terminate') {
                     const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
                     if (obj?.common?.enabled) {
@@ -857,13 +857,13 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
             const responsePost = await axios({
                 method: 'post',
-                url: `https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`,
+                url: `https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`,
                 data: data,
                 headers: { 'Content-Type': 'application/vnd.tcpdump.pcap', }
             });
 
             // check if the file was sent successfully
-            const response = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`);
+            const response = await axios.get(`https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`);
             if (response.status === 200 && response.data === md5) {
                 if (name.endsWith('.pcap')) {
                     fs.unlinkSync(fileName);

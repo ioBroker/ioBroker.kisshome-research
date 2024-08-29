@@ -3,7 +3,6 @@ node_modules
 tmp
 .DS_store
 iob_npm.done
-admin/custom/*
 nbproject
 /src-admin/package-lock.json
 package-lock.json

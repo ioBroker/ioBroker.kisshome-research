@@ -128,7 +128,12 @@
     "licenseInformation": {
       "type": "free",
       "license": "MIT"
-    }
+    },
+    "globalDependencies": [
+      {
+        "admin": ">=7.0.25"
+      }
+    ]
   },
   "protectedNative": [
     "password",

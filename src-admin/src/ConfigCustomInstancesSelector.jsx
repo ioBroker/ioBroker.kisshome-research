@@ -34,6 +34,39 @@ const styles = {
     },
 };
 
+async function browseShelly(socket, instance) {
+    const states = await socket.getObjectViewSystem('state', `${instance}.`, `${instance}.\u9999`);
+    const devices = [];
+    const ids = Object.keys(states).filter(id => id.endsWith('.hostname'));
+    for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const value = await socket.getState(id);
+        if (value?.val) {
+            devices.push({
+                ip: value.val,
+                name: 'shelly',
+            });
+        }
+    }
+
+    return devices;
+}
+
+async function browseClients(socket, instance) {
+    const clients = await socket.getObjectViewSystem('state', `${instance}.info.clients.`, `${instance}.info.clients.\u9999`);
+    const devices = [];
+    const objs = Object.values(clients);
+    for (let i = 0; i < objs.length; i++) {
+        if (objs[i]?.native?.ip) {
+            devices.push({
+                ip: objs[i].native.ip,
+                name: instance.split('.')[0],
+            });
+        }
+    }
+    return devices;
+}
+
 const ADAPTERS = [
     { adapter: 'broadlink2', attr: 'additional' },
 //     { adapter: 'cameras' },
@@ -48,15 +81,15 @@ const ADAPTERS = [
     { adapter: 'loxone', attr: 'host' },
 //    { adapter: 'meross' }, not possible. It communicates with the cloud
     { adapter: 'mihome-vacuum', attr: 'ip' },
-    { adapter: 'modbus', attr: 'params.bind' },
-//    { adapter: 'mqtt', attr: 'bind' }, // read clients IP addresses
+    { adapter: 'modbus', attr: 'params.bind', clients: true },
+    { adapter: 'mqtt', attr: 'url', clients: true }, // read clients IP addresses
     { adapter: 'mqtt-client', attr: 'host' },
     { adapter: 'onvif' },
     { adapter: 'openknx', attr: 'gwip' },
     { adapter: 'proxmox', attr: 'ip' },
     { adapter: 'samsung', attr: 'ip' },
-//    { adapter: 'shelly', attr: 'bind' },
-    { adapter: 'sonoff', attr: 'bind' },
+    { adapter: 'shelly', browse: browseShelly },
+    { adapter: 'sonoff', clients: true },
     { adapter: 'sonos', attr: 'devices', arrayAttr: 'ip' },
     { adapter: 'tr-064', attr: 'iporhost' },
 //    { adapter: 'tuya' }, not possible. It communicates with the cloud
@@ -237,7 +270,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         }, 1000);
     }
 
-    collectIpAddresses(instances, ownAddresses) {
+    async collectIpAddresses(instances, ownAddresses) {
         let result = [];
 
         instances = instances || this.state.instances;
@@ -245,7 +278,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             const adapter = ADAPTERS.find(item => item.adapter === instances[i].name);
             if (adapter && instances[i].native) {
                 const attr = adapter.attr;
-                if (instances[i].native[attr]) {
+                if (adapter.attr && instances[i].native[attr]) {
                     if (adapter.arrayAttr) {
                         if (Array.isArray(instances[i].native[attr])) {
                             for (let j = 0; j < instances[i].native[attr].length; j++) {
@@ -273,6 +306,42 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         }
                     }
                 }
+
+                if (adapter.browse) {
+                    try {
+                        const devices = await adapter.browse(this.props.socket, instances[i]._id.replace('system.adapter.', ''));
+                        devices.forEach(item => {
+                            const type = ConfigCustomInstancesSelector.isIp(item.ip);
+                            if (type) {
+                                result.push({
+                                    ip: item.ip,
+                                    type,
+                                    desc: item.name || instances[i].name,
+                                });
+                            }
+                        });
+                    } catch (e) {
+                        console.error(`Cannot collect "${instances[i]}": ${e}`);
+                    }
+                }
+
+                if (adapter.clients) {
+                    try {
+                        const devices = await browseClients(this.props.socket, instances[i]._id.replace('system.adapter.', ''));
+                        devices.forEach(item => {
+                            const type = ConfigCustomInstancesSelector.isIp(item.ip);
+                            if (type) {
+                                result.push({
+                                    ip: item.ip,
+                                    type,
+                                    desc: item.name || instances[i].name,
+                                });
+                            }
+                        });
+                    } catch (e) {
+                        console.error(`Cannot collect "${instances[i]}": ${e}`);
+                    }
+                }
             }
         }
 
@@ -281,7 +350,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             item.ip !== '0.0.0.0' &&
             item.ip !== 'localhost' &&
             item.ip !== '127.0.0.1' &&
-            item.ip !== '::1'
+            item.ip !== '::1' &&
+            item.type === 'ipv4' // take only ipv4 addresses
         );
 
         // filter duplicates

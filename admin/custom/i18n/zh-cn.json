@@ -1,0 +1,9 @@
+{
+  "custom_kisshome_enabled": "已启用",
+  "custom_kisshome_ip": "IP地址",
+  "custom_kisshome_name": "适配器名称",
+  "custom_kisshome_vendor": "小贩",
+  "custom_kisshome_mac": "MAC地址",
+  "custom_kisshome_select_all": "全部启用",
+  "custom_kisshome_unselect_all": "禁用所有"
+}
