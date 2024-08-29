@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "news": {
+      "0.3.0": {
+        "en": "Added detection of some IPs",
+        "de": "Zusätzliche Erkennung einiger IPs",
+        "ru": "Добавлено обнаружение некоторых ИС",
+        "pt": "Adicionado detecção de alguns IPs",
+        "nl": "Toegevoegd detectie van sommige IP's",
+        "fr": "Ajout de la détection de certains IP",
+        "it": "Aggiunta di rilevamento di alcuni IP",
+        "es": "Se agregó la detección de algunos IPs",
+        "pl": "Dodano wykrywanie niektórych IP",
+        "uk": "Додано виявлення деяких IP-адрес",
+        "zh-cn": "添加检测一些IP"
+      },
       "0.2.1": {
         "en": "used valid URL address",
         "de": "verwendete gültige URL-Adresse",

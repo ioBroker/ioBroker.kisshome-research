@@ -738,7 +738,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             const md5 = this.calculateMd5(data);
             // check if the file was sent successfully
             try {
-                const responseCheck = await axios_1.default.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`);
+                const responseCheck = await axios_1.default.get(`https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`);
                 if (((_a = responseCheck.data) === null || _a === void 0 ? void 0 : _a.command) === 'terminate') {
                     const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
                     if ((_b = obj === null || obj === void 0 ? void 0 : obj.common) === null || _b === void 0 ? void 0 : _b.enabled) {
@@ -760,12 +760,12 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             }
             const responsePost = await (0, axios_1.default)({
                 method: 'post',
-                url: `https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`,
+                url: `https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`,
                 data: data,
                 headers: { 'Content-Type': 'application/vnd.tcpdump.pcap', }
             });
             // check if the file was sent successfully
-            const response = await axios_1.default.get(`https://${PCAP_HOST}/api/v1/upload/${config.email}/${name}?key=${this.publicKey}&uuid=${this.uuid}`);
+            const response = await axios_1.default.get(`https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`);
             if (response.status === 200 && response.data === md5) {
                 if (name.endsWith('.pcap')) {
                     node_fs_1.default.unlinkSync(fileName);
