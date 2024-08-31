@@ -143,8 +143,8 @@
     "enabled": true,
     "compact": true,
     "singletonHost": true,
-    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.kisshome-research/master/admin/kisshome-research.png",
-    "type": "misc-data",
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.kisshome-research/main/admin/kisshome-research.png",
+    "type": "utility",
     "messagebox": true,
     "plugins": {
       "sentry": {
