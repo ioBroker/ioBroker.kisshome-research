@@ -60,7 +60,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### 0.3.0 (2024-08-29)
+### **WORK IN PROGRESS**
 * (bluefox) Added detection of some IPs
 
 ### 0.2.1 (2024-08-28)

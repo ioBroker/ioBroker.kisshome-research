@@ -156,78 +156,77 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             address = host.common.address;
         }
 
-        this.props.socket.getAdapterInstances()
-            .then(instances => {
-                instances = instances
-                    .filter(instance =>
-                        instance?.common?.adminUI && (instance.common.adminUI.config !== 'none' || instance.common.adminUI.tab))
-                    .map(instance => ({
-                        id: instance._id.replace(/^system\.adapter\./, ''),
-                        name: instance.common.name,
-                        native: instance.native,
-                    }))
-                    .sort((a, b) => a.id > b.id ? 1 : (a.id < b.id ? -1 : 0));
+        let instances = await this.props.socket.getAdapterInstances();
+        instances = instances
+            .filter(instance =>
+                instance?.common?.adminUI && (instance.common.adminUI.config !== 'none' || instance.common.adminUI.tab))
+            .map(instance => ({
+                id: instance._id.replace(/^system\.adapter\./, ''),
+                name: instance.common.name,
+                native: instance.native,
+            }))
+            .sort((a, b) => a.id > b.id ? 1 : (a.id < b.id ? -1 : 0));
 
-                const ips = this.collectIpAddresses(instances, address);
+        const ips = await this.collectIpAddresses(instances, address);
 
-                const newState = {
-                    instances,
-                    ips,
-                };
-                // get vendor and MAC-Address information
-                if (this.props.alive) {
-                    const devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
-                    newState.runningRequest = true;
+        const newState = {
+            instances,
+            ips,
+        };
 
-                    this.props.socket.sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', devices)
-                        .then(result => {
-                            // result: { result: { mac: string; vendor?: string, ip: string }[] }
-                            let changedState = false;
-                            const vendors = {};
-                            result?.result?.forEach(item => {
-                                const ip = item.ip;
-                                const pos = ips.findIndex(i => i.ip === ip);
-                                if (pos !== -1) {
-                                    changedState = true;
-                                    ips[pos].mac = item.mac;
-                                    vendors[item.mac] = item.vendor;
-                                }
-                            });
+        // get vendor and MAC-Address information
+        if (this.props.alive) {
+            const devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+            newState.runningRequest = true;
 
-                            let changed = false;
-                            // detect changed MAC addresses in saved information
-                            devices.forEach(item => {
-                                const pos = ips.findIndex(i => i.ip === item.ip);
-                                if (pos !== -1) {
-                                    if (item.mac !== ips[pos].mac) {
-                                        changed = true;
-                                    }
-                                    if (!vendors[item.mac]) {
-                                        vendors[item.mac] = ips[pos].vendor;
-                                        changedState = true;
-                                    }
-                                }
-                            });
+            this.props.socket.sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', devices)
+                .then(result => {
+                    // result: { result: { mac: string; vendor?: string, ip: string }[] }
+                    let changedState = false;
+                    const vendors = {};
+                    result?.result?.forEach(item => {
+                        const ip = item.ip;
+                        const pos = ips.findIndex(i => i.ip === ip);
+                        if (pos !== -1) {
+                            changedState = true;
+                            ips[pos].mac = item.mac;
+                            vendors[item.mac] = item.vendor;
+                        }
+                    });
 
-                            if (changedState) {
-                                this.setState({ ips, vendors, runningRequest: false });
-                            } else {
-                                this.setState({ runningRequest: false });
+                    let changed = false;
+                    // detect changed MAC addresses in saved information
+                    devices.forEach(item => {
+                        const pos = ips.findIndex(i => i.ip === item.ip);
+                        if (pos !== -1) {
+                            if (item.mac !== ips[pos].mac) {
+                                changed = true;
                             }
-                            if (changed) {
-                                this.onChange('devices', devices);
+                            if (!vendors[item.mac]) {
+                                vendors[item.mac] = ips[pos].vendor;
+                                changedState = true;
                             }
-                        })
-                        .catch(e => {
-                            if (e.toString() !== 'no results') {
-                                window.alert(`Cannot get MAC addresses: ${e}`);
-                            }
-                            this.setState({ runningRequest: false });
-                        });
-                }
+                        }
+                    });
 
-                this.setState(newState);
-            });
+                    if (changedState) {
+                        this.setState({ ips, vendors, runningRequest: false });
+                    } else {
+                        this.setState({ runningRequest: false });
+                    }
+                    if (changed) {
+                        this.onChange('devices', devices);
+                    }
+                })
+                .catch(e => {
+                    if (e.toString() !== 'no results') {
+                        window.alert(`Cannot get MAC addresses: ${e}`);
+                    }
+                    this.setState({ runningRequest: false });
+                });
+        }
+
+        this.setState(newState);
     }
 
     static getAttr(obj, attr) {
