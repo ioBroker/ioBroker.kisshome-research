@@ -431,9 +431,14 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 }
             } else {
                 if (response.status === 404) {
-                    this.log.error(`Cannot register on the cloud: unknown email address`);
+                    this.log.error(`Cannot register on the kisshome-cloud: unknown email address`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Unbekannte E-Mail-Adresse`);
                 } else if (response.status === 403) {
-                    this.log.error(`Cannot register on the cloud: public key changed`);
+                    this.log.error(`Cannot register on the kisshome-cloud: public key changed. Please contact us via kisshome@internet-sicherheit.de`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Der öffentliche Schlüssel hat sich geändert. Bitte kontaktieren Sie uns unter kisshome@internet-sicherheit.de`);
+                } else if (response.status === 401) {
+                    this.log.error(`Cannot register on the cloud: invalid password`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Ungültiges Passwort`);
                 } else {
                     this.log.error(`Cannot register on the cloud: ${response.data || response.statusText || response.status}`);
                 }
@@ -869,7 +874,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 method: 'post',
                 url: `https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`,
                 data: data,
-                headers: { 'Content-Type': 'application/vnd.tcpdump.pcap', }
+                headers: { 'Content-Type': 'application/vnd.tcpdump.pcap' }
             });
 
             // check if the file was sent successfully
