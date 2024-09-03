@@ -199,6 +199,16 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                                     msg.message?.password,
                                     msg.message?.login === config.login && msg.message.password === config.password ? this.sid : undefined,
                                 );
+                                const lan1 = ifaces?.find(i => i.label === '1-lan');
+                                if (lan1) {
+                                    lan1.label += ' (default)';
+                                }
+                                const index = ifaces?.findIndex(it => it === lan1);
+                                // place lan1 on the first position
+                                if (ifaces && index && index !== -1) {
+                                    ifaces.splice(0, 0, ifaces.splice(index, 1)[0]);
+                                }
+
                                 this.sendTo(msg.from, msg.command, ifaces, msg.callback);
                             } else {
                                 this.sendTo(msg.from, msg.command, [], msg.callback);
@@ -373,7 +383,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 fs.mkdirSync(this.workingDir);
             }
         } catch (e) {
-            this.log.error(`Cannot create working directory: ${e}`);
+            this.log.error(`Cannot create working directory "${this.workingDir}": ${e}`);
             return;
         }
 

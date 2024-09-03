@@ -18,7 +18,7 @@
                     "newLine": true,
                     "type": "staticLink",
                     "sm": 12,
-                    "href": "https://kisshome-feldversuch.if-is.net/#register",
+                    "href": "https://kisshome-research.if-is.net/#register",
                     "text": "To participate in the KISSHome research, you need to register here."
                 },
                 "fritzbox": {
@@ -49,6 +49,13 @@
                     "lg": 6,
                     "label": "FritzBox Password"
                 },
+                "_hint2": {
+                    "newLine": true,
+                    "type": "staticLink",
+                    "sm": 12,
+                    "href": "https://kisshome-research.if-is.net/#faq/interface",
+                    "text": "Explanation of the Fritz!Box interface could be found at this link."
+                },
                 "iface": {
                     "newLine": true,
                     "type": "selectSendTo",
@@ -58,7 +65,8 @@
                     "sm": 12,
                     "md": 6,
                     "lg": 6,
-                    "label": "FritzBox Interface"
+                    "label": "FritzBox Interface",
+                    "help": "Default interface is 1-lan"
                 },
                 "tempDir": {
                     "newLine": true,
@@ -67,7 +75,7 @@
                     "md": 6,
                     "lg": 6,
                     "label": "Working directory",
-                    "tooltip": "Directory for temporary files. Leave empty to use the system directory."
+                    "help": "Directory for temporary files. Leave empty to use the system directory."
                 },
                 "_header": {
                     "newLine": true,

@@ -12,5 +12,9 @@
   "FritzBox Password": "FritzBox Password",
   "To participate in the KISSHome research, you need to register here.": "To participate in the KISSHome research, you need to register here.",
   "Email address as registered in the KISSHome research": "Email address as registered in the KISSHome research",
-  "Addresses": "Addresses"
+  "Addresses": "Addresses",
+  "Working directory": "Working directory",
+  "Directory for temporary files. Leave empty to use the system directory.": "Directory for temporary files. Leave empty to use the system directory.",
+  "Default interface is 1-lan": "Default interface is 1-lan",
+  "Explanation of the Fritz!Box interface could be found at this link.": "Explanation of the Fritz!Box interface could be found at this link."
 }

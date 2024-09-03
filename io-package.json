@@ -170,7 +170,7 @@
   ],
   "native": {
     "fritzbox": "0.0.0.0",
-    "iface": "1-guest",
+    "iface": "1-lan",
     "login": "",
     "password": "",
     "tempDir": "",
