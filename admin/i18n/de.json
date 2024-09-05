@@ -12,5 +12,9 @@
   "To participate in the KISSHome research, you need to register here.": "Um an der KISSHome-Umfrage teilzunehmen, müssen Sie sich hier registrieren.",
   "Recording": "Aufzeichnung",
   "Recording enabled": "Aufzeichnung aktiviert",
-  "Addresses": "Adressen"
+  "Addresses": "Adressen",
+  "Working directory": "Arbeitsverzeichnis",
+  "Directory for temporary files. Leave empty to use the system directory.": "Verzeichnis für temporäre Dateien. Lassen Sie das Feld leer, um das Systemverzeichnis zu verwenden.",
+  "Default interface is 1-lan": "Das Standard-Interface ist 1-lan",
+  "Explanation of the Fritz!Box interface could be found at this link.": "Erklärung der Fritz!Box-Schnittstelle finden Sie unter diesem Link."
 }

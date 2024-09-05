@@ -199,6 +199,16 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                                     msg.message?.password,
                                     msg.message?.login === config.login && msg.message.password === config.password ? this.sid : undefined,
                                 );
+                                const lan1 = ifaces?.find(i => i.label === '1-lan');
+                                if (lan1) {
+                                    lan1.label += ' (default)';
+                                }
+                                const index = ifaces?.findIndex(it => it === lan1);
+                                // place lan1 on the first position
+                                if (ifaces && index && index !== -1) {
+                                    ifaces.splice(0, 0, ifaces.splice(index, 1)[0]);
+                                }
+
                                 this.sendTo(msg.from, msg.command, ifaces, msg.callback);
                             } else {
                                 this.sendTo(msg.from, msg.command, [], msg.callback);
@@ -373,7 +383,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 fs.mkdirSync(this.workingDir);
             }
         } catch (e) {
-            this.log.error(`Cannot create working directory: ${e}`);
+            this.log.error(`Cannot create working directory "${this.workingDir}": ${e}`);
             return;
         }
 
@@ -421,9 +431,14 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 }
             } else {
                 if (response.status === 404) {
-                    this.log.error(`Cannot register on the cloud: unknown email address`);
+                    this.log.error(`Cannot register on the kisshome-cloud: unknown email address`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Unbekannte E-Mail-Adresse`);
                 } else if (response.status === 403) {
-                    this.log.error(`Cannot register on the cloud: public key changed`);
+                    this.log.error(`Cannot register on the kisshome-cloud: public key changed. Please contact us via kisshome@internet-sicherheit.de`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Der öffentliche Schlüssel hat sich geändert. Bitte kontaktieren Sie uns unter kisshome@internet-sicherheit.de`);
+                } else if (response.status === 401) {
+                    this.log.error(`Cannot register on the cloud: invalid password`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Ungültiges Passwort`);
                 } else {
                     this.log.error(`Cannot register on the cloud: ${response.data || response.statusText || response.status}`);
                 }
@@ -859,7 +874,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 method: 'post',
                 url: `https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`,
                 data: data,
-                headers: { 'Content-Type': 'application/vnd.tcpdump.pcap', }
+                headers: { 'Content-Type': 'application/vnd.tcpdump.pcap' }
             });
 
             // check if the file was sent successfully
