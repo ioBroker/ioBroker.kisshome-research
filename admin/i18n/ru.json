@@ -12,5 +12,15 @@
   "To participate in the KISSHome research, you need to register here.": "Чтобы принять участие в исследовании KISSHome, вам необходимо зарегистрироваться здесь.",
   "Recording": "Запись",
   "Recording enabled": "Запись включена",
-  "Addresses": "Адреса"
+  "Addresses": "Адреса",
+  "Default interface is 1-lan": "Интерфейс по умолчанию — 1-lan",
+  "Directory for temporary files. Leave empty to use the system directory.": "Каталог для временных файлов. Оставьте пустым, чтобы использовать системный каталог.",
+  "Explanation of the Fritz!Box interface could be found at this link.": "Объяснение интерфейса Fritz!Box можно найти по этой ссылке.",
+  "FritzBox Interface": "Интерфейс FritzBox",
+  "Working directory": "Рабочий каталог",
+  "Recording is not running": "Запись не ведется",
+  "Recording is running": "Запись идет",
+  "Activate recording": "Активировать запись",
+  "Disabled": "Неполноценный",
+  "Enabled": "Включено"
 }

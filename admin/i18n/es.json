@@ -12,5 +12,15 @@
   "To participate in the KISSHome research, you need to register here.": "Para participar en la investigación de KISSHome, debe registrarse aquí.",
   "Recording": "Grabación",
   "Recording enabled": "Grabación habilitada",
-  "Addresses": "Direcciones"
+  "Addresses": "Direcciones",
+  "Default interface is 1-lan": "La interfaz predeterminada es 1-lan",
+  "Directory for temporary files. Leave empty to use the system directory.": "Directorio para archivos temporales. Déjelo vacío para utilizar el directorio del sistema.",
+  "Explanation of the Fritz!Box interface could be found at this link.": "La explicación de la interfaz de Fritz!Box se puede encontrar en este enlace.",
+  "FritzBox Interface": "Interfaz de FritzBox",
+  "Working directory": "Directorio de trabajo",
+  "Recording is not running": "La grabación no se está ejecutando",
+  "Recording is running": "La grabación se está ejecutando",
+  "Activate recording": "Activar grabación",
+  "Disabled": "Desactivado",
+  "Enabled": "Activado"
 }

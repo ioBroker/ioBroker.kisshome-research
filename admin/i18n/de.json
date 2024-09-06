@@ -6,6 +6,7 @@
   "FritzBox IP": "FritzBox IP",
   "FritzBox Login": "FritzBox Login",
   "FritzBox Password": "FritzBox-Passwort",
+  "FritzBox Interface": "FritzBox-Schnittstelle",
   "General settings": "Allgemeine Einstellungen",
   "IP address": "IP Adresse",
   "MAC address": "MAC-Adresse",
@@ -16,5 +17,10 @@
   "Working directory": "Arbeitsverzeichnis",
   "Directory for temporary files. Leave empty to use the system directory.": "Verzeichnis für temporäre Dateien. Lassen Sie das Feld leer, um das Systemverzeichnis zu verwenden.",
   "Default interface is 1-lan": "Das Standard-Interface ist 1-lan",
-  "Explanation of the Fritz!Box interface could be found at this link.": "Erklärung der Fritz!Box-Schnittstelle finden Sie unter diesem Link."
+  "Explanation of the Fritz!Box interface could be found at this link.": "Erklärung der Fritz!Box-Schnittstelle finden Sie unter diesem Link.",
+  "Recording is not running": "Die Aufnahme läuft nicht",
+  "Recording is running": "Aufzeichnung läuft",
+  "Activate recording": "Aufzeichnung aktivieren",
+  "Disabled": "Deaktiviert",
+  "Enabled": "Ermöglicht"
 }

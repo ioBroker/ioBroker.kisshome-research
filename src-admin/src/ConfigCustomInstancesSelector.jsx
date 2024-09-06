@@ -34,6 +34,43 @@ const styles = {
     },
 };
 
+async function browseHomekit(socket, instance) {
+    const states = await socket.getObjectViewSystem('state', `${instance}.`, `${instance}.\u9999`);
+    const devices = [];
+    const ids = Object.keys(states).filter(id => id.endsWith('.address'));
+    for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const value = await socket.getState(id);
+        if (value?.val) {
+            devices.push({
+                ip: value.val,
+                name: 'homekit-controller',
+            });
+        }
+    }
+
+    return devices;
+}
+
+async function browseHomeConnect(socket, instance) {
+    const states = await socket.getObjectViewSystem('state', `${instance}.`, `${instance}.\u9999`);
+    const devices = [];
+    // This must be found if it is address or not
+    const ids = Object.keys(states).filter(id => id.endsWith('.address'));
+    for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const value = await socket.getState(id);
+        if (value?.val) {
+            devices.push({
+                ip: value.val,
+                name: 'homekit-controller',
+            });
+        }
+    }
+
+    return devices;
+}
+
 async function browseShelly(socket, instance) {
     const states = await socket.getObjectViewSystem('state', `${instance}.`, `${instance}.\u9999`);
     const devices = [];
@@ -67,14 +104,30 @@ async function browseClients(socket, instance) {
     return devices;
 }
 
+async function browseUpnp(socket, instance) {
+    const objects = await socket.getObjectViewSystem('device', `${instance}.`, `${instance}.\u9999`);
+    const objs = Object.values(objects);
+    const devices = [];
+    for (let i = 0; i < objs.length; i++) {
+        if (objs[i]?.type === 'device' && objs[i]?.native?.ip) {
+            devices.push({
+                ip: objs[i].native.ip,
+                name: instance.split('.')[0],
+            });
+        }
+    }
+
+    return devices;
+}
+
 const ADAPTERS = [
     { adapter: 'broadlink2', attr: 'additional' },
 //     { adapter: 'cameras' },
     { adapter: 'harmony', attr: 'devices', arrayAttr: 'ip' },
     { adapter: 'hm-rpc', attr: 'homematicAddress' },
     // { adapter: 'hmip' }, not possible. It communicates with the cloud
-    { adapter: 'homeconnect' },
-    { adapter: 'homekit-controller', attr: 'discoverIp' },
+    { adapter: 'homeconnect', browse: browseHomeConnect },
+    { adapter: 'homekit-controller', attr: 'discoverIp', browse: browseHomekit },
     { adapter: 'hue', attr: 'bridge' },
     { adapter: 'knx', attr: 'bind' },
     { adapter: 'lgtv', attr: 'ip' },
@@ -84,8 +137,11 @@ const ADAPTERS = [
     { adapter: 'modbus', attr: 'params.bind', clients: true },
     { adapter: 'mqtt', attr: 'url', clients: true }, // read clients IP addresses
     { adapter: 'mqtt-client', attr: 'host' },
+    { adapter: 'lcn', attr: 'host' },
+    { adapter: 'knx', attr: 'gwip' },
     { adapter: 'onvif' },
     { adapter: 'openknx', attr: 'gwip' },
+    { adapter: 'broadlink2', attr: 'additional' },
     { adapter: 'proxmox', attr: 'ip' },
     { adapter: 'samsung', attr: 'ip' },
     { adapter: 'shelly', browse: browseShelly },
@@ -94,11 +150,15 @@ const ADAPTERS = [
     { adapter: 'tr-064', attr: 'iporhost' },
 //    { adapter: 'tuya' }, not possible. It communicates with the cloud
     { adapter: 'unify', attr: 'controllerIp' },
-    { adapter: 'upnp' },
+    { adapter: 'upnp', browse: browseUpnp },
     { adapter: 'wled', attr: 'devices', arrayAttr: 'ip' },
+    { adapter: 'wifilight', attr: 'devices', arrayAttr: 'ip' },
 ];
 
 function validateMacAddress(mac) {
+    if (!mac) {
+        return true;
+    }
     if (typeof mac !== 'string') {
         return false;
     }
@@ -122,6 +182,9 @@ function normalizeMacAddress(mac) {
 }
 
 function validateIpAddress(ip) {
+    if (!ip) {
+        return true;
+    }
     if (typeof ip !== 'string') {
         return false;
     }
@@ -341,6 +404,29 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         console.error(`Cannot collect "${instances[i]}": ${e}`);
                     }
                 }
+            } else {
+                 // check common settings like host, ip, address
+                if (instances[i].native.ip &&
+                    typeof instances[i].native.ip === 'string' &&
+                    // Check if it IP4 address
+                    instances[i].native.ip.match(/^\d+\.\d+\.\d+\.\d+$/)
+                ) {
+                    result.push({
+                        ip: instances[i].native.ip,
+                        type: 'ipv4',
+                        desc: instances[i].name,
+                    });
+                } else if (instances[i].native.host &&
+                    typeof instances[i].native.host === 'string' &&
+                    // Check if it IP4 address
+                    instances[i].native.host.match(/^\d+\.\d+\.\d+\.\d+$/)
+                ) {
+                    result.push({
+                        ip: instances[i].native.host,
+                        type: 'ipv4',
+                        desc: instances[i].name,
+                    });
+                }
             }
         }
 
@@ -453,7 +539,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                     {notFound.map((row, i) => <TableRow key={i}>
                         <TableCell scope="row" style={styles.td}>
                             <Checkbox
-                                checked={devices.includes(row.ip)}
+                                checked={!!devices.find(item => item.ip === row.ip)?.enabled}
                                 disabled={this.state.runningRequest}
                                 onClick={() => {
                                     const _devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];

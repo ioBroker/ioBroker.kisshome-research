@@ -12,5 +12,15 @@
   "To participate in the KISSHome research, you need to register here.": "要参与 KISSHome 研究，您需要在此处注册。",
   "Recording": "记录",
   "Recording enabled": "已启用录制功能",
-  "Addresses": "地址"
+  "Addresses": "地址",
+  "Default interface is 1-lan": "默认接口为 1-lan",
+  "Directory for temporary files. Leave empty to use the system directory.": "临时文件目录。保留为空则使用系统目录。",
+  "Explanation of the Fritz!Box interface could be found at this link.": "您可以在此链接中找到 Fritz!Box 界面的解释。",
+  "FritzBox Interface": "FritzBox 界面",
+  "Working directory": "工作目录",
+  "Recording is not running": "录音未进行",
+  "Recording is running": "正在录制",
+  "Activate recording": "激活录音",
+  "Disabled": "已禁用",
+  "Enabled": "已启用"
 }

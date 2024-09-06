@@ -10,11 +10,17 @@
   "MAC address": "MAC address",
   "FritzBox Login": "FritzBox Login",
   "FritzBox Password": "FritzBox Password",
+  "FritzBox Interface": "FritzBox Interface",
   "To participate in the KISSHome research, you need to register here.": "To participate in the KISSHome research, you need to register here.",
   "Email address as registered in the KISSHome research": "Email address as registered in the KISSHome research",
   "Addresses": "Addresses",
   "Working directory": "Working directory",
   "Directory for temporary files. Leave empty to use the system directory.": "Directory for temporary files. Leave empty to use the system directory.",
   "Default interface is 1-lan": "Default interface is 1-lan",
-  "Explanation of the Fritz!Box interface could be found at this link.": "Explanation of the Fritz!Box interface could be found at this link."
+  "Explanation of the Fritz!Box interface could be found at this link.": "Explanation of the Fritz!Box interface could be found at this link.",
+  "Recording is not running": "Recording is not running",
+  "Recording is running": "Recording is running",
+  "Activate recording": "Activate recording",
+  "Disabled": "Disabled",
+  "Enabled": "Enabled"
 }

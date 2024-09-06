@@ -174,14 +174,13 @@
     "login": "",
     "password": "",
     "tempDir": "",
-    "devices": [],
-    "recordingEnabled": false
+    "devices": []
   },
   "objects": [],
   "instanceObjects": [
     {
       "_id": "info",
-      "type": "channel",
+      "type": "device",
       "common": {
         "name": {
           "en": "Information",
@@ -225,7 +224,27 @@
       "native": {}
     },
     {
-      "_id": "info.capturedPackets",
+      "_id": "info.recording",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Recoding on Fritz!Box",
+          "de": "Aufnahme auf Fritz!Box",
+          "ru": "Запись на Fritz!Box",
+          "pt": "Recoding no Fritz!Box",
+          "nl": "Opname op Fritz!Box",
+          "fr": "Enregistrement sur Fritz!Box",
+          "it": "Registrazione su Fritz!Box",
+          "es": "Grabación en Fritz!Box",
+          "pl": "Nagrywanie na Fritz!Box",
+          "uk": "Запис на Fritz!Box",
+          "zh-cn": "Fritz!Box上的录制"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.recording.captured",
       "type": "state",
       "common": {
         "name": {
@@ -243,6 +262,7 @@
         },
         "type": "number",
         "role": "state",
+        "unit": "packets",
         "read": true,
         "write": false,
         "def": 0
@@ -250,7 +270,7 @@
       "native": {}
     },
     {
-      "_id": "info.recordingRunning",
+      "_id": "info.recording.enabled",
       "type": "state",
       "common": {
         "name": {
@@ -275,7 +295,32 @@
       "native": {}
     },
     {
-      "_id": "info.recordingWrite",
+      "_id": "info.recording.running",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Is recording is running",
+          "de": "Wird aufgezeichnet",
+          "ru": "Идет запись",
+          "pt": "A gravação está em execução",
+          "nl": "Wordt opgenomen",
+          "fr": "L'enregistrement est en cours",
+          "it": "La registrazione è in corso",
+          "es": "La grabación está en curso",
+          "pl": "Nagrywanie jest w toku",
+          "uk": "Запис виконується",
+          "zh-cn": "录制正在进行中"
+        },
+        "type": "boolean",
+        "role": "state",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.recording.triggerWrite",
       "type": "state",
       "common": {
         "name": {
@@ -300,7 +345,27 @@
       "native": {}
     },
     {
-      "_id": "info.syncRunning",
+      "_id": "info.sync",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Synchronization with KISSHome",
+          "de": "Synchronisation mit KISSHome",
+          "ru": "Синхронизация с KISSHome",
+          "pt": "Sincronização com KISSHome",
+          "nl": "Synchronisatie met KISSHome",
+          "fr": "Synchronisation avec KISSHome",
+          "it": "Sincronizzazione con KISSHome",
+          "es": "Sincronización con KISSHome",
+          "pl": "Synchronizacja z KISSHome",
+          "uk": "Синхронізація з KISSHome",
+          "zh-cn": "与KISSHome同步"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.sync.running",
       "type": "state",
       "common": {
         "name": {
@@ -325,7 +390,7 @@
       "native": {}
     },
     {
-      "_id": "info.keys",
+      "_id": "info.sync.keys",
       "type": "config",
       "common": {
         "name": {

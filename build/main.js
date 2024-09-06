@@ -80,6 +80,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         this.syncTimer = null;
         this.publicKey = '';
         this.uuid = '';
+        this.recordingEnabled = false;
         this.on('ready', () => this.onReady());
         this.on('unload', callback => this.onUnload(callback));
         this.on('message', this.onMessage.bind(this));
@@ -92,12 +93,17 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             switch (msg.command) {
                 case 'getDefaultGateway':
                     if (msg.callback) {
-                        try {
-                            const ip = await (0, utils_1.getDefaultGateway)();
-                            this.sendTo(msg.from, msg.command, { result: ip }, msg.callback);
+                        if (msg.message.value !== '0.0.0.0') {
+                            this.sendTo(msg.from, msg.command, msg.message.value, msg.callback);
                         }
-                        catch (e) {
-                            this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
+                        else {
+                            try {
+                                const ip = await (0, utils_1.getDefaultGateway)();
+                                this.sendTo(msg.from, msg.command, ip, msg.callback);
+                            }
+                            catch (e) {
+                                this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
+                            }
                         }
                     }
                     break;
@@ -149,6 +155,15 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                                 ((_k = msg.message) === null || _k === void 0 ? void 0 : _k.login) || config.login &&
                                 ((_l = msg.message) === null || _l === void 0 ? void 0 : _l.password) || config.password) {
                                 const ifaces = await (0, fritzbox_1.getFritzBoxInterfaces)(((_m = msg.message) === null || _m === void 0 ? void 0 : _m.ip) || config.fritzbox, (_o = msg.message) === null || _o === void 0 ? void 0 : _o.login, (_p = msg.message) === null || _p === void 0 ? void 0 : _p.password, ((_q = msg.message) === null || _q === void 0 ? void 0 : _q.login) === config.login && msg.message.password === config.password ? this.sid : undefined);
+                                const lan1 = ifaces === null || ifaces === void 0 ? void 0 : ifaces.find(i => i.label === '1-lan');
+                                if (lan1) {
+                                    lan1.label += ' (default)';
+                                }
+                                const index = ifaces === null || ifaces === void 0 ? void 0 : ifaces.findIndex(it => it === lan1);
+                                // place lan1 on the first position
+                                if (ifaces && index && index !== -1) {
+                                    ifaces.splice(0, 0, ifaces.splice(index, 1)[0]);
+                                }
                                 this.sendTo(msg.from, msg.command, ifaces, msg.callback);
                             }
                             else {
@@ -189,34 +204,33 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             return;
         }
         // first, try to detect the default gateway
-        if (config.fritzbox === '0.0.0.0') {
-            try {
-                const ip = await (0, utils_1.getDefaultGateway)();
-                if (ip && ip !== '0.0.0.0') {
-                    this.log.info(`Found default gateway: ${ip}`);
-                    config.fritzbox = ip;
-                    const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
-                    if (obj) {
-                        obj.native.fritzbox = ip;
-                        await this.setForeignObjectAsync(obj._id, obj);
-                        // wait for restart
-                        return;
-                    }
-                }
-            }
-            catch (e) {
-                this.log.warn(`Cannot get default gateway: ${e}`);
-            }
-        }
+        // if (config.fritzbox === '0.0.0.0') {
+        //     try {
+        //         const ip = await getDefaultGateway();
+        //         if (ip && ip !== '0.0.0.0') {
+        //             this.log.info(`Found default gateway: ${ip}`);
+        //             config.fritzbox = ip;
+        //             const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
+        //             if (obj) {
+        //                 obj.native.fritzbox = ip;
+        //                 await this.setForeignObjectAsync(obj._id, obj);
+        //                 // wait for restart
+        //                 return;
+        //             }
+        //         }
+        //     } catch (e) {
+        //         this.log.warn(`Cannot get default gateway: ${e}`);
+        //     }
+        // }
         // remove running flag
         const runningState = await this.getStateAsync('info.connection');
         if (runningState === null || runningState === void 0 ? void 0 : runningState.val) {
             await this.setState('info.connection', false, true);
-            await this.setState('info.recordingRunning', false, true);
+            await this.setState('info.recording.running', false, true);
         }
-        const captured = await this.getStateAsync('info.capturedPackets');
+        const captured = await this.getStateAsync('info.recording.captured');
         if (captured === null || captured === void 0 ? void 0 : captured.val) {
-            await this.setState('info.capturedPackets', 0, true);
+            await this.setState('info.recording.captured', 0, true);
         }
         // try to get MAC addresses for all IPs
         const IPs = config.devices.filter(item => item.enabled && (item.ip || item.mac));
@@ -256,7 +270,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         }
         else {
             this.log.warn(`Cannot find any temporary directory. Please specify manually in the configuration. For best performance it should be a RAM disk`);
-            return this.terminate(11);
+            return;
         }
         this.tempDir = this.tempDir.replace(/\\/g, '/');
         if (this.tempDir.endsWith('/')) {
@@ -266,7 +280,15 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         // retrieve public and private keys
         let keysObj;
         try {
-            keysObj = await this.getObjectAsync('info.keys');
+            keysObj = await this.getObjectAsync('info.sync.keys');
+            if (!keysObj) {
+                // try to migrate configuration
+                keysObj = await this.getObjectAsync('info.keys');
+                if (keysObj) {
+                    await this.setObjectAsync('info.sync.keys', keysObj);
+                    await this.delObjectAsync('info.keys');
+                }
+            }
         }
         catch (e) {
             // ignore
@@ -278,7 +300,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             privateKey = result.privateKey;
             this.publicKey = result.publicKey;
             keysObj = {
-                _id: 'info.keys',
+                _id: 'info.sync.keys',
                 type: 'config',
                 common: {
                     name: {
@@ -318,7 +340,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             }
         }
         catch (e) {
-            this.log.error(`Cannot create working directory: ${e}`);
+            this.log.error(`Cannot create working directory "${this.workingDir}": ${e}`);
             return;
         }
         // this.clearWorkingDir();
@@ -337,10 +359,6 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         if (!config.email) {
             this.log.error('No email provided. Please provide an email address in the configuration');
             this.log.error('You must register this email first on https://kisshome-feldversuch.if-is.net/#register');
-            return;
-        }
-        if (!config.recordingEnabled) {
-            this.log.warn('Recording is not enabled. Do nothing');
             return;
         }
         try {
@@ -365,10 +383,16 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             }
             else {
                 if (response.status === 404) {
-                    this.log.error(`Cannot register on the cloud: unknown email address`);
+                    this.log.error(`Cannot register on the kisshome-cloud: unknown email address`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Unbekannte E-Mail-Adresse`);
                 }
                 else if (response.status === 403) {
-                    this.log.error(`Cannot register on the cloud: public key changed`);
+                    this.log.error(`Cannot register on the kisshome-cloud: public key changed. Please contact us via kisshome@internet-sicherheit.de`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Der öffentliche Schlüssel hat sich geändert. Bitte kontaktieren Sie uns unter kisshome@internet-sicherheit.de`);
+                }
+                else if (response.status === 401) {
+                    this.log.error(`Cannot register on the cloud: invalid password`);
+                    this.log.error(`Kann nicht auf die kisshome-cloud registrieren: Ungültiges Passwort`);
                 }
                 else {
                     this.log.error(`Cannot register on the cloud: ${response.data || response.statusText || response.status}`);
@@ -381,15 +405,21 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             return;
         }
         this.saveMetaFile(IPs);
-        await this.setState('info.recordingRunning', false, true);
-        await this.setState('info.recordingWrite', false, true);
-        this.subscribeStates('info.recordingRunning');
-        this.subscribeStates('info.recordingWrite');
-        // start the monitoring
-        this.startRecording(config)
-            .catch(e => this.log.error(`[PCAP] Cannot start recording: ${e}`));
-        // Send the data every hour to the cloud
-        this.syncJob();
+        await this.setState('info.recording.running', false, true);
+        await this.setState('info.recording.triggerWrite', false, true);
+        this.subscribeStates('info.recording.enabled');
+        this.subscribeStates('info.recording.triggerWrite');
+        this.recordingEnabled = (await this.getStateAsync('info.recording.enabled') || {}).val || false;
+        if (this.recordingEnabled) {
+            // start the monitoring
+            this.startRecording(config)
+                .catch(e => this.log.error(`[PCAP] Cannot start recording: ${e}`));
+            // Send the data every hour to the cloud
+            this.syncJob();
+        }
+        else {
+            this.log.warn('Recording is not enabled. Do nothing');
+        }
     }
     syncJob() {
         // Send the data every hour to the cloud
@@ -413,15 +443,19 @@ class KISSHomeResearchAdapter extends utils.Adapter {
     }
     onStateChange(id, state) {
         if (state) {
-            if (id === `${this.namespace}.info.recordingRunning` && !state.ack) {
+            if (id === `${this.namespace}.info.recording.enabled` && !state.ack) {
                 if (state.val) {
-                    if (!this.recordingRunning) {
+                    // If recording is not running
+                    if (!this.recordingEnabled) {
+                        this.recordingEnabled = true;
+                        this.context.terminate = false;
                         const config = this.config;
                         this.startRecording(config)
                             .catch(e => this.log.error(`Cannot start recording: ${e}`));
                     }
                 }
-                else if (this.recordingRunning) {
+                else if (this.recordingEnabled) {
+                    this.recordingEnabled = false;
                     this.context.terminate = true;
                     if (this.context.controller) {
                         this.context.controller.abort();
@@ -429,10 +463,10 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                     }
                 }
             }
-            else if (id === `${this.namespace}.info.recordingWrite` && !state.ack) {
+            else if (id === `${this.namespace}.info.recording.triggerWrite` && !state.ack) {
                 if (state.val) {
                     if (this.recordingRunning) {
-                        this.setState('info.recordingWrite', false, true);
+                        this.setState('info.recording.triggerWrite', false, true);
                         this.savePacketsToFile();
                         setTimeout(() => {
                             this.startSynchronization()
@@ -517,9 +551,9 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         }
         if (this.sid) {
             this.log.debug(`[PCAP] Use SID: ${this.sid}`);
-            const captured = await this.getStateAsync('info.capturedPackets');
+            const captured = await this.getStateAsync('info.recording.captured');
             if (captured === null || captured === void 0 ? void 0 : captured.val) {
-                await this.setState('info.capturedPackets', 0, true);
+                await this.setState('info.recording.captured', 0, true);
             }
             this.context.controller = new AbortController();
             this.context.packets = [];
@@ -548,10 +582,10 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                     this.log.info(`[PCAP] Recording stopped`);
                     this.recordingRunning = false;
                     this.setState('info.connection', false, true);
-                    this.setState('info.recordingRunning', false, true);
+                    this.setState('info.recording.running', false, true);
                 }
                 if ((_a = this.context.packets) === null || _a === void 0 ? void 0 : _a.length) {
-                    this.setState('info.capturedPackets', this.context.totalPackets, true);
+                    this.setState('info.recording.captured', this.context.totalPackets, true);
                 }
                 if (error) {
                     if (!this.context.terminate || !error.toString().includes('aborted')) {
@@ -566,7 +600,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                     this.log.debug('[PCAP] Recording started!');
                     this.recordingRunning = true;
                     this.setState('info.connection', true, true);
-                    this.setState('info.recordingRunning', true, true);
+                    this.setState('info.recording.running', true, true);
                     this.monitorInterval = this.monitorInterval || this.setInterval(() => {
                         if (Date.now() - this.lastDebug > 60000) {
                             this.log.debug(`[PCAP] Captured ${this.context.totalPackets} packets (${size2text(this.context.totalBytes)})`);
@@ -584,7 +618,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                         }
                     }, 10000);
                 }
-                this.setState('info.capturedPackets', this.context.totalPackets, true);
+                this.setState('info.recording.captured', this.context.totalPackets, true);
             });
         }
         else {
@@ -671,21 +705,13 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         this.context.terminate = true;
         if (this.recordingRunning) {
             this.recordingRunning = false;
-            this.setState('info.connection', false, true);
-            this.setState('info.recordingRunning', false, true);
+            await this.setState('info.connection', false, true);
+            await this.setState('info.recording.running', false, true);
         }
         if (this.syncTimer) {
             clearTimeout(this.syncTimer);
             this.syncTimer = null;
         }
-        // if (this.syncProcess?.pid) {
-        //     try {
-        //         await terminate(this.syncProcess.pid);
-        //     } catch (err) {
-        //         this.log.error(`Cannot terminate sync process: ${err}`);
-        //     }
-        //     this.syncProcess = null;
-        // }
         if (this.startTimeout) {
             clearTimeout(this.startTimeout);
             this.startTimeout = undefined;
@@ -762,7 +788,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                 method: 'post',
                 url: `https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`,
                 data: data,
-                headers: { 'Content-Type': 'application/vnd.tcpdump.pcap', }
+                headers: { 'Content-Type': 'application/vnd.tcpdump.pcap' }
             });
             // check if the file was sent successfully
             const response = await axios_1.default.get(`https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`);
@@ -811,7 +837,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             return;
         }
         this.syncRunning = true;
-        await this.setState('info.syncRunning', true, true);
+        await this.setState('info.sync.running', true, true);
         this.log.debug(`[RSYNC] Syncing files to the cloud (${size2text(totalBytes)})`);
         // const cmd = this.getRSyncCommand();
         //
@@ -868,7 +894,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             await this.sendOneFileToCloud(`${this.workingDir}/${file}`);
         }
         this.syncRunning = false;
-        await this.setState('info.syncRunning', false, true);
+        await this.setState('info.sync.running', false, true);
     }
 }
 exports.KISSHomeResearchAdapter = KISSHomeResearchAdapter;

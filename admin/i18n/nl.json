@@ -12,5 +12,15 @@
   "To participate in the KISSHome research, you need to register here.": "Om deel te nemen aan het KISSHome-onderzoek moet u zich hier registreren.",
   "Recording": "Opname",
   "Recording enabled": "Opname ingeschakeld",
-  "Addresses": "Adressen"
+  "Addresses": "Adressen",
+  "Default interface is 1-lan": "Standaardinterface is 1-lan",
+  "Directory for temporary files. Leave empty to use the system directory.": "Directory voor tijdelijke bestanden. Laat leeg om de systeemdirectory te gebruiken.",
+  "Explanation of the Fritz!Box interface could be found at this link.": "Een uitleg over de Fritz!Box-interface vindt u via deze link.",
+  "FritzBox Interface": "FritzBox-interface",
+  "Working directory": "Werkmap",
+  "Recording is not running": "Opname is niet actief",
+  "Recording is running": "Opname is bezig",
+  "Activate recording": "Opname activeren",
+  "Disabled": "Gehandicapt",
+  "Enabled": "Ingeschakeld"
 }
