@@ -62,7 +62,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.0.0 (2024-09-06)
 * (bluefox) Corrected configuration page
 
 ### 0.3.1 (2024-08-31)

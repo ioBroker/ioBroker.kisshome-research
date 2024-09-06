@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "0.3.1",
+    "version": "1.0.0",
     "news": {
+      "1.0.0": {
+        "en": "Corrected configuration page",
+        "de": "Korrigierte Konfigurationsseite",
+        "ru": "Исправленная страница конфигурации",
+        "pt": "Página de configuração correta",
+        "nl": "Gecorrigeerde configuratiepagina",
+        "fr": "Page de configuration corrigée",
+        "it": "Pagina di configurazione corretta",
+        "es": "Página de configuración corregida",
+        "pl": "Skorygowana strona konfiguracji",
+        "uk": "Правильна сторінка конфігурації",
+        "zh-cn": "已更正的配置页面"
+      },
       "0.3.1": {
         "en": "Added detection of some IPs",
         "de": "Zusätzliche Erkennung einiger IPs",
@@ -80,19 +93,6 @@
         "pl": "Dodano opcję nagrywania",
         "uk": "Додана можливість запису",
         "zh-cn": "添加已启用的记录选项"
-      },
-      "0.0.2": {
-        "en": "Initial commit",
-        "de": "Ursprüngliche Verpflichtung",
-        "ru": "Первоначальное обязательство",
-        "pt": "Compromisso inicial",
-        "nl": "Eerste commit",
-        "fr": "Engagement initial",
-        "it": "Impegno iniziale",
-        "es": "Composición inicial",
-        "pl": "Początkowe zobowiązanie",
-        "uk": "Початкова комісія",
-        "zh-cn": "初步承诺"
       }
     },
     "titleLang": {
