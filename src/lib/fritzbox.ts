@@ -92,6 +92,7 @@ export async function getFritzBoxToken(ip: string, login: string, password: stri
                     if (sessionInfo) {
                         if (sessionInfo[1] === '0000000000000000') {
                             log(`Invalid Fritz!Box password for user ${(login || 'dslf-config').trim()}`);
+                            log(`Ungueltiges Fitz!Box Passwort fuer den Nutzer ${(login || 'dslf-config').trim()}`);
                         }
                         return sessionInfo[1] !== '0000000000000000' ? sessionInfo[1] : null;
                     }
@@ -101,6 +102,7 @@ export async function getFritzBoxToken(ip: string, login: string, password: stri
     } catch (e) {
         console.error(e);
         log(`Error while getting token: ${e.message}`);
+        log(`Fehler beim Erhalten eines Token: ${e.message}`);
         return null;
     }
 
