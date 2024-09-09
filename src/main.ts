@@ -177,7 +177,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                                     msg.message?.password || config.password,
                                 );
                                 this.sendTo(msg.from, msg.command, {
-                                    text: filter ? 'Fritz!Box unterstützt Filter-Funktion' : 'Fritz!Box unterstützt Filter-Funktion nicht',
+                                    text: filter ? 'Fritz!Box unterstuetzt Filter-Funktion' : 'Fritz!Box unterstuetzt Filter-Funktion nicht',
                                     style: {
                                         color: filter ? 'green' : 'red',
                                     },
@@ -322,7 +322,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.log.info(`Using ${this.tempDir} as temporary directory`);
         } else {
             this.log.warn(`Cannot find any temporary directory. Please specify manually in the configuration. For best performance, it should be a RAM disk.`);
-            this.log.warn(`Kein temporäres Verzeichnis gefunden. Bitte manuell in der Konfiguration angeben. Für optimale Leistung sollte es eine RAM-Disk sein.`);
+            this.log.warn(`Kein temporaeres Verzeichnis gefunden. Bitte manuell in der Konfiguration angeben. Fuer optimale Leistung sollte es eine RAM-Disk sein.`);
             return;
         }
 
@@ -352,7 +352,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
         if (!keysObj || !keysObj?.native?.publicKey || !keysObj.native?.privateKey) {
             this.log.info('Generating keys for the first time.');
-            this.log.info('Schlüssel werden erstmalig generiert.');
+            this.log.info('Schluessel werden erstmalig generiert.');
             const result = generateKeys();
             privateKey = result.privateKey;
             this.publicKey = result.publicKey;
@@ -363,7 +363,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 common: {
                     name: {
                         en: 'Public and private keys',
-                        de: 'Öffentliche und private Schlüssel',
+                        de: 'oeffentliche und private Schluessel',
                         ru: 'Публичные и частные ключи',
                         pt: 'Chaves públicas e privadas',
                         nl: 'Openbare en privésleutels',
@@ -388,7 +388,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         if (!this.publicKey || !privateKey) {
             this.log.error('Cannot generate keys.');
-            this.log.error('Schlüssel können nicht generiert werden.');
+            this.log.error('Schluessel koennen nicht generiert werden.');
             return;
         }
 
@@ -413,7 +413,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             const oldPrivateKey = fs.readFileSync(this.privateKeyPath, 'utf8');
             if (oldPrivateKey !== privateKey) {
                 this.log.warn('Private key changed. Updating...');
-                this.log.warn('Privater Schlüssel hat sich geändert. Es wird geupdated...');
+                this.log.warn('Privater Schluessel hat sich geaendert. Es wird geupdated...');
                 fs.writeFileSync(this.privateKeyPath, privateKey);
             }
         } else {
@@ -424,7 +424,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.log.error('No email provided. Please provide an email address in the configuration.');
             this.log.error('Keine E-Mail angegeben. Bitte geben Sie eine E-Mail-Adresse in der Konfiguration an.');
             this.log.error('You must register this email first on https://kisshome-feldversuch.if-is.net/#register.');
-            this.log.error('Sie müssen diese E-Mail zuerst unter https://kisshome-feldversuch.if-is.net/#register registrieren.');
+            this.log.error('Sie muessen diese E-Mail zuerst unter https://kisshome-feldversuch.if-is.net/#register registrieren.');
             return;
         }
 
@@ -453,7 +453,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     this.log.error(`Registrieren auf der kisshome-cloud nicht moeglich: Unbekannte E-Mail-Adresse`);
                 } else if (response.status === 403) {
                     this.log.error(`Cannot register on the kisshome-cloud: public key changed. Please contact us via kisshome@internet-sicherheit.de`);
-                    this.log.error(`Registrieren auf der kisshome-cloud nicht moeglich: Der oeffentliche Schlüssel hat sich geaendert. Bitte kontaktieren Sie uns unter kisshome@internet-sicherheit.de`);
+                    this.log.error(`Registrieren auf der kisshome-cloud nicht moeglich: Der oeffentliche Schluessel hat sich geaendert. Bitte kontaktieren Sie uns unter kisshome@internet-sicherheit.de`);
                 } else if (response.status === 401) {
                     this.log.error(`Cannot register on the cloud: invalid password`);
                     this.log.error(`Registrieren auf der kisshome-cloud nicht moeglich: Ungueltiges Passwort`);
@@ -628,7 +628,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             } catch (e) {
                 this.sid = '';
                 this.sidCreated = 0;
-                this.log.error(`[PCAP] Cannot get SID from FritzBox: ${e}`);
+                this.log.error(`[PCAP] Cannot get SID from Fritz!Box: ${e}`);
+                this.log.error(`[PCAP] SID kann nicht von Fritz!Box abgerufen werden : ${e}`);
             }
         }
 
@@ -650,8 +651,8 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             // stop all recordings
             const response = await stopAllRecordingsOnFritzBox(config.fritzbox, this.sid);
             if (response) {
-                this.log.info(`[PCAP] Stopped all recordings on FritzBox: ${response}`);
-                this.log.info(`[PCAP] Alle Aufnahmen auf der FritzBox wurden beendet: ${response}`);
+                this.log.info(`[PCAP] Stopped all recordings on Fritz!Box: ${response}`);
+                this.log.info(`[PCAP] Alle Aufnahmen auf der Fritz!Box wurden beendet: ${response}`);
             }
             this.log.debug(`[PCAP] Starting recording on ${config.fritzbox}/"${config.iface}"...`);
             this.log.debug(`[PCAP] Starte das Mitschneiden von ${config.fritzbox}/"${config.iface}"...`);
@@ -691,7 +692,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     if (error) {
                         if (!this.context.terminate || !error.toString().includes('aborted')) {
                             this.log.error(`[PCAP] Error while recording: ${error}`);
-                            this.log.error(`[PCAP] Fehler während dem Mitschneiden: ${error}`);
+                            this.log.error(`[PCAP] Fehler waehrend dem Mitschneiden: ${error}`);
                         }
                     }
                     if (!this.context.terminate) {
@@ -730,7 +731,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             );
         } else {
             this.log.warn('[PCAP] Cannot login into Fritz!Box. Could be wrong credentials or Fritz!Box is not available');
-            this.log.warn('[PCAP] Anmelden auf Fritz!Box nicht möglich. Vermutlich falsche Anmeldedaten oder die Fritz!Box ist nicht verfügbar.');
+            this.log.warn('[PCAP] Anmelden auf Fritz!Box nicht moeglich. Vermutlich falsche Anmeldedaten oder die Fritz!Box ist nicht verfuegbar.');
             // try to get the token in 10 seconds again. E.g., if fritzbox is rebooting
             this.restartRecording(config);
         }
@@ -774,7 +775,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             }
         } catch (e) {
             this.log.warn(`Cannot save meta file "${newFile}": ${e}`);
-            this.log.warn(`Speicher von Meta-Datei "${newFile}" nicht möglich: ${e}`);
+            this.log.warn(`Speicher von Meta-Datei "${newFile}" nicht moeglich: ${e}`);
         }
     }
 
@@ -915,7 +916,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 this.log.debug(`[RSYNC] Sent file ${fileName}(${size2text(len)}) to the cloud: ${responsePost.status}`);
             } else 
                 this.log.warn(`[RSYNC] File sent to server, but check fails. ${fileName} to the cloud: status=${responsePost.status}, len=${len}, response=${response.data}`);
-                this.log.warn(`[RSYNC] Datei wurde zum Server gesendet, aber Prüfung war nicht erfolgreich. ${fileName} an die Cloud: status=${responsePost.status}, len=${len}, response=${response.data}`);
+                this.log.warn(`[RSYNC] Datei wurde zum Server gesendet, aber Pruefung war nicht erfolgreich. ${fileName} an die Cloud: status=${responsePost.status}, len=${len}, response=${response.data}`);
             }
         } catch (e) {
             this.log.error(`[RSYNC] Cannot send file ${fileName} to the cloud: ${e}`);
@@ -944,7 +945,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             }
         } catch (e) {
             this.log.error(`[RSYNC] Cannot read working directory "${this.workingDir}" for sync : ${e}`);
-            this.log.error(`[RSYNC] Arbeitsverzeichnis "${this.workingDir}" kann nicht für die Synchronisierung gelesen werden: ${e}`);
+            this.log.error(`[RSYNC] Arbeitsverzeichnis "${this.workingDir}" kann nicht fuer die Synchronisierung gelesen werden: ${e}`);
             return;
         }
 
@@ -956,7 +957,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         if (this.syncRunning) {
             this.log.warn(`[RSYNC] Synchronization still running...`);
-            this.log.warn(`[RSYNC] Synchronisierung läuft noch...`);
+            this.log.warn(`[RSYNC] Synchronisierung laeuft noch...`);
             return;
         }
 
