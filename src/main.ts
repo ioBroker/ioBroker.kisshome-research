@@ -250,6 +250,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             this.uuid = uuidObj.native.uuid;
         } else {
             this.log.error('Cannot read UUID');
+            this.log.error('Kann UUID nicht auslesen');
             return;
         }
 
@@ -303,6 +304,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 }
             } catch (e: unknown) {
                 this.log.error(`Cannot get MAC addresses: ${e}`);
+                this.log.error(`MAC-Adressen können nicht ermittelt werden: ${e}`);
             }
         }
 
@@ -314,15 +316,18 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         this.tempDir = config.tempDir || '/run/shm';
         if (fs.existsSync(this.tempDir)) {
             this.log.info(`Using ${this.tempDir} as temporary directory`);
+            this.log.info(`${this.tempDir} wird als temporäres Verzeichnis verwendet`);
         } else if (fs.existsSync('/run/shm')) {
             this.tempDir = '/run/shm';
             this.log.info(`Using ${this.tempDir} as temporary directory`);
+            this.log.info(`${this.tempDir} wird als temporäres Verzeichnis verwendet`);
         } else if (fs.existsSync('/tmp')) {
             this.tempDir = '/tmp';
             this.log.info(`Using ${this.tempDir} as temporary directory`);
+            this.log.info(`${this.tempDir} wird als temporäres Verzeichnis verwendet`);
         } else {
-            this.log.warn(`Cannot find any temporary directory. Please specify manually in the configuration. For best performance, it should be a RAM disk.`);
-            this.log.warn(`Kein temporaeres Verzeichnis gefunden. Bitte manuell in der Konfiguration angeben. Fuer optimale Leistung sollte es eine RAM-Disk sein.`);
+            this.log.warn(`Cannot find any temporary directory. Please specify manually in the configuration. For best performance it should be a RAM disk`);
+            this.log.warn(`Es kann kein temporäres Verzeichnis gefunden werden. Bitte geben Sie es manuell in der Konfiguration an. Für beste Leistung sollte es eine RAM-Disk sein.`);
             return;
         }
 
@@ -446,6 +451,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     }
                 } else {
                     this.log.info('Successfully registered on the cloud');
+                    this.log.info('Erfolgreich in der Cloud registriert');
                 }
             } else {
                 if (response.status === 404) {
@@ -482,7 +488,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         if (this.recordingEnabled) {
             // start the monitoring
             this.startRecording(config)
-                .catch(e => this.log.error(`[PCAP] Cannot start recording: ${e}`));
+                .catch(e => {
+                    this.log.error(`[PCAP] Cannot start recording: ${e}`);
+                    this.log.error(`[PCAP] Aufzeichnen kann nicht gestartet werden: ${e}`);
+                });
 
             // Send the data every hour to the cloud
             this.syncJob();
@@ -506,7 +515,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         const started = Date.now();
 
         this.startSynchronization()
-            .catch(e => this.log.error(`[RSYNC] Cannot synchronize: ${e}`))
+            .catch(e => {
+                this.log.error(`[RSYNC] Cannot synchronize: ${e}`);
+                this.log.error(`[RSYNC] Kann nicht synchronisieren: ${e}`);
+            })
             .then(() => {
                 const duration = Date.now() - started;
                 this.syncTimer = setTimeout(() => {
@@ -526,7 +538,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.context.terminate = false;
                         const config: KISSHomeResearchConfig = this.config as unknown as KISSHomeResearchConfig;
                         this.startRecording(config)
-                            .catch(e => this.log.error(`Cannot start recording: ${e}`));
+                            .catch(e => {
+                                this.log.error(`Cannot start recording: ${e}`);
+                                this.log.error(`Aufzeichnen kann nicht gestartet werden: ${e}`);
+                            });
                     }
                 } else if (this.recordingEnabled) {
                     this.recordingEnabled = false;
@@ -543,7 +558,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.savePacketsToFile();
                         setTimeout(() => {
                             this.startSynchronization()
-                                .catch(e => this.log.error(`[RSYNC] Cannot synchronize: ${e}`));
+                                .catch(e => {
+                                    this.log.error(`[RSYNC] Cannot synchronize: ${e}`);
+                                    this.log.error(`[RSYNC] Kann nicht synchronisieren: ${e}`);
+                                });
                         }, 2000)
                     }
                 }
@@ -556,7 +574,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         this.startTimeout = this.setTimeout(() => {
             this.startTimeout = undefined;
             this.startRecording(config)
-                .catch(e => this.log.error(`Cannot start recording: ${e}`));
+                .catch(e => {
+                    this.log.error(`Cannot start recording: ${e}`);
+                    this.log.error(`Aufzeichnen kann nicht gestartet werden: ${e}`);
+                });
         }, 10000);
     }
 
@@ -608,6 +629,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
             fs.closeSync(fd);
 
             this.log.debug(`Saved file ${fileName} with ${size2text(offset)}`);
+            this.log.debug(`Datei ${fileName} mit ${size2text(offset)} gespeichert`);
         }
 
         this.context.lastSaved = Date.now();
@@ -635,6 +657,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         if (this.sid) {
             this.log.debug(`[PCAP] Use SID: ${this.sid}`);
+            this.log.debug(`[PCAP] Nutze SID: ${this.sid}`);
 
             const captured = await this.getStateAsync('info.recording.captured');
             if (captured?.val) {
@@ -703,6 +726,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 () => {
                     if (!this.recordingRunning) {
                         this.log.debug('[PCAP] Recording started!');
+                        this.log.debug('[PCAP] Aufzeichnen hat gestartet!');
                         this.recordingRunning = true;
                         this.setState('info.connection', true, true);
                         this.setState('info.recording.running', true, true);
@@ -710,6 +734,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         this.monitorInterval = this.monitorInterval || this.setInterval(() => {
                             if (Date.now() - this.lastDebug > 60000) {
                                 this.log.debug(`[PCAP] Captured ${this.context.totalPackets} packets (${size2text(this.context.totalBytes)})`);
+                                this.log.debug(`[PCAP] ${this.context.totalPackets} Pakete (${size2text(this.context.totalBytes)}) aufgezeichnet`);
                                 this.lastDebug = Date.now();
                             }
                             // save if a file is bigger than 50 Mb
@@ -720,7 +745,10 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                                 this.savePacketsToFile();
                                 if (!this.context.terminate) {
                                     this.startSynchronization()
-                                        .catch(e => this.log.error(`[RSYNC] Cannot synchronize: ${e}`));
+                                        .catch(e => {
+                                            this.log.error(`[RSYNC] Cannot synchronize: ${e}`);
+                                            this.log.error(`[RSYNC] Kann nicht synchronisieren: ${e}`);
+                                        });
                                 }
                             }
                         }, 10000);
@@ -764,6 +792,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                 const oldFile = fs.readFileSync(`${this.workingDir}/${latestFile}`, 'utf8');
                 if (oldFile !== text) {
                     this.log.debug('Meta file updated');
+                    this.log.debug('Meta-Datei geupdated');
                     fs.unlinkSync(`${this.workingDir}/${latestFile}`);
                     fs.writeFileSync(newFile, text);
                 }
@@ -853,6 +882,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         fs.unlinkSync(`${this.workingDir}/${file}`);
                     } catch (e) {
                         this.log.error(`Cannot delete file ${this.workingDir}/${file}: ${e}`);
+                        this.log.error(`Die Datei ${this.workingDir}/${file} kann nicht gelöscht werden: ${e}`);
                     }
                 } else if (!file.endsWith('.json')) {
                     // delete unknown files
@@ -860,11 +890,13 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                         fs.unlinkSync(`${this.workingDir}/${file}`);
                     } catch (e) {
                         this.log.error(`Cannot delete file ${this.workingDir}/${file}: ${e}`);
+                        this.log.error(`Die Datei ${this.workingDir}/${file} kann nicht gelöscht werden: ${e}`);
                     }
                 }
             }
         } catch (e) {
             this.log.error(`Cannot read working directory "${this.workingDir}": ${e}`);
+            this.log.error(`Arbeitsverzeichnis „${this.workingDir}“ kann nicht gelesen werden: ${e}`);
         }
     }
 
@@ -914,6 +946,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     fs.unlinkSync(fileName);
                 }
                 this.log.debug(`[RSYNC] Sent file ${fileName}(${size2text(len)}) to the cloud: ${responsePost.status}`);
+                this.log.debug(`[RSYNC] Datei ${fileName}(${size2text(len)}) an die Cloud gesendet: ${responsePost.status}`);
             } else 
                 this.log.warn(`[RSYNC] File sent to server, but check fails. ${fileName} to the cloud: status=${responsePost.status}, len=${len}, response=${response.data}`);
                 this.log.warn(`[RSYNC] Datei wurde zum Server gesendet, aber Pruefung war nicht erfolgreich. ${fileName} an die Cloud: status=${responsePost.status}, len=${len}, response=${response.data}`);
@@ -933,6 +966,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         // calculate the total number of bytes
         let totalBytes = 0;
         this.log.debug(`[RSYNC] Start synchronization...`);
+        this.log.debug(`[RSYNC] Starte Synchronisierung...`);
 
         // calculate the total number of bytes in pcap files
         let pcapFiles: string[];
