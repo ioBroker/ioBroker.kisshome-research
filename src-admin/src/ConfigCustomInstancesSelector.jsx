@@ -36,6 +36,12 @@ const styles = {
     td: {
         padding: '2px 16px',
     },
+    vendor: {
+        maxWidth: 150,
+        fontSize: 12,
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+    }
 };
 
 async function browseHomekit(socket, instance) {
@@ -181,7 +187,7 @@ function validateMacAddress(mac) {
 }
 
 function normalizeMacAddress(mac) {
-    if (!validateMacAddress(mac)) {
+    if (!mac || !validateMacAddress(mac)) {
         return mac;
     }
     mac = mac
@@ -214,7 +220,7 @@ function validateIpAddress(ip) {
 }
 
 function normalizeIpAddress(ip) {
-    if (!validateIpAddress(ip)) {
+    if (!ip || !validateIpAddress(ip)) {
         return ip;
     }
     const parts = ip.trim().split('.');
@@ -259,27 +265,65 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         const newState = {
             instances,
             ips,
+            IP2MAC: {},
+            MAC2VENDOR: {},
+            alive: this.props.alive,
+            resolving: false,
         };
 
+        this.setState(newState);
+        this.props.socket.subscribeState(`system.adapter.kisshome-research.${this.props.instance}.alive`, this.onAliveChanged);
         // get vendor and MAC-Address information
         if (this.props.alive) {
-            const devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
-            newState.runningRequest = true;
+            this.resolveMACs();
+        }
+    }
 
-            this.props.socket
-                .sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', devices)
+    resolveMACs() {
+        this.setState({ runningRequest: true }, () => {
+            const devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
+
+            // merge together devices and ips
+            const requestIps = [];
+            devices.forEach(item => {
+                const ip = normalizeIpAddress(item.ip);
+                const mac = normalizeMacAddress(item.mac);
+                if (ip && validateIpAddress(ip)) {
+                    requestIps.push({ ip, mac });
+                } else if (mac && validateMacAddress(mac)) {
+                    requestIps.push({ ip, mac });
+                }
+            })
+            this.state.ips.forEach(item => {
+                const ip = normalizeIpAddress(item.ip);
+                const mac = normalizeMacAddress(item.mac);
+                if (ip && validateIpAddress(ip) && !requestIps.find(i => i.ip === ip)) {
+                    requestIps.push({ ip, mac });
+                } else if (mac && validateMacAddress(mac) && !requestIps.find(i => i.ip === ip)) {
+                    requestIps.push({ ip, mac });
+                }
+            });
+
+            return this.props.socket
+                .sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', requestIps)
                 .then(result => {
+                    if (result?.error) {
+                        this.setState({ runningRequest: false });
+                        return;
+                    }
+                    const IP2MAC = { ...(this.state.IP2MAC || {}) };
+                    const MAC2VENDOR = { ...(this.state.MAC2VENDOR || {}) };
+                    const ips = JSON.parse(JSON.stringify(this.state.ips));
+
                     // result: { result: { mac: string; vendor?: string, ip: string }[] }
-                    let changedState = false;
-                    const vendors = {};
                     result?.result?.forEach(item => {
                         const ip = item.ip;
                         const pos = ips.findIndex(i => i.ip === ip);
                         if (pos !== -1) {
-                            changedState = true;
                             ips[pos].mac = item.mac;
-                            vendors[item.mac] = item.vendor;
                         }
+                        IP2MAC[normalizeIpAddress(ip)] = item.mac;
+                        MAC2VENDOR[normalizeMacAddress(item.mac)] = item.vendor;
                     });
 
                     let changed = false;
@@ -287,21 +331,15 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                     devices.forEach(item => {
                         const pos = ips.findIndex(i => i.ip === item.ip);
                         if (pos !== -1) {
-                            if (item.mac !== ips[pos].mac) {
+                            if (ips[pos].mac && item.mac !== ips[pos].mac) {
                                 changed = true;
-                            }
-                            if (!vendors[item.mac]) {
-                                vendors[item.mac] = ips[pos].vendor;
-                                changedState = true;
+                                item.mac = ips[pos].mac;
                             }
                         }
                     });
 
-                    if (changedState) {
-                        this.setState({ ips, vendors, runningRequest: false });
-                    } else {
-                        this.setState({ runningRequest: false });
-                    }
+                    this.setState({ ips, IP2MAC, MAC2VENDOR, runningRequest: false });
+
                     if (changed) {
                         this.onChange('devices', devices);
                     }
@@ -312,9 +350,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                     }
                     this.setState({ runningRequest: false });
                 });
-        }
-
-        this.setState(newState);
+        });
     }
 
     static getAttr(obj, attr) {
@@ -344,16 +380,79 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
 
     componentWillUnmount() {
         super.componentWillUnmount();
+        this.props.socket.unsubscribeState(`system.adapter.kisshome-research.${this.props.instance}.alive`, this.onAliveChanged);
         this.validateTimeout && clearTimeout(this.validateTimeout);
         this.validateTimeout = null;
     }
+
+    onAliveChanged = (id, state) => {
+        if (this.state.alive !== !!state?.val) {
+            this.setState({ alive: !!state?.val }, () => {
+                if (this.state.alive) {
+                    this.resolveMACs();
+                }
+            });
+        }
+    };
 
     validateAddresses() {
         this.validateTimeout && clearTimeout(this.validateTimeout);
 
         this.validateTimeout = setTimeout(() => {
             this.validateTimeout = null;
+            if (!this.state.alive) {
+                return;
+            }
             // read MACs for all IPs
+            const unknownMacs = [];
+            const devices = ConfigGeneric.getValue(this.props.data, 'devices') || [];
+            const IP2MAC = { ...this.state.IP2MAC };
+            const MAC2VENDOR = { ...this.state.MAC2VENDOR };
+            devices.forEach(item => {
+                const ip = normalizeIpAddress(item.ip);
+                const mac = normalizeMacAddress(item.mac);
+                if (ip && validateIpAddress(item.ip) && !IP2MAC[ip]) {
+                    IP2MAC[ip] = '-';
+                    unknownMacs.push(item);
+                    if (item.mac && validateMacAddress(item.mac) && !MAC2VENDOR[mac]) {
+                        MAC2VENDOR[mac] = '-';
+                    }
+                } else if (item.mac && validateMacAddress(item.mac) && !MAC2VENDOR[mac]) {
+                    MAC2VENDOR[mac] = '-';
+                    unknownMacs.push(item);
+                }
+            });
+            if (unknownMacs.length) {
+                this.setState({ resolving: true, IP2MAC, MAC2VENDOR }, () => {
+                    this.props.socket
+                        .sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', unknownMacs)
+                        .then(result => {
+                            if (result?.error) {
+                                this.setState({ resolving: false });
+                                return;
+                            }
+                            const IP2MAC = { ...this.state.IP2MAC };
+                            const MAC2VENDOR = { ...this.state.MAC2VENDOR };
+                            // result: { result: { mac: string; vendor?: string, ip: string }[] }
+                            let changedState = false;
+                            result?.result?.forEach(item => {
+                                item.ip = normalizeMacAddress(item.ip);
+                                item.mac = normalizeMacAddress(item.mac);
+                                if (item.mac && IP2MAC[item.ip] !== item.mac) {
+                                    IP2MAC[item.ip] = item.mac;
+                                    changedState = true;
+                                }
+                                if (item.vendor && MAC2VENDOR[item.mac] !== item.vendor) {
+                                    MAC2VENDOR[item.mac] = item.vendor;
+                                    changedState = true;
+                                }
+                            });
+                            if (changedState) {
+                                this.setState({ IP2MAC, MAC2VENDOR, resolving: false });
+                            }
+                        });
+                });
+            }
         }, 1000);
     }
 
@@ -403,7 +502,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                     try {
                         const devices = await adapter.browse(
                             this.props.socket,
-                            instances[i]._id.replace('system.adapter.', ''),
+                            instances[i].id.replace('system.adapter.', ''),
                         );
                         devices.forEach(item => {
                             const type = ConfigCustomInstancesSelector.isIp(item.ip);
@@ -426,7 +525,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                     try {
                         const devices = await browseClients(
                             this.props.socket,
-                            instances[i]._id.replace('system.adapter.', ''),
+                            instances[i].id.replace('system.adapter.', ''),
                         );
                         devices.forEach(item => {
                             const type = ConfigCustomInstancesSelector.isIp(item.ip);
@@ -516,7 +615,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
 
         return (
             <TableContainer>
-                {this.state.runningRequest ? <LinearProgress /> : <div style={{ height: 2, width: '100%' }} />}
+                {this.state.runningRequest || this.state.resolving ? <LinearProgress /> : <div style={{ height: 2, width: '100%' }} />}
                 <Table
                     style={styles.table}
                     size="small"
@@ -615,13 +714,16 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 </TableCell>
                                 <TableCell style={styles.td}>{row.ip}</TableCell>
                                 <TableCell style={styles.td}>{row.mac || ''}</TableCell>
-                                <TableCell style={styles.td}>{this.state.vendors?.[row.mac] || ''}</TableCell>
+                                <TableCell style={{ ...styles.td, ...styles.vendor }}>{this.state.MAC2VENDOR?.[normalizeMacAddress(row.mac)] || ''}</TableCell>
                                 <TableCell style={styles.td}>{row.desc}</TableCell>
                                 <TableCell style={styles.td} />
                             </TableRow>
                         ))}
-                        {notFound.map(row => (
-                            <TableRow key={row.uuid}>
+                        {notFound.map(row => {
+                            const normalizedIp = normalizeIpAddress(row.ip);
+                            const normalizedMac = normalizeMacAddress(row.mac);
+                            const possibleMac = this.state.IP2MAC?.[normalizedIp];
+                            return <TableRow key={row.uuid}>
                                 <TableCell
                                     scope="row"
                                     style={styles.td}
@@ -661,8 +763,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         }}
                                         onBlur={() => {
                                             if (row.ip.trim()) {
-                                                const normalized = normalizeIpAddress(row.ip);
-                                                if (normalized !== row.ip) {
+                                                if (normalizedIp !== row.ip) {
                                                     const _devices = [
                                                         ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                                     ];
@@ -683,7 +784,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         value={row.mac}
                                         disabled={this.state.runningRequest}
                                         error={!validateMacAddress(row.mac)}
-                                        placeholder="00:11:22:33:44:55"
+                                        placeholder={possibleMac || 'XX:XX:XX:XX:XX:XX'}
                                         onChange={e => {
                                             const _devices = [
                                                 ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
@@ -697,7 +798,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         }}
                                         onBlur={() => {
                                             if (row.mac.trim()) {
-                                                const normalized = normalizeMacAddress(row.mac);
+                                                const normalized = normalizedMac;
                                                 if (normalized !== row.mac) {
                                                     const _devices = [
                                                         ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
@@ -713,8 +814,9 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         variant="standard"
                                     />
                                 </TableCell>
-                                <TableCell style={styles.td}>
-                                    {this.state.vendors?.[normalizeMacAddress(row.mac)] || ''}
+                                <TableCell style={{ ...styles.td, ...styles.vendor }}>
+                                    {row.mac ? (this.state.MAC2VENDOR?.[normalizedMac] || '') :
+                                        (possibleMac ? (this.state.MAC2VENDOR?.[possibleMac] || '') : '')}
                                 </TableCell>
                                 <TableCell style={styles.td}>
                                     <TextField
@@ -751,8 +853,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         <Delete />
                                     </IconButton>
                                 </TableCell>
-                            </TableRow>
-                        ))}
+                            </TableRow>;
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>

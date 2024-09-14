@@ -4,6 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMacForIp = getMacForIp;
+exports.validateIpAddress = validateIpAddress;
+exports.getVendorForMac = getVendorForMac;
 exports.getDefaultGateway = getDefaultGateway;
 exports.generateKeys = generateKeys;
 // @ts-expect-error no types
@@ -17,6 +19,29 @@ async function getMacForIp(ip) {
         return { mac: mac.toUpperCase(), vendor: (0, vendor_lookup_1.toVendor)(mac), ip };
     }
     return null;
+}
+function validateIpAddress(ip) {
+    if (!ip) {
+        return true;
+    }
+    if (typeof ip !== 'string') {
+        return false;
+    }
+    ip = ip.trim();
+    if (!ip) {
+        return true;
+    }
+    if (!ip.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+        return false;
+    }
+    const parts = ip
+        .trim()
+        .split('.')
+        .map(part => parseInt(part, 10));
+    return !parts.find(part => part < 0 || part > 0xff);
+}
+function getVendorForMac(mac) {
+    return (0, vendor_lookup_1.toVendor)(mac);
 }
 function getDefaultGateway() {
     return new Promise((resolve, reject) => (0, network_1.get_gateway_ip)((err, ip) => {
@@ -40,7 +65,7 @@ function generateKeys() {
     });
     const privateKey = result.privateKey;
     const publicKey = result.publicKey;
-    const sshKeyBodyPublic = publicKey.export().toString().split('\n').slice(1, -2).join('');
-    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.export().toString() };
+    const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
+    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.toString() };
 }
 //# sourceMappingURL=utils.js.map

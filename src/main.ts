@@ -4,7 +4,7 @@ import axios from 'axios';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-import { getDefaultGateway, getMacForIp, generateKeys } from './lib/utils';
+import { getDefaultGateway, getMacForIp, generateKeys, getVendorForMac, validateIpAddress } from './lib/utils';
 
 import {
     startRecordingOnFritzBox,
@@ -28,6 +28,7 @@ type Device = {
     mac: string;
     ip: string;
     desc: string;
+    uuid: string;
 };
 
 type KISSHomeResearchConfig = {
@@ -86,6 +87,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         totalPackets: 0,
         buffer: Buffer.from([]),
         modifiedMagic: false,
+        libpCapFormat: false,
         networkType: 1,
         lastSaved: 0,
     };
@@ -237,7 +239,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     if (msg.callback) {
                         try {
                             const devices: Device[] = msg.message as Device[];
-                            const result = await KISSHomeResearchAdapter.getMacForIps(devices.map(d => d.ip));
+                            const result = await KISSHomeResearchAdapter.getMacForIps(devices);
                             this.sendTo(msg.from, msg.command, { result }, msg.callback);
                         } catch (e) {
                             this.sendTo(msg.from, msg.command, { error: e.message }, msg.callback);
@@ -299,7 +301,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
         if (tasks.length) {
             try {
-                const macs = await KISSHomeResearchAdapter.getMacForIps(tasks.map(t => t.ip));
+                const macs = await KISSHomeResearchAdapter.getMacForIps(tasks);
                 for (let i = 0; i < tasks.length; i++) {
                     const mac = macs[i];
                     if (mac?.mac) {
@@ -853,25 +855,38 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         return JSON.stringify(desc, null, 2);
     }
 
-    static async getMacForIps(ips: string[]): Promise<{ mac: string; vendor?: string; ip: string }[]> {
-        const result: { mac: string; vendor?: string; ip: string }[] = [];
+    static async getMacForIps(
+        devices: Device[],
+    ): Promise<{ mac: string; vendor?: string; ip: string; found: boolean }[]> {
+        const result: { mac: string; vendor?: string; ip: string; found: boolean }[] = [];
         let error = '';
-        for (const ip of ips) {
-            if (KISSHomeResearchAdapter.macCache[ip]) {
-                result.push({ ...KISSHomeResearchAdapter.macCache[ip], ip });
+        for (const dev of devices) {
+            if (dev.ip && KISSHomeResearchAdapter.macCache[dev.ip]) {
+                result.push({ ...KISSHomeResearchAdapter.macCache[dev.ip], ip: dev.ip, found: true });
                 continue;
             }
-            try {
-                const mac = await getMacForIp(ip);
-                if (mac) {
-                    result.push(mac);
-                    KISSHomeResearchAdapter.macCache[ip] = { mac: mac.mac, vendor: mac.vendor };
+            if (!dev.mac && dev.ip && validateIpAddress(dev.ip)) {
+                try {
+                    const mac = await getMacForIp(dev.ip);
+                    if (mac) {
+                        result.push({ ...mac, found: true });
+                        KISSHomeResearchAdapter.macCache[dev.ip] = { mac: mac.mac, vendor: mac.vendor };
+                    }
+                } catch (e) {
+                    error = e.message;
                 }
-            } catch (e) {
-                error = e.message;
+            } else {
+                const item = {
+                    mac: dev.mac,
+                    ip: dev.ip,
+                    vendor: dev.mac ? getVendorForMac(dev.mac) : '',
+                    found: false,
+                };
+                result.push(item);
             }
         }
-        if (!result.length && ips.length) {
+
+        if (!result.length && devices.length) {
             throw new Error(error || 'no results');
         }
 

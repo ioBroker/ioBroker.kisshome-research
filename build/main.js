@@ -69,6 +69,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             totalPackets: 0,
             buffer: Buffer.from([]),
             modifiedMagic: false,
+            libpCapFormat: false,
             networkType: 1,
             lastSaved: 0,
         };
@@ -186,7 +187,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                     if (msg.callback) {
                         try {
                             const devices = msg.message;
-                            const result = await KISSHomeResearchAdapter.getMacForIps(devices.map(d => d.ip));
+                            const result = await KISSHomeResearchAdapter.getMacForIps(devices);
                             this.sendTo(msg.from, msg.command, { result }, msg.callback);
                         }
                         catch (e) {
@@ -244,7 +245,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         const tasks = IPs.filter(ip => !ip.mac);
         if (tasks.length) {
             try {
-                const macs = await KISSHomeResearchAdapter.getMacForIps(tasks.map(t => t.ip));
+                const macs = await KISSHomeResearchAdapter.getMacForIps(tasks);
                 for (let i = 0; i < tasks.length; i++) {
                     const mac = macs[i];
                     if (mac === null || mac === void 0 ? void 0 : mac.mac) {
@@ -729,26 +730,37 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         });
         return JSON.stringify(desc, null, 2);
     }
-    static async getMacForIps(ips) {
+    static async getMacForIps(devices) {
         const result = [];
         let error = '';
-        for (const ip of ips) {
-            if (KISSHomeResearchAdapter.macCache[ip]) {
-                result.push({ ...KISSHomeResearchAdapter.macCache[ip], ip });
+        for (const dev of devices) {
+            if (dev.ip && KISSHomeResearchAdapter.macCache[dev.ip]) {
+                result.push({ ...KISSHomeResearchAdapter.macCache[dev.ip], ip: dev.ip, found: true });
                 continue;
             }
-            try {
-                const mac = await (0, utils_1.getMacForIp)(ip);
-                if (mac) {
-                    result.push(mac);
-                    KISSHomeResearchAdapter.macCache[ip] = { mac: mac.mac, vendor: mac.vendor };
+            if (!dev.mac && dev.ip && (0, utils_1.validateIpAddress)(dev.ip)) {
+                try {
+                    const mac = await (0, utils_1.getMacForIp)(dev.ip);
+                    if (mac) {
+                        result.push({ ...mac, found: true });
+                        KISSHomeResearchAdapter.macCache[dev.ip] = { mac: mac.mac, vendor: mac.vendor };
+                    }
+                }
+                catch (e) {
+                    error = e.message;
                 }
             }
-            catch (e) {
-                error = e.message;
+            else {
+                const item = {
+                    mac: dev.mac,
+                    ip: dev.ip,
+                    vendor: dev.mac ? (0, utils_1.getVendorForMac)(dev.mac) : '',
+                    found: false,
+                };
+                result.push(item);
             }
         }
-        if (!result.length && ips.length) {
+        if (!result.length && devices.length) {
             throw new Error(error || 'no results');
         }
         return result;

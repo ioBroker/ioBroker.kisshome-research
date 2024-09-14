@@ -12,6 +12,31 @@ export async function getMacForIp(ip: string): Promise<{ mac: string; vendor?: s
     return null;
 }
 
+export function validateIpAddress(ip: string): boolean {
+    if (!ip) {
+        return true;
+    }
+    if (typeof ip !== 'string') {
+        return false;
+    }
+    ip = ip.trim();
+    if (!ip) {
+        return true;
+    }
+    if (!ip.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+        return false;
+    }
+    const parts = ip
+        .trim()
+        .split('.')
+        .map(part => parseInt(part, 10));
+    return !parts.find(part => part < 0 || part > 0xff);
+}
+
+export function getVendorForMac(mac: string): string {
+    return toVendor(mac);
+}
+
 export function getDefaultGateway(): Promise<string> {
     return new Promise((resolve, reject) =>
         get_gateway_ip((err: string, ip: string) => {
