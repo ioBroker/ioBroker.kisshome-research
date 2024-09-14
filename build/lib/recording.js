@@ -57,7 +57,7 @@ function analyzePacket(context) {
     }
     // next 6 bytes are MAC address of a source
     // next 6 bytes are MAC address of destination
-    let offset = headerLength + 12;
+    const offset = headerLength + 12;
     let maxBytes = 0;
     if (offset + 2 <= len) {
         // next 2 bytes are Ethernet type
@@ -159,7 +159,7 @@ function startRecordingOnFritzBox(ip, sid, iface, MACs, onEnd, context, progress
     };
     const executeOnEnd = (error) => {
         if (debug) {
-            console.log(`FINISH receiving of data...: ${error}`);
+            console.log(`FINISH receiving of data...: ${error === null || error === void 0 ? void 0 : error.toString()}`);
         }
         timeout && clearTimeout(timeout);
         timeout = null;
@@ -182,7 +182,7 @@ function startRecordingOnFritzBox(ip, sid, iface, MACs, onEnd, context, progress
             try {
                 controller.abort();
             }
-            catch (e) {
+            catch {
                 // ignore
             }
             return;

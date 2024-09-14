@@ -11,7 +11,7 @@ const axios_1 = __importDefault(require("axios"));
 const node_crypto_1 = __importDefault(require("node:crypto"));
 async function getFritzBoxInterfaces(ip, login, password, sid) {
     if (!sid && login && password) {
-        sid = await getFritzBoxToken(ip, login, password, console.log);
+        sid = (await getFritzBoxToken(ip, login, password, console.log)) || '';
     }
     if (!sid) {
         return null;
@@ -19,7 +19,7 @@ async function getFritzBoxInterfaces(ip, login, password, sid) {
     const response = await (0, axios_1.default)(`http://${ip}/capture.lua?sid=${sid}`);
     if (response.data) {
         let text = response.data;
-        let result = [];
+        const result = [];
         // <tr>
         //    <th>1. Internetverbindung</th>
         //    <td class="buttonrow">
@@ -33,7 +33,7 @@ async function getFritzBoxInterfaces(ip, login, password, sid) {
             text = text.substring(i);
             const tr = text.indexOf('</tr>');
             if (tr !== -1) {
-                let part = text.substring(0, tr);
+                const part = text.substring(0, tr);
                 text = text.substring(tr);
                 const nameStart = part.indexOf('name="start"');
                 const nameStop = part.indexOf('>Start<');
@@ -53,10 +53,11 @@ async function getFritzBoxInterfaces(ip, login, password, sid) {
         }
         return result;
     }
+    return null;
 }
 async function getFritzBoxFilter(ip, login, password, sid) {
     if (!sid && login && password) {
-        sid = await getFritzBoxToken(ip, login, password, console.log);
+        sid = (await getFritzBoxToken(ip, login, password, console.log)) || '';
     }
     if (!sid) {
         return null;
@@ -65,15 +66,18 @@ async function getFritzBoxFilter(ip, login, password, sid) {
     if (response.data) {
         return response.data.includes('id="uiFilter"');
     }
+    return null;
 }
 async function getFritzBoxUsers(ip) {
     const response = await (0, axios_1.default)(`http://${ip}/login_sid.lua`);
     if (response.data) {
         const challenge = response.data.match(/<User( [a-z]+="\w+")?>([^<]+)<\/User>/g);
-        return challenge.map((user) => {
+        return challenge
+            .map((user) => {
             const res = user.match(/>([^<]+)<\/User>/);
             return res ? res[1] : null;
-        }).filter((user) => user);
+        })
+            .filter((user) => user);
     }
     return [];
 }
@@ -92,6 +96,7 @@ async function getFritzBoxToken(ip, login, password, log) {
                     if (sessionInfo) {
                         if (sessionInfo[1] === '0000000000000000') {
                             log(`Invalid Fritz!Box password for user ${(login || 'dslf-config').trim()}`);
+                            log(`Ungueltiges Fitz!Box Passwort fuer den Nutzer ${(login || 'dslf-config').trim()}`);
                         }
                         return sessionInfo[1] !== '0000000000000000' ? sessionInfo[1] : null;
                     }
@@ -102,6 +107,7 @@ async function getFritzBoxToken(ip, login, password, log) {
     catch (e) {
         console.error(e);
         log(`Error while getting token: ${e.message}`);
+        log(`Fehler beim Erhalten eines Token: ${e.message}`);
         return null;
     }
     return null;

@@ -10,6 +10,7 @@ package-lock.json
 *.map
 *.tgz
 *.pcap
+*.eth
 
 .dev-server
 .vscode

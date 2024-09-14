@@ -1,4 +1,5 @@
 ![Logo](admin/kisshome-research.png)
+
 # ioBroker KISSHome research
 
 ![Number of Installations](http://iobroker.live/badges/kisshome-research-installed.svg)
@@ -16,45 +17,48 @@ This special adapter was developed for the KISSHome research project. It is not 
 To use this adapter, you must first register on the [KISSHome research](https://kisshome-feldversuch.if-is.net) website and get the confirmation email.
 
 To run this adapter, you need:
-- More than 3 smart home devices
-- Fritz!Box Router. Without `Fritz!Box`, the adapter will not work.
-- iobroker must run on debian/raspbian (or at least on linux, where the following commands are available: `which`, `rsync`)
+
+-   More than 3 smart home devices
+-   Fritz!Box Router. Without `Fritz!Box`, the adapter will not work.
+-   iobroker must run on debian/raspbian (or at least on linux, where the following commands are available: `which`, `rsync`)
 
 ## Todo
+
 Detect IP addresses from:
-- [X] hm-rpc (Homematic CCU),
-- [X] loxone,
-- [X] shelly,
-- [X] mqtt
-- [X] tr-064,
-- [-] alexa-2 - not possible, as alexa reads no IP addresses
-- [X] sonoff,
-- [X] modbus,
-- [X] hue (philips hue),
-- [-] tuya - not possible, It communicates with the cloud
-- [X] mqtt-client,
-- [-] synology - it is a multifunctional device - ignore it,
-- [X] sonos,
-- [X] mihome-vacuum,
-- [-] hmip (It communicates with the cloud),
-- [ ] homeconnect,
-- [X] wled (ESP8266/ESP32),
-- [X] unify,
-- [X] harmony,
-- [-] samsung (TV) - too many data,
-- [-] onvif (Webkameras) - too many data,
-- [-] kameras (URL oder IP-Kameras)  - too many data,
-- [-] proxmox - not possible, as alexa reads no IP addresses
-- [X] broadlink2,
-- [-] lgtv - too many data,
-- [X] knx (KNX-Gateway),
-- [X] openknx (KNX-Gateway),
-- [X] lcn,
-- [X] homekit-controller,
-- [X] upnp,
-- [X] openknx,
-- [X] wifilight,
-- [-] meross - not possible, It communicates with the cloud
+
+-   [x] hm-rpc (Homematic CCU),
+-   [x] loxone,
+-   [x] shelly,
+-   [x] mqtt
+-   [x] tr-064,
+-   [-] alexa-2 - not possible, as alexa reads no IP addresses
+-   [x] sonoff,
+-   [x] modbus,
+-   [x] hue (philips hue),
+-   [-] tuya - not possible, It communicates with the cloud
+-   [x] mqtt-client,
+-   [-] synology - it is a multifunctional device - ignore it,
+-   [x] sonos,
+-   [x] mihome-vacuum,
+-   [-] hmip (It communicates with the cloud),
+-   [ ] homeconnect,
+-   [x] wled (ESP8266/ESP32),
+-   [x] unify,
+-   [x] harmony,
+-   [-] samsung (TV) - too many data,
+-   [-] onvif (Webkameras) - too many data,
+-   [-] kameras (URL oder IP-Kameras) - too many data,
+-   [-] proxmox - not possible, as alexa reads no IP addresses
+-   [x] broadlink2,
+-   [-] lgtv - too many data,
+-   [x] knx (KNX-Gateway),
+-   [x] openknx (KNX-Gateway),
+-   [x] lcn,
+-   [x] homekit-controller,
+-   [x] upnp,
+-   [x] openknx,
+-   [x] wifilight,
+-   [-] meross - not possible, It communicates with the cloud
 
 <!--
 	Placeholder for the next version (at the beginning of the line):
@@ -62,28 +66,37 @@ Detect IP addresses from:
 -->
 
 ## Changelog
+
 ### 1.0.0 (2024-09-06)
-* (bluefox) Corrected configuration page
+
+-   (bluefox) Corrected configuration page
 
 ### 0.3.1 (2024-08-31)
-* (bluefox) Added detection of some IPs
+
+-   (bluefox) Added detection of some IPs
 
 ### 0.2.1 (2024-08-28)
-* (bluefox) used valid URL address
+
+-   (bluefox) used valid URL address
 
 ### 0.1.1 (2024-08-20)
-* (bluefox) Used MD5 for the file consistency check
+
+-   (bluefox) Used MD5 for the file consistency check
 
 ### 0.1.0 (2024-08-19)
-* (bluefox) File upload was implemented
+
+-   (bluefox) File upload was implemented
 
 ### 0.0.3 (2024-08-14)
-* (bluefox) Added the recording enabled option
+
+-   (bluefox) Added the recording enabled option
 
 ### 0.0.2 (2024-07-22)
-* (bluefox) Initial commit
+
+-   (bluefox) Initial commit
 
 ## License
+
 The MIT License (MIT)
 
 Copyright (c) 2024 Denis Haev <dogafox@gmail.com>

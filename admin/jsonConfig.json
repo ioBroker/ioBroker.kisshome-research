@@ -12,7 +12,7 @@
                     "md": 3,
                     "lg": 3,
                     "label": "Email",
-                    "tooltip": "Email address as registered in the KISSHome research"
+                    "tooltip": "E-mail address that was used for registration"
                 },
                 "_hint": {
                     "newLine": true,

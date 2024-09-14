@@ -1,9 +1,14 @@
 import axios from 'axios';
 import crypto from 'node:crypto';
 
-export async function getFritzBoxInterfaces(ip: string, login?: string, password?: string, sid?: string) {
+export async function getFritzBoxInterfaces(
+    ip: string,
+    login?: string,
+    password?: string,
+    sid?: string,
+): Promise<{ label: string; value: string }[] | null> {
     if (!sid && login && password) {
-        sid = await getFritzBoxToken(ip, login, password, console.log);
+        sid = (await getFritzBoxToken(ip, login, password, console.log)) || '';
     }
     if (!sid) {
         return null;
@@ -13,7 +18,7 @@ export async function getFritzBoxInterfaces(ip: string, login?: string, password
 
     if (response.data) {
         let text = response.data;
-        let result = [];
+        const result: { label: string; value: string }[] = [];
         // <tr>
         //    <th>1. Internetverbindung</th>
         //    <td class="buttonrow">
@@ -27,7 +32,7 @@ export async function getFritzBoxInterfaces(ip: string, login?: string, password
             text = text.substring(i);
             const tr = text.indexOf('</tr>');
             if (tr !== -1) {
-                let part = text.substring(0, tr);
+                const part = text.substring(0, tr);
                 text = text.substring(tr);
 
                 const nameStart = part.indexOf('name="start"');
@@ -37,7 +42,7 @@ export async function getFritzBoxInterfaces(ip: string, login?: string, password
                     const m = name.match(/value="([^"]+)"/);
                     const label = part.match(/<th>([^<]+)<\/th>/);
                     if (m) {
-                        result.push({ label: label ? `${label[1]} - ${m[1]}`: m[1], value: m[1] });
+                        result.push({ label: label ? `${label[1]} - ${m[1]}` : m[1], value: m[1] });
                     }
                 }
             } else {
@@ -48,11 +53,18 @@ export async function getFritzBoxInterfaces(ip: string, login?: string, password
 
         return result;
     }
+
+    return null;
 }
 
-export async function getFritzBoxFilter(ip: string, login?: string, password?: string, sid?: string) {
+export async function getFritzBoxFilter(
+    ip: string,
+    login?: string,
+    password?: string,
+    sid?: string,
+): Promise<boolean | null> {
     if (!sid && login && password) {
-        sid = await getFritzBoxToken(ip, login, password, console.log);
+        sid = (await getFritzBoxToken(ip, login, password, console.log)) || '';
     }
     if (!sid) {
         return null;
@@ -62,22 +74,29 @@ export async function getFritzBoxFilter(ip: string, login?: string, password?: s
     if (response.data) {
         return response.data.includes('id="uiFilter"');
     }
+    return null;
 }
 
 export async function getFritzBoxUsers(ip: string): Promise<string[]> {
     const response = await axios(`http://${ip}/login_sid.lua`);
     if (response.data) {
         const challenge = response.data.match(/<User( [a-z]+="\w+")?>([^<]+)<\/User>/g);
-        return challenge.map((user: string) => {
-            const res = user.match(/>([^<]+)<\/User>/);
-            return res ? res[1] : null;
-        }).filter((user: string) => user);
+        return challenge
+            .map((user: string) => {
+                const res = user.match(/>([^<]+)<\/User>/);
+                return res ? res[1] : null;
+            })
+            .filter((user: string) => user);
     }
     return [];
 }
 
-
-export async function getFritzBoxToken(ip: string, login: string, password: string, log: (text: string) => void) {
+export async function getFritzBoxToken(
+    ip: string,
+    login: string,
+    password: string,
+    log: (text: string) => void,
+): Promise<string | null> {
     try {
         const response = await axios(`http://${ip.trim()}/login_sid.lua`);
         if (response.data) {
@@ -86,7 +105,9 @@ export async function getFritzBoxToken(ip: string, login: string, password: stri
                 const challengeResponse = `${challenge[1]}-${password.trim()}`;
                 const challengeResponseBuffer = Buffer.from(challengeResponse, 'utf16le');
                 const challengeResponseHash = crypto.createHash('md5').update(challengeResponseBuffer).digest('hex');
-                const response2 = await axios(`http://${ip.trim()}/login_sid.lua?username=${(login || 'dslf-config').trim()}&response=${challenge[1]}-${challengeResponseHash}`);
+                const response2 = await axios(
+                    `http://${ip.trim()}/login_sid.lua?username=${(login || 'dslf-config').trim()}&response=${challenge[1]}-${challengeResponseHash}`,
+                );
                 if (response2.data) {
                     const sessionInfo = response2.data.match(/<SID>(.*?)<\/SID>/);
                     if (sessionInfo) {

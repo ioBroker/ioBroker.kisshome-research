@@ -21,7 +21,7 @@ async function getMacForIp(ip) {
 function getDefaultGateway() {
     return new Promise((resolve, reject) => (0, network_1.get_gateway_ip)((err, ip) => {
         if (err) {
-            return reject(err);
+            return reject(new Error(err));
         }
         return resolve(ip);
     }));
@@ -33,12 +33,14 @@ function generateKeys() {
     //     privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
     // });
     // const sshKeyBodyPublic = publicKey.toString();
-    const { publicKey, privateKey } = node_crypto_1.default.generateKeyPairSync('ed25519', {
+    const result = node_crypto_1.default.generateKeyPairSync('ed25519', {
         modulusLength: 2048,
         publicKeyEncoding: { type: 'spki', format: 'pem' },
         privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
-    const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
-    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.toString() };
+    const privateKey = result.privateKey;
+    const publicKey = result.publicKey;
+    const sshKeyBodyPublic = publicKey.export().toString().split('\n').slice(1, -2).join('');
+    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.export().toString() };
 }
 //# sourceMappingURL=utils.js.map

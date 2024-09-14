@@ -9,16 +9,18 @@ export async function getMacForIp(ip: string): Promise<{ mac: string; vendor?: s
     if (mac) {
         return { mac: mac.toUpperCase(), vendor: toVendor(mac), ip };
     }
-    return null
+    return null;
 }
 
 export function getDefaultGateway(): Promise<string> {
-    return new Promise((resolve, reject) => get_gateway_ip((err: string, ip: string) => {
-        if (err) {
-            return reject(err);
-        }
-        return resolve(ip);
-    }));
+    return new Promise((resolve, reject) =>
+        get_gateway_ip((err: string, ip: string) => {
+            if (err) {
+                return reject(new Error(err));
+            }
+            return resolve(ip);
+        }),
+    );
 }
 
 export function generateKeys(): { publicKey: string; privateKey: string } {
@@ -29,13 +31,15 @@ export function generateKeys(): { publicKey: string; privateKey: string } {
     // });
     // const sshKeyBodyPublic = publicKey.toString();
 
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519', {
+    const result = crypto.generateKeyPairSync('ed25519', {
         modulusLength: 2048,
         publicKeyEncoding: { type: 'spki', format: 'pem' },
         privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
+    const privateKey = result.privateKey;
+    const publicKey = result.publicKey;
 
-    const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
+    const sshKeyBodyPublic = publicKey.export().toString().split('\n').slice(1, -2).join('');
 
-    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.toString() };
+    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.export().toString() };
 }

@@ -25,18 +25,16 @@ if (process.argv.includes('--0-clean')) {
     process.exit();
 } else if (process.argv.includes('--1-npm')) {
     if (!existsSync(`${__dirname}/src-admin/node_modules`)) {
-        npmInstall(srcAdmin)
-            .catch(e => {
-                console.error(`Cannot install admin dependencies: ${e}`);
-                process.exit(1);
-            });
-    }
-} else if (process.argv.includes('--2-compile')) {
-    buildCraco(srcAdmin, { rootDir: __dirname })
-        .catch(e => {
+        npmInstall(srcAdmin).catch(e => {
             console.error(`Cannot install admin dependencies: ${e}`);
             process.exit(1);
         });
+    }
+} else if (process.argv.includes('--2-compile')) {
+    buildCraco(srcAdmin, { rootDir: __dirname }).catch(e => {
+        console.error(`Cannot install admin dependencies: ${e}`);
+        process.exit(1);
+    });
 } else if (process.argv.includes('--3-copy')) {
     copyAllFiles();
 } else {
@@ -50,5 +48,4 @@ if (process.argv.includes('--0-clean')) {
             console.error(`Cannot install admin dependencies: ${e}`);
             process.exit(1);
         });
-
 }
