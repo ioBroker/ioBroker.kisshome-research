@@ -22,5 +22,6 @@
   "Recording is running": "Запись идет",
   "Activate recording": "Активировать запись",
   "Disabled": "Неполноценный",
-  "Enabled": "Включено"
+  "Enabled": "Включено",
+  "The MAC address is important, but if you enter the IP address, the system will try to find the MAC address automatically.": "MAC-адрес важен, но если вы введете IP-адрес, система попытается найти MAC-адрес автоматически."
 }

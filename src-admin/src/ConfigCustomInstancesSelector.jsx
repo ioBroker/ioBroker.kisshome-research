@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { v4 as uuid } from 'uuid';
 
 import {
     Table,
@@ -246,7 +247,14 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             }))
             .sort((a, b) => (a.id > b.id ? 1 : a.id < b.id ? -1 : 0));
 
-        const ips = await this.collectIpAddresses(instances, address);
+        const devices = ConfigGeneric.getValue(this.props.data, 'devices') || [];
+        devices.forEach(item => {
+            if (!item.uuid) {
+                item.uuid = uuid();
+            }
+        });
+
+        const ips = await this.collectIpAddresses(instances, address, devices);
 
         const newState = {
             instances,
@@ -349,7 +357,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         }, 1000);
     }
 
-    async collectIpAddresses(instances, ownAddresses) {
+    async collectIpAddresses(instances, ownAddresses, knownDevices) {
         let result = [];
 
         instances = instances || this.state.instances;
@@ -365,10 +373,13 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 const ip = ConfigCustomInstancesSelector.getAttr(item, adapter.arrayAttr);
                                 const type = ConfigCustomInstancesSelector.isIp(ip);
                                 if (type) {
+                                    const knownDevice = knownDevices.find(iItem => iItem.ip === ip);
+
                                     result.push({
                                         ip,
                                         type,
                                         desc: instances[i].name,
+                                        uuid: knownDevice?.uuid || uuid(),
                                     });
                                 }
                             }
@@ -377,10 +388,12 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         const ip = ConfigCustomInstancesSelector.getAttr(instances[i].native, attr);
                         const type = ConfigCustomInstancesSelector.isIp(ip);
                         if (type) {
+                            const knownDevice = knownDevices.find(iItem => iItem.ip === ip);
                             result.push({
                                 ip,
                                 type,
                                 desc: instances[i].name,
+                                uuid: knownDevice?.uuid || uuid(),
                             });
                         }
                     }
@@ -395,10 +408,12 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         devices.forEach(item => {
                             const type = ConfigCustomInstancesSelector.isIp(item.ip);
                             if (type) {
+                                const knownDevice = knownDevices.find(iItem => iItem.ip === item.ip);
                                 result.push({
                                     ip: item.ip,
                                     type,
                                     desc: item.name || instances[i].name,
+                                    uuid: knownDevice?.uuid || uuid(),
                                 });
                             }
                         });
@@ -416,10 +431,12 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         devices.forEach(item => {
                             const type = ConfigCustomInstancesSelector.isIp(item.ip);
                             if (type) {
+                                const knownDevice = knownDevices.find(iItem => iItem.ip === item.ip);
                                 result.push({
                                     ip: item.ip,
                                     type,
                                     desc: item.name || instances[i].name,
+                                    uuid: knownDevice?.uuid || uuid(),
                                 });
                             }
                         });
@@ -432,24 +449,28 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                 if (
                     instances[i].native.ip &&
                     typeof instances[i].native.ip === 'string' &&
-                    // Check if it IP4 address
+                    // Check if it is an IP4 address
                     instances[i].native.ip.match(/^\d+\.\d+\.\d+\.\d+$/)
                 ) {
+                    const knownDevice = knownDevices.find(iItem => iItem.ip === instances[i].native.ip);
                     result.push({
                         ip: instances[i].native.ip,
                         type: 'ipv4',
                         desc: instances[i].name,
+                        uuid: knownDevice?.uuid || uuid(),
                     });
                 } else if (
                     instances[i].native.host &&
                     typeof instances[i].native.host === 'string' &&
-                    // Check if it IP4 address
+                    // Check if it is an IP4 address
                     instances[i].native.host.match(/^\d+\.\d+\.\d+\.\d+$/)
                 ) {
+                    const knownDevice = knownDevices.find(iItem => iItem.ip === instances[i].native.host);
                     result.push({
                         ip: instances[i].native.host,
                         type: 'ipv4',
                         desc: instances[i].name,
+                        uuid: knownDevice?.uuid || uuid(),
                     });
                 }
             }
@@ -477,8 +498,13 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
     }
 
     renderItem(error, disabled, defaultValue) {
-        /** @type {{mac: string; ip: string; desc: string; enabled: boolean}[]} */
+        /** @type {{mac: string; ip: string; desc: string; enabled: boolean, uuid: string}[]} */
         const devices = ConfigGeneric.getValue(this.props.data, 'devices') || [];
+        devices.forEach(item => {
+            if (!item.uuid) {
+                item.uuid = uuid();
+            }
+        });
 
         const notFound = this.state.ips
             ? devices.filter(iItem => !this.state.ips.find(item => item.ip === iItem.ip))
@@ -527,6 +553,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                                         mac: item.mac,
                                                         desc: item.desc,
                                                         enabled: true,
+                                                        uuid: item.uuid,
                                                     });
                                                 }
                                             });
@@ -540,7 +567,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         const _devices = [
                                             ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                         ];
-                                        _devices.push({ ip: '0.0.0.0', mac: '', desc: '', enabled: true });
+                                        _devices.push({ ip: '', mac: '', desc: '', enabled: true, uuid: uuid() });
                                         this.onChange('devices', _devices);
                                     }}
                                     size="small"
@@ -557,8 +584,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {this.state.ips?.map((row, i) => (
-                            <TableRow key={i}>
+                        {this.state.ips?.map(row => (
+                            <TableRow key={row.uuid}>
                                 <TableCell
                                     scope="row"
                                     style={styles.td}
@@ -577,6 +604,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                                     mac: row.mac,
                                                     desc: row.desc,
                                                     enabled: true,
+                                                    uuid: row.uuid,
                                                 });
                                             } else {
                                                 _devices.splice(pos, 1);
@@ -592,8 +620,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 <TableCell style={styles.td} />
                             </TableRow>
                         ))}
-                        {notFound.map((row, i) => (
-                            <TableRow key={i}>
+                        {notFound.map(row => (
+                            <TableRow key={row.uuid}>
                                 <TableCell
                                     scope="row"
                                     style={styles.td}
@@ -605,8 +633,11 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             const _devices = [
                                                 ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                             ];
-                                            _devices[i].enabled = !_devices[i].enabled;
-                                            this.onChange('devices', _devices);
+                                            const dev = _devices.find(item => item.uuid === row.uuid);
+                                            if (dev) {
+                                                dev.enabled = !dev.enabled;
+                                                this.onChange('devices', _devices);
+                                            }
                                         }}
                                     />
                                 </TableCell>
@@ -616,13 +647,17 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         error={!validateIpAddress(row.ip)}
                                         value={row.ip}
                                         disabled={this.state.runningRequest}
+                                        placeholder="192.168.x.y"
                                         onChange={e => {
                                             const _devices = [
                                                 ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                             ];
-                                            _devices[i].ip = e.target.value;
-                                            this.onChange('devices', _devices);
-                                            this.validateAddresses();
+                                            const dev = _devices.find(item => item.uuid === row.uuid);
+                                            if (dev) {
+                                                dev.ip = e.target.value;
+                                                this.onChange('devices', _devices);
+                                                this.validateAddresses();
+                                            }
                                         }}
                                         onBlur={() => {
                                             if (row.ip.trim()) {
@@ -631,8 +666,11 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                                     const _devices = [
                                                         ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                                     ];
-                                                    _devices[i].ip = normalized;
-                                                    this.onChange('devices', _devices);
+                                                    const dev = _devices.find(item => item.uuid === row.uuid);
+                                                    if (dev) {
+                                                        dev.ip = normalized;
+                                                        this.onChange('devices', _devices);
+                                                    }
                                                 }
                                             }
                                         }}
@@ -645,13 +683,17 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         value={row.mac}
                                         disabled={this.state.runningRequest}
                                         error={!validateMacAddress(row.mac)}
+                                        placeholder="00:11:22:33:44:55"
                                         onChange={e => {
                                             const _devices = [
                                                 ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                             ];
-                                            _devices[i].mac = e.target.value;
-                                            this.onChange('devices', _devices);
-                                            this.validateAddresses();
+                                            const dev = _devices.find(item => item.uuid === row.uuid);
+                                            if (dev) {
+                                                dev.mac = e.target.value;
+                                                this.onChange('devices', _devices);
+                                                this.validateAddresses();
+                                            }
                                         }}
                                         onBlur={() => {
                                             if (row.mac.trim()) {
@@ -660,8 +702,11 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                                     const _devices = [
                                                         ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                                     ];
-                                                    _devices[i].mac = normalized;
-                                                    this.onChange('devices', _devices);
+                                                    const dev = _devices.find(item => item.uuid === row.uuid);
+                                                    if (dev) {
+                                                        dev.mac = normalized;
+                                                        this.onChange('devices', _devices);
+                                                    }
                                                 }
                                             }
                                         }}
@@ -680,8 +725,11 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             const _devices = [
                                                 ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                             ];
-                                            _devices[i].desc = e.target.value;
-                                            this.onChange('devices', _devices);
+                                            const dev = _devices.find(item => item.uuid === row.uuid);
+                                            if (dev) {
+                                                dev.desc = e.target.value;
+                                                this.onChange('devices', _devices);
+                                            }
                                         }}
                                         variant="standard"
                                     />
@@ -693,8 +741,11 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             const _devices = [
                                                 ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                             ];
-                                            _devices.splice(i, 1);
-                                            this.onChange('devices', _devices);
+                                            const devIndex = _devices.findIndex(item => item.uuid === row.uuid);
+                                            if (devIndex !== -1) {
+                                                _devices.splice(i, 1);
+                                                this.onChange('devices', _devices);
+                                            }
                                         }}
                                     >
                                         <Delete />

@@ -2,7 +2,7 @@
  * ioBroker gulpfile
  * Date: 2024-07-16
  */
-const { deleteFoldersRecursive, npmInstall, buildCraco, copyFiles } = require('@iobroker/build-tools');
+const { deleteFoldersRecursive, npmInstall, buildReact, copyFiles } = require('@iobroker/build-tools');
 const { existsSync } = require('node:fs');
 
 const srcAdmin = `${__dirname}/src-admin/`;
@@ -31,7 +31,7 @@ if (process.argv.includes('--0-clean')) {
         });
     }
 } else if (process.argv.includes('--2-compile')) {
-    buildCraco(srcAdmin, { rootDir: __dirname }).catch(e => {
+    buildReact(srcAdmin, { rootDir: __dirname, craco: true }).catch(e => {
         console.error(`Cannot install admin dependencies: ${e}`);
         process.exit(1);
     });
@@ -41,7 +41,7 @@ if (process.argv.includes('--0-clean')) {
     clean();
     npmInstall(srcAdmin)
         .then(async () => {
-            await buildCraco(srcAdmin, { rootDir: __dirname });
+            await buildReact(srcAdmin, { rootDir: __dirname, craco: true });
             copyAllFiles();
         })
         .catch(e => {

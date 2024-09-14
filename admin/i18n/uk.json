@@ -22,5 +22,6 @@
   "Recording is running": "Запис йде",
   "Activate recording": "Активувати запис",
   "Disabled": "Вимкнено",
-  "Enabled": "Увімкнено"
+  "Enabled": "Увімкнено",
+  "The MAC address is important, but if you enter the IP address, the system will try to find the MAC address automatically.": "MAC-адреса важлива, але якщо ви введете IP-адресу, система спробує знайти MAC-адресу автоматично."
 }

@@ -22,5 +22,6 @@
   "Recording is running": "正在录制",
   "Activate recording": "激活录音",
   "Disabled": "已禁用",
-  "Enabled": "已启用"
+  "Enabled": "已启用",
+  "The MAC address is important, but if you enter the IP address, the system will try to find the MAC address automatically.": "MAC 地址很重要，但如果您输入 IP 地址，系统将尝试自动查找 MAC 地址。"
 }

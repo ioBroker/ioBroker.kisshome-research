@@ -22,5 +22,6 @@
   "Recording is running": "Opname is bezig",
   "Activate recording": "Opname activeren",
   "Disabled": "Gehandicapt",
-  "Enabled": "Ingeschakeld"
+  "Enabled": "Ingeschakeld",
+  "The MAC address is important, but if you enter the IP address, the system will try to find the MAC address automatically.": "Het MAC-adres is belangrijk, maar als u het IP-adres invoert, probeert het systeem het MAC-adres automatisch te vinden."
 }

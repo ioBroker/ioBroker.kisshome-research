@@ -8,9 +8,10 @@ export type Context = {
     totalBytes: number;
     totalPackets: number;
     buffer?: Buffer;
-    modifiedMagic: boolean;
+    modifiedMagic: boolean; // little Endian with longer header
     networkType: number;
     lastSaved: number;
+    libpCapFormat: boolean; // BigEndian with longer header
 };
 
 export const MAX_PACKET_LENGTH = 96;
@@ -31,17 +32,19 @@ function analyzePacket(context: Context): boolean {
     // next 2 bytes is protocol
     // next byte is pkt_type: broadcast/multicast/etc. indication
     // next byte is padding
-    const headerLength = context.modifiedMagic ? 24 : 16;
+    const headerLength = context.libpCapFormat || context.modifiedMagic ? 24 : 16;
 
     if (len < headerLength) {
         return false;
     }
 
     if (debug) {
-        const seconds = context.buffer.readUInt32LE(0);
-        const microseconds = context.buffer.readUInt32LE(4);
-        const packageLen = context.buffer.readUInt32LE(8);
-        const packageLenSent = context.buffer.readUInt32LE(12);
+        const seconds = context.libpCapFormat ? context.buffer.readUInt32BE(0) : context.buffer.readUInt32LE(0);
+        const microseconds = context.libpCapFormat ? context.buffer.readUInt32BE(4) : context.buffer.readUInt32LE(4);
+        const packageLen = context.libpCapFormat ? context.buffer.readUInt32BE(8) : context.buffer.readUInt32LE(8);
+        const packageLenSent = context.libpCapFormat
+            ? context.buffer.readUInt32BE(12)
+            : context.buffer.readUInt32LE(12);
         let MAC1;
         let MAC2;
         if (context.networkType === 0x69) {
@@ -56,7 +59,7 @@ function analyzePacket(context: Context): boolean {
         );
     }
 
-    const nextPackageLen = context.buffer.readUInt32LE(8);
+    const nextPackageLen = context.libpCapFormat ? context.buffer.readUInt32BE(8) : context.buffer.readUInt32LE(8);
     if (nextPackageLen > 10000) {
         // error of capturing
         throw new Error(`Packet length is too big: ${nextPackageLen}`);
@@ -244,14 +247,27 @@ export function startRecordingOnFritzBox(
                             first = true;
                             const magic = context.buffer.readUInt32LE(0);
                             context.modifiedMagic = magic === 0xa1b2cd34;
-                            context.networkType = context.buffer.readUInt32LE(4 * 5);
+                            context.libpCapFormat = magic === 0x34cdb2a1;
+                            context.networkType = context.libpCapFormat
+                                ? context.buffer.readUInt32BE(4 * 5)
+                                : context.buffer.readUInt32LE(4 * 5);
 
                             if (debug) {
-                                const versionMajor = context.buffer.readUInt16LE(4);
-                                const versionMinor = context.buffer.readUInt16LE(4 + 2);
-                                const reserved1 = context.buffer.readUInt32LE(4 * 2);
-                                const reserved2 = context.buffer.readUInt32LE(4 * 3);
-                                const snapLen = context.buffer.readUInt32LE(4 * 4);
+                                const versionMajor = context.libpCapFormat
+                                    ? context.buffer.readUInt16BE(4)
+                                    : context.buffer.readUInt16LE(4);
+                                const versionMinor = context.libpCapFormat
+                                    ? context.buffer.readUInt16BE(4 + 2)
+                                    : context.buffer.readUInt16LE(4 + 2);
+                                const reserved1 = context.libpCapFormat
+                                    ? context.buffer.readUInt32BE(4 * 2)
+                                    : context.buffer.readUInt32LE(4 * 2);
+                                const reserved2 = context.libpCapFormat
+                                    ? context.buffer.readUInt32BE(4 * 3)
+                                    : context.buffer.readUInt32LE(4 * 3);
+                                const snapLen = context.libpCapFormat
+                                    ? context.buffer.readUInt32BE(4 * 4)
+                                    : context.buffer.readUInt32LE(4 * 4);
                                 console.log(
                                     `PCAP: ${magic.toString(16)} ${versionMajor}.${versionMinor} res1=${reserved1} res2=${reserved2} snaplen=${snapLen} ${context.networkType.toString(16)}`,
                                 );

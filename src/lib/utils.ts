@@ -36,10 +36,10 @@ export function generateKeys(): { publicKey: string; privateKey: string } {
         publicKeyEncoding: { type: 'spki', format: 'pem' },
         privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
-    const privateKey = result.privateKey;
-    const publicKey = result.publicKey;
+    const privateKey = result.privateKey as unknown as string;
+    const publicKey = result.publicKey as unknown as string;
 
-    const sshKeyBodyPublic = publicKey.export().toString().split('\n').slice(1, -2).join('');
+    const sshKeyBodyPublic = publicKey.toString().split('\n').slice(1, -2).join('');
 
-    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.export().toString() };
+    return { publicKey: sshKeyBodyPublic, privateKey: privateKey.toString() };
 }

@@ -66,6 +66,9 @@ Detect IP addresses from:
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+-   (bluefox) Implemented the support for the big endian format of a PCAP file
 
 ### 1.0.0 (2024-09-06)
 

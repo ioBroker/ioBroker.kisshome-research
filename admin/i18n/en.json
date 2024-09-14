@@ -22,5 +22,6 @@
   "Recording is running": "Recording is running",
   "Activate recording": "Activate recording",
   "Disabled": "Disabled",
-  "Enabled": "Enabled"
+  "Enabled": "Enabled",
+  "The MAC address is important, but if you enter the IP address, the system will try to find the MAC address automatically.": "The MAC address is important, but if you enter the IP address, the system will try to find the MAC address automatically."
 }

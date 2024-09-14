@@ -22,5 +22,6 @@
   "Recording is running": "Aufzeichnung läuft",
   "Activate recording": "Aufzeichnung aktivieren",
   "Disabled": "Deaktiviert",
-  "Enabled": "Ermöglicht"
+  "Enabled": "Ermöglicht",
+  "The MAC address is important, but if you enter the IP address, the system will try to find the MAC address automatically.": "Die MAC-Adresse ist wichtig, aber wenn Sie nur die IP-Adresse eingeben, versucht das System, die MAC-Adresse automatisch zu finden."
 }

@@ -131,6 +131,11 @@
             "type": "panel",
             "label": "Addresses",
             "items": {
+                "_info": {
+                    "type": "staticText",
+                    "sm": 12,
+                    "text": "The MAC address is important, but if you enter the IP address, the system will try to find the MAC address automatically."
+                },
                 "_devices": {
                     "newLine": true,
                     "type": "custom",
