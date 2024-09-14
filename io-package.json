@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "news": {
+      "1.0.1": {
+        "en": "Implemented the support for the big endian format of a PCAP file",
+        "de": "Implementierung der Unterstützung für das große endische Format einer PCAP-Datei",
+        "ru": "Выполнена поддержка большого конечного формата файла PCAP",
+        "pt": "Implementou o suporte para o grande formato endiano de um arquivo PCAP",
+        "nl": "De ondersteuning voor het grote endian formaat van een PCAP-bestand geïmplementeerd",
+        "fr": "Implémenté le support pour le format grand endian d'un fichier PACP",
+        "it": "Implementato il supporto per il grande formato endiano di un file PCAP",
+        "es": "Implementó el soporte para el gran formato endiano de un archivo PCAP",
+        "pl": "Wdrożenie wsparcia dla dużego formatu endiańskiego pliku PCAP",
+        "uk": "Реалізовано підтримку великого ендоріанного формату PCAP файл",
+        "zh-cn": "执行对 PCAP 文件大端格式的支持"
+      },
       "1.0.0": {
         "en": "Corrected configuration page",
         "de": "Korrigierte Konfigurationsseite",
@@ -80,19 +93,6 @@
         "pl": "Wysłano plik",
         "uk": "Завантажено файл",
         "zh-cn": "文件上传已执行"
-      },
-      "0.0.3": {
-        "en": "Added the recording enabled option",
-        "de": "Option für die Aufnahme aktiviert",
-        "ru": "Добавлена возможность записи",
-        "pt": "Adicionado a opção ativada de gravação",
-        "nl": "De optie opname toegevoegd",
-        "fr": "Ajout de l'option d'enregistrement activée",
-        "it": "Aggiunto l'opzione di registrazione abilitata",
-        "es": "Añadido la opción habilitada para la grabación",
-        "pl": "Dodano opcję nagrywania",
-        "uk": "Додана можливість запису",
-        "zh-cn": "添加已启用的记录选项"
       }
     },
     "titleLang": {
