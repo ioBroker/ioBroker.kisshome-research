@@ -270,6 +270,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             alive: this.props.alive,
             resolving: false,
         };
+        this.resolveDone = false;
 
         this.setState(newState);
         this.props.socket.subscribeState(`system.adapter.kisshome-research.${this.props.instance}.alive`, this.onAliveChanged);
@@ -280,6 +281,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
     }
 
     resolveMACs() {
+        this.resolveDone = true;
+
         this.setState({ runningRequest: true }, () => {
             const devices = [...(ConfigGeneric.getValue(this.props.data, 'devices') || [])];
 
@@ -389,7 +392,11 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         if (this.state.alive !== !!state?.val) {
             this.setState({ alive: !!state?.val }, () => {
                 if (this.state.alive) {
-                    this.resolveMACs();
+                    if (this.resolveDone) {
+                        this.validateAddresses();
+                    } else {
+                        this.resolveMACs();
+                    }
                 }
             });
         }
