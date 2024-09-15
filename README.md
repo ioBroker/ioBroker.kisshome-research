@@ -66,7 +66,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.0.2 (2024-09-15)
 
 -   (bluefox) Added error logging
 

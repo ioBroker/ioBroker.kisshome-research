@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "news": {
+      "1.0.2": {
+        "en": "Added error logging",
+        "de": "Fehlersuche hinzugefügt",
+        "ru": "Добавлен блог об ошибках",
+        "pt": "Registo de erro adicionado",
+        "nl": "Fout loggen toegevoegd",
+        "fr": "Ajout de l'enregistrement des erreurs",
+        "it": "Registrazione di errore Aggiunto",
+        "es": "Registro de errores",
+        "pl": "Dodano logowanie błędów",
+        "uk": "Додано запис помилки",
+        "zh-cn": "添加错误记录"
+      },
       "1.0.1": {
         "en": "Implemented the support for the big endian format of a PCAP file",
         "de": "Implementierung der Unterstützung für das große endische Format einer PCAP-Datei",
@@ -80,19 +93,6 @@
         "pl": "Używany MD5 do sprawdzania spójności plików",
         "uk": "Використовується MD5 для перевірки відповідності файлів",
         "zh-cn": "用于文件一致性检查的 MD5"
-      },
-      "0.1.0": {
-        "en": "File upload was implemented",
-        "de": "Datei-Upload wurde implementiert",
-        "ru": "Загрузка файлов была реализована",
-        "pt": "O upload de arquivos foi implementado",
-        "nl": "Bestandsupload is geïmplementeerd",
-        "fr": "Le téléchargement de fichier a été implémenté",
-        "it": "Il caricamento dei file è stato implementato",
-        "es": "Se implementó la carga de archivos",
-        "pl": "Wysłano plik",
-        "uk": "Завантажено файл",
-        "zh-cn": "文件上传已执行"
       }
     },
     "titleLang": {

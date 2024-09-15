@@ -415,6 +415,10 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                     this.log.error(`Cannot register on the cloud: invalid password`);
                     this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: Ungültiges Passwort`);
                 }
+                else if (response.status === 422) {
+                    this.log.error(`Cannot register on the cloud: missing email, public key or uuid`);
+                    this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: E-Mail, öffentlicher Schlüssel oder UUID fehlen`);
+                }
                 else {
                     this.log.error(`Cannot register on the kisshome-cloud: ${response.data || response.statusText || response.status}`);
                     this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: ${response.data || response.statusText || response.status}`);
