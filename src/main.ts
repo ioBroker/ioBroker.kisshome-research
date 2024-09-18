@@ -1,6 +1,6 @@
 import * as utils from '@iobroker/adapter-core';
 import fs from 'node:fs';
-import axios, {AxiosResponse} from 'axios';
+import axios, { type AxiosResponse } from 'axios';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
