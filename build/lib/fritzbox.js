@@ -9,6 +9,31 @@ exports.getFritzBoxUsers = getFritzBoxUsers;
 exports.getFritzBoxToken = getFritzBoxToken;
 const axios_1 = __importDefault(require("axios"));
 const node_crypto_1 = __importDefault(require("node:crypto"));
+const KNOWN_INTERFACES = {
+    ':acc0': true, //	27,2 MB
+    ':acc0.4': true, //	4,5 KB
+    'l2sd0.2': true, //	76,7 KB
+    l2sm0: false, //	0 Bytes
+    acc0: true, //	23,1 KB
+    'acc0.4': false, //	0 Bytes
+    eth0: true, //	182 KB
+    eth1: true, //	0 Bytes
+    eth2: true, //	186 KB
+    eth3: true, //	0 Bytes
+    eth_udma0: true, //	137 KB
+    lan: true, //	not tested
+    ppptty: false, //	0 Bytes
+    traceDH0: true, //	3,5 MB
+    traceDH2: true, //	30,7 KB
+    traceDL0: true, //	264 KB
+    traceDL2: true, //	15,5 KB
+    traceN0: true, //	766 KB
+    traceV0: true, //	382 KB
+    traceV1: true, //	37,8 KB
+    vlan_master0: true, //	241 KB
+    wifi0: true, //	0 KB
+    wifi1: true, //	0 KB
+};
 async function getFritzBoxInterfaces(ip, login, password, sid) {
     if (!sid && login && password) {
         sid = (await getFritzBoxToken(ip, login, password, console.log)) || '';
@@ -51,7 +76,7 @@ async function getFritzBoxInterfaces(ip, login, password, sid) {
             }
             i = text.indexOf('<th>');
         }
-        return result;
+        return result.filter(e => KNOWN_INTERFACES[e.value] === undefined || KNOWN_INTERFACES[e.value]);
     }
     return null;
 }

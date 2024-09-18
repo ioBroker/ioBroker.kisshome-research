@@ -71,6 +71,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             modifiedMagic: false,
             libpCapFormat: false,
             networkType: 1,
+            started: 0,
             lastSaved: 0,
         };
         this.recordingRunning = false;
@@ -681,6 +682,8 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                             }, 10000);
                 }
                 await this.setState('info.recording.captured', this.context.totalPackets, true);
+            }, (text, level = 'info') => {
+                this.log[level](`[PCAP] ${text}`);
             });
         }
         else {

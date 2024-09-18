@@ -89,6 +89,7 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         modifiedMagic: false,
         libpCapFormat: false,
         networkType: 1,
+        started: 0,
         lastSaved: 0,
     };
 
