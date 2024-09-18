@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "news": {
+      "1.0.3": {
+        "en": "Corrected GUI\nFilter out not used interfaces\nAdded notification to admin if public key not accepted\nTry to detect zero bytes interfaces",
+        "de": "Korrigierte GUI\nFiltern nicht genutzte Schnittstellen\nHinzugefügt Benachrichtigung zu Admin, wenn der öffentliche Schlüssel nicht akzeptiert\nVersuchen Sie, Null Bytes-Schnittstellen zu erkennen",
+        "ru": "Исправленный GUI\nОтфильтровать не используемые интерфейсы\nДобавить уведомление администратору, если публичный ключ не принят\nПопробуйте обнаружить интерфейсы с нулевыми байтами",
+        "pt": "GUI corrigida\nFiltrar interfaces não utilizadas\nNotificação adicionada a admin se a chave pública não aceita\nTente detectar zero bytes interfaces",
+        "nl": "Gecorrigeerde GUI\nNiet gebruikte interfaces filteren\nToegevoegd kennisgeving aan admin als publieke sleutel niet geaccepteerd\nProbeer nul bytes interfaces te detecteren",
+        "fr": "IGU corrigé\nFiltrer les interfaces non utilisées\nAjout d'une notification à l'administrateur si la clé publique n'est pas acceptée\nEssayez de détecter les interfaces zéro octets",
+        "it": "GUI corretta\nFiltra le interfacce non utilizzate\nAggiunto la notifica ad admin se chiave pubblica non accettata\nProva a rilevare le interfacce di byte zero",
+        "es": "Corregido GUI\nFiltrar interfaces no utilizadas\nSe agregó notificación a admin si no se acepta la clave pública\nIntenta detectar interfaces de bytes cero",
+        "pl": "Poprawiony GUI\nWyfiltrować nie używane interfejsy\nDodano powiadomienie administratora, jeśli klucz publiczny nie został zaakceptowany\nSpróbuj wykryć interfejsy zero bajtów",
+        "uk": "Правильний інтерфейс\nФільтрувати не використовувані інтерфейси\nДодано повідомлення для адміністратора, якщо публічний ключ не приймається\nСпробуйте визначити інтерфейси нульових байтів",
+        "zh-cn": "更正的图形界面\n过滤未使用的接口\n如果公钥未被接受, 通知会添加到管理员\n尝试检测零字节接口"
+      },
       "1.0.2": {
         "en": "Added error logging",
         "de": "Fehlersuche hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "używany poprawny adres URL",
         "uk": "використовується вірна адреса URL",
         "zh-cn": "使用有效的 URL 地址"
-      },
-      "0.1.1": {
-        "en": "Used MD5 for the file consistency check",
-        "de": "Gebrauchte MD5 für die Dateikonsistenzprüfung",
-        "ru": "Использованный MD5 для проверки последовательности файла",
-        "pt": "Usado MD5 para verificação de consistência de arquivo",
-        "nl": "Gebruikte MD5 voor de controle op bestandsconsistentie",
-        "fr": "MD5 utilisé pour la vérification de la cohérence des fichiers",
-        "it": "Usato MD5 per il controllo della consistenza del file",
-        "es": "MD5 usado para el control de consistencia del archivo",
-        "pl": "Używany MD5 do sprawdzania spójności plików",
-        "uk": "Використовується MD5 для перевірки відповідності файлів",
-        "zh-cn": "用于文件一致性检查的 MD5"
       }
     },
     "titleLang": {

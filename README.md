@@ -66,7 +66,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.0.3 (2024-09-18)
 
 -   (bluefox) Corrected GUI
 -   (bluefox) Filter out not used interfaces
