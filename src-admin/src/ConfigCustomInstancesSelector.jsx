@@ -697,7 +697,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                     style={styles.td}
                                 >
                                     <Checkbox
-                                        checked={!!devices.find(item => item.ip === row.ip)?.enabled}
+                                        checked={!!devices.find(item => item.uuid === row.uuid)?.enabled}
                                         disabled={this.state.runningRequest}
                                         onClick={() => {
                                             const _devices = [
@@ -736,7 +736,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                     style={styles.td}
                                 >
                                     <Checkbox
-                                        checked={!!devices.find(item => item.ip === row.ip)?.enabled}
+                                        checked={!!devices.find(item => item.uuid === row.uuid)?.enabled}
                                         disabled={this.state.runningRequest}
                                         onClick={() => {
                                             const _devices = [
