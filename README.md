@@ -66,6 +66,13 @@ Detect IP addresses from:
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+-   (bluefox) Corrected GUI
+-   (bluefox) Filter out not used interfaces
+-   (bluefox) Added notification to admin if public key not accepted
+-   (bluefox) Try to detect zero bytes interfaces
+
 ### 1.0.2 (2024-09-15)
 
 -   (bluefox) Added error logging
