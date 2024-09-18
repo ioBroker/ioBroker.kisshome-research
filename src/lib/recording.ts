@@ -11,6 +11,7 @@ export type Context = {
     modifiedMagic: boolean; // little Endian with longer header
     networkType: number;
     lastSaved: number;
+    started: number;
     libpCapFormat: boolean; // BigEndian with longer header
 };
 
@@ -169,6 +170,7 @@ export function startRecordingOnFritzBox(
     onEnd: ((error: Error | null) => void) | null,
     context: Context,
     progress?: () => void,
+    log?: (text: string, level: 'info' | 'warn' | 'error' | 'debug') => void,
 ): void {
     const captureUrl = getRecordURL(ip, sid, iface, MACs);
 
@@ -199,6 +201,7 @@ export function startRecordingOnFritzBox(
 
     const controller = context.controller || new AbortController();
     context.controller = controller;
+    context.started = Date.now();
 
     console.log(`START capture: ${captureUrl}`);
 
@@ -225,16 +228,16 @@ export function startRecordingOnFritzBox(
             }
             res.setEncoding('binary');
 
-            if (debug) {
-                console.log(`Starting receiving of data...: ${JSON.stringify(res.headers)}`);
+            if (debug && log) {
+                log(`Starting receiving of data...: ${JSON.stringify(res.headers)}`, 'debug');
             }
 
             informProgress();
 
             res.on('data', (chunk: string) => {
                 const chunkBuffer = Buffer.from(chunk, 'binary');
-                if (debug) {
-                    console.log(`Received ${chunkBuffer.length} bytes`);
+                if (debug && log) {
+                    log(`Received ${chunkBuffer.length} bytes`, 'debug');
                 }
                 // add data to buffer
                 context.buffer = context.buffer ? Buffer.concat([context.buffer, chunkBuffer]) : chunkBuffer;
@@ -313,9 +316,32 @@ export function startRecordingOnFritzBox(
                 }
             });
 
-            res.on('end', () => executeOnEnd(null));
+            res.on('end', () => {
+                if (log) {
+                    log(
+                        `File closed by fritzbox after ${context.totalBytes} bytes received in ${Math.floor((Date.now() - context.started) / 100) / 10} seconds`,
+                        'debug',
+                    );
+                }
+                if (!context.totalBytes && log && Date.now() - context.started < 3000) {
+                    log(
+                        `No bytes received and file was closed by Fritzbox very fast. May be wrong interface selected`,
+                        'info',
+                    );
+                    // In german
+                    log(
+                        `Keine Bytes empfangen und Datei wurde von Fritzbox sehr schnell geschlossen. Möglicherweise falsche Schnittstelle ausgewählt`,
+                        'info',
+                    );
+                }
+
+                executeOnEnd(null);
+            });
 
             res.on('error', (error: Error) => {
+                if (!error && log) {
+                    log(`Error by receiving, but no error provided!`, 'error');
+                }
                 try {
                     controller.abort();
                 } catch {

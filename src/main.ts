@@ -803,6 +803,9 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
                     await this.setState('info.recording.captured', this.context.totalPackets, true);
                 },
+                (text: string, level: 'info' | 'warn' | 'error' | 'debug' = 'info') => {
+                    this.log[level](`[PCAP] ${text}`);
+                },
             );
         } else {
             this.log.warn(
