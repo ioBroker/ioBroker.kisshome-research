@@ -1,6 +1,6 @@
 import * as utils from '@iobroker/adapter-core';
 import fs from 'node:fs';
-import axios from 'axios';
+import axios, {AxiosResponse} from 'axios';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
@@ -250,6 +250,36 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
     }
 
+    async analyseError(response: AxiosResponse): Promise<void> {
+        if (response.status === 404) {
+            this.log.error(`Cannot register on the kisshome-cloud: Unknown email address`);
+            this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: Unbekannte E-Mail-Adresse`);
+        } else if (response.status === 403) {
+            this.log.error(
+                `Cannot register on the kisshome-cloud: public key changed. Please contact us via kisshome@internet-sicherheit.de`,
+            );
+            this.log.error(
+                `Registrieren auf der kisshome-cloud nicht möglich: Der öffentliche Schlüssel hat sich geändert. Bitte kontaktieren Sie uns unter kisshome@internet-sicherheit.de`,
+            );
+            await this.registerNotification('kisshome-research', 'publicKey', 'Public key changed');
+        } else if (response.status === 401) {
+            this.log.error(`Cannot register on the cloud: invalid password`);
+            this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: Ungültiges Passwort`);
+        } else if (response.status === 422) {
+            this.log.error(`Cannot register on the cloud: missing email, public key or uuid`);
+            this.log.error(
+                `Registrieren auf der kisshome-cloud nicht möglich: E-Mail, öffentlicher Schlüssel oder UUID fehlen`,
+            );
+        } else {
+            this.log.error(
+                `Cannot register on the kisshome-cloud: ${response.data || response.statusText || response.status}`,
+            );
+            this.log.error(
+                `Registrieren auf der kisshome-cloud nicht möglich: ${response.data || response.statusText || response.status}`,
+            );
+        }
+    }
+
     async onReady(): Promise<void> {
         const config: KISSHomeResearchConfig = this.config as unknown as KISSHomeResearchConfig;
 
@@ -469,37 +499,16 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
                     this.log.info('Erfolgreich in der Cloud registriert');
                 }
             } else {
-                if (response.status === 404) {
-                    this.log.error(`Cannot register on the kisshome-cloud: Unknown email address`);
-                    this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: Unbekannte E-Mail-Adresse`);
-                } else if (response.status === 403) {
-                    this.log.error(
-                        `Cannot register on the kisshome-cloud: public key changed. Please contact us via kisshome@internet-sicherheit.de`,
-                    );
-                    this.log.error(
-                        `Registrieren auf der kisshome-cloud nicht möglich: Der öffentliche Schlüssel hat sich geändert. Bitte kontaktieren Sie uns unter kisshome@internet-sicherheit.de`,
-                    );
-                } else if (response.status === 401) {
-                    this.log.error(`Cannot register on the cloud: invalid password`);
-                    this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: Ungültiges Passwort`);
-                } else if (response.status === 422) {
-                    this.log.error(`Cannot register on the cloud: missing email, public key or uuid`);
-                    this.log.error(
-                        `Registrieren auf der kisshome-cloud nicht möglich: E-Mail, öffentlicher Schlüssel oder UUID fehlen`,
-                    );
-                } else {
-                    this.log.error(
-                        `Cannot register on the kisshome-cloud: ${response.data || response.statusText || response.status}`,
-                    );
-                    this.log.error(
-                        `Registrieren auf der kisshome-cloud nicht möglich: ${response.data || response.statusText || response.status}`,
-                    );
-                }
+                await this.analyseError(response);
                 return;
             }
         } catch (e) {
-            this.log.error(`Cannot register on the kisshome-cloud: ${e}`);
-            this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: ${e}`);
+            if (e.response) {
+                await this.analyseError(e.response);
+            } else {
+                this.log.error(`Cannot register on the kisshome-cloud: ${e}`);
+                this.log.error(`Registrieren auf der kisshome-cloud nicht möglich: ${e}`);
+            }
             return;
         }
 

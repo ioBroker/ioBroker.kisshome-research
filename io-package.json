@@ -176,6 +176,71 @@
     "tempDir": "",
     "devices": []
   },
+  "notifications": [
+    {
+      "scope": "kisshome-research",
+      "name": {
+        "en": "KISSHome-Research",
+        "de": "KISSHome-Research",
+        "ru": "KISSHome-Research",
+        "pt": "KISSHome-Research",
+        "nl": "KISSHome-Research",
+        "fr": "KISSHome-Research",
+        "it": "KISSHome-Research",
+        "es": "KISSHome-Research",
+        "pl": "KISSHome-Research",
+        "uk": "KISSHome-Research",
+        "zh-cn": "KISSHome-Research"
+      },
+      "description": {
+        "en": "Problem with KISSHome-Research instance",
+        "de": "Problem mit KISSHome-Research-Instanz",
+        "ru": "Проблема с экземпляром KISSHome-Research",
+        "pt": "Problema com a instância KISSHome-Research",
+        "nl": "Probleem met KISSHome-Research-instantie",
+        "fr": "Problème avec l'instance KISSHome-Research",
+        "it": "Problema con l'istanza KISSHome-Research",
+        "es": "Problema con la instancia KISSHome-Research",
+        "pl": "Problem z instancją KISSHome-Research",
+        "uk": "Проблема з екземпляром KISSHome-Research",
+        "zh-cn": "KISSHome-Research 实例存在问题"
+      },
+      "categories": [
+        {
+          "category": "publicKey",
+          "name": {
+            "en": "Problem with KISSHome-Research instance",
+            "de": "Problem mit KISSHome-Research-Instanz",
+            "ru": "Проблема с экземпляром KISSHome-Research",
+            "pt": "Problema com a instância KISSHome-Research",
+            "nl": "Probleem met KISSHome-Research-instantie",
+            "fr": "Problème avec l'instance KISSHome-Research",
+            "it": "Problema con l'istanza KISSHome-Research",
+            "es": "Problema con la instancia KISSHome-Research",
+            "pl": "Problem z instancją KISSHome-Research",
+            "uk": "Проблема з екземпляром KISSHome-Research",
+            "zh-cn": "KISSHome-Research 实例存在问题"
+          },
+          "severity": "notify",
+          "description": {
+            "en": "The public key was rejected because previous connections used a different one. It can happens, if your settings for instance was deleted and then the instance was created again. To make the acceptance of the new public key possible, please contact us under kisshome@internet-sicherheit.de and provide the reason why the public key was changed.",
+            "de": "Der Public-Schlüssel wurde abgelehnt, da frühere Verbindungen einen anderen verwendeten. Es kann vorkommen, wenn Ihre Einstellungen für die Instanz gelöscht wurden und dann die Instanz erneut erstellt wurde. Um die Annahme des neuen öffentlichen Schlüssels zu ermöglichen, kontaktieren Sie uns bitte unter kisshome@internet-sicherheit.de und geben Sie den Grund an, warum der öffentliche Schlüssel geändert wurde.",
+            "ru": "Публичный ключ был отклонен, потому что предыдущие подключения использовали другой. Это может произойти, если ваши настройки для экземпляра были удалены, а затем экземпляр был создан снова. Чтобы сделать возможным принятие нового открытого ключа, пожалуйста, свяжитесь с нами по адресу kisshome@internet-sicherheit.de и укажите причину изменения открытого ключа.",
+            "pt": "A chave pública foi rejeitada porque as conexões anteriores usaram uma diferente. Pode acontecer se suas configurações para a instância foram excluídas e, em seguida, a instância foi criada novamente. Para tornar possível a aceitação da nova chave pública, entre em contato conosco em kisshome@internet-sicherheit.de e forneça o motivo da alteração da chave pública.",
+            "nl": "De openbare sleutel werd afgewezen omdat eerdere verbindingen een andere gebruikten. Het kan gebeuren als uw instellingen voor de instantie zijn verwijderd en vervolgens de instantie opnieuw is gemaakt. Om de acceptatie van de nieuwe openbare sleutel mogelijk te maken, neem contact met ons op via kisshome@internet-sicherheit.de en geef de reden op waarom de openbare sleutel is gewijzigd.",
+            "fr": "La clé publique a été rejetée car les connexions précédentes utilisaient une autre clé. Cela peut se produire si vos paramètres pour l'instance ont été supprimés, puis que l'instance a été recréée. Pour rendre possible l'acceptation de la nouvelle clé publique, veuillez nous contacter à kisshome@internet-sicherheit.de et fournir la raison pour laquelle la clé publique a été modifiée.",
+            "it": "La chiave pubblica è stata rifiutata perché le connessioni precedenti ne utilizzavano una diversa. Può accadere se le impostazioni per l'istanza sono state eliminate e quindi l'istanza è stata creata nuovamente. Per rendere possibile l'accettazione del nuovo chiave pubblica, contattaci a kisshome@internet-sicherheit.de e fornisci il motivo per cui la chiave pubblica è stata modificata.",
+            "es": "La clave pública fue rechazada porque las conexiones anteriores usaban una diferente. Puede suceder si su configuración para la instancia fue eliminada y luego la instancia fue creada nuevamente. Para hacer posible la aceptación de la nueva clave pública, contáctenos en kisshome@internet-sicherheit.de y proporcione la razón por la que se cambió la clave pública.",
+            "pl": "Klucz publiczny został odrzucony, ponieważ poprzednie połączenia używały innego. Może się zdarzyć, jeśli Twoje ustawienia dla instancji zostały usunięte, a następnie instancja została utworzona ponownie. Aby umożliwić akceptację nowego klucza publicznego, skontaktuj się z nami pod adresem kisshome@internet-sicherheit.de i podaj powód zmiany klucza publicznego.",
+            "uk": "Відкритий ключ був відхилений, оскільки попередні підключення використовували інший. Це може статися, якщо ваші налаштування для екземпляра були видалені, а потім екземпляр був створений знову. Щоб зробити прийняття нового відкритого ключа можливим, будь ласка, зв'яжіться з нами за адресою kisshome@internet-sicherheit.de і вкажіть причину зміни відкритого ключа.",
+            "zh-cn": "公钥被拒绝，因为之前的连接使用了不同的公钥. 如果您的实例设置被删除，然后实例被重新创建，就会发生这种情况。为了使新公钥的接受成为可能，请通过 kisshome@internet-sicherheit.de 与我们联系，并提供更改公钥的原因。"
+          },
+          "regex": [],
+          "limit": 1
+        }
+      ]
+    }
+  ],
   "objects": [],
   "instanceObjects": [
     {
