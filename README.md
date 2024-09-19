@@ -25,40 +25,7 @@ To run this adapter, you need:
 ## Todo
 
 Detect IP addresses from:
-
--   [x] hm-rpc (Homematic CCU),
--   [x] loxone,
--   [x] shelly,
--   [x] mqtt
--   [x] tr-064,
--   [-] alexa-2 - not possible, as alexa reads no IP addresses
--   [x] sonoff,
--   [x] modbus,
--   [x] hue (philips hue),
--   [-] tuya - not possible, It communicates with the cloud
--   [x] mqtt-client,
--   [-] synology - it is a multifunctional device - ignore it,
--   [x] sonos,
--   [x] mihome-vacuum,
--   [-] hmip (It communicates with the cloud),
 -   [ ] homeconnect,
--   [x] wled (ESP8266/ESP32),
--   [x] unify,
--   [x] harmony,
--   [-] samsung (TV) - too many data,
--   [-] onvif (Webkameras) - too many data,
--   [-] kameras (URL oder IP-Kameras) - too many data,
--   [-] proxmox - not possible, as alexa reads no IP addresses
--   [x] broadlink2,
--   [-] lgtv - too many data,
--   [x] knx (KNX-Gateway),
--   [x] openknx (KNX-Gateway),
--   [x] lcn,
--   [x] homekit-controller,
--   [x] upnp,
--   [x] openknx,
--   [x] wifilight,
--   [-] meross - not possible, It communicates with the cloud
 
 <!--
 	Placeholder for the next version (at the beginning of the line):
