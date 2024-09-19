@@ -34,6 +34,9 @@ Detect IP addresses from:
 
 ## Changelog
 ### **WORK IN PROGRESS**
+-   (ChrisDietrich) Corrected the link in readme.md
+
+### 1.0.4 (2024-09-19)
 
 -   (bluefox) Corrected GUI
 -   (bluefox) Filter out not used interfaces
