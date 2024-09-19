@@ -75,7 +75,6 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             lastSaved: 0,
         };
         this.recordingRunning = false;
-        this.privateKeyPath = '';
         this.workingDir = '';
         this.lastDebug = 0;
         this.syncRunning = false;
@@ -384,19 +383,6 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             return;
         }
         // this.clearWorkingDir();
-        // update privateKey on disk
-        this.privateKeyPath = `${this.__dirname}/privateKey.pem`.replace(/\\/g, '/');
-        if (node_fs_1.default.existsSync(this.privateKeyPath)) {
-            const oldPrivateKey = node_fs_1.default.readFileSync(this.privateKeyPath, 'utf8');
-            if (oldPrivateKey !== privateKey) {
-                this.log.warn('Private key changed. Updating...');
-                this.log.warn('Privater Schlüssel hat sich geändert. Es wird aktualisiert...');
-                node_fs_1.default.writeFileSync(this.privateKeyPath, privateKey);
-            }
-        }
-        else {
-            node_fs_1.default.writeFileSync(this.privateKeyPath, privateKey);
-        }
         if (!config.email) {
             this.log.error('No email provided. Please provide an email address in the configuration.');
             this.log.error('Keine E-Mail angegeben. Bitte geben Sie eine E-Mail-Adresse in der Konfiguration an.');
