@@ -95,8 +95,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
 
     private recordingRunning: boolean = false;
 
-    private privateKeyPath: string = '';
-
     private workingDir: string = '';
 
     private lastDebug: number = 0;
@@ -455,19 +453,6 @@ export class KISSHomeResearchAdapter extends utils.Adapter {
         }
 
         // this.clearWorkingDir();
-
-        // update privateKey on disk
-        this.privateKeyPath = `${this.__dirname}/privateKey.pem`.replace(/\\/g, '/');
-        if (fs.existsSync(this.privateKeyPath)) {
-            const oldPrivateKey = fs.readFileSync(this.privateKeyPath, 'utf8');
-            if (oldPrivateKey !== privateKey) {
-                this.log.warn('Private key changed. Updating...');
-                this.log.warn('Privater Schlüssel hat sich geändert. Es wird aktualisiert...');
-                fs.writeFileSync(this.privateKeyPath, privateKey);
-            }
-        } else {
-            fs.writeFileSync(this.privateKeyPath, privateKey);
-        }
 
         if (!config.email) {
             this.log.error('No email provided. Please provide an email address in the configuration.');
