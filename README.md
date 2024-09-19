@@ -14,7 +14,7 @@
 
 This special adapter was developed for the KISSHome research project. It is not intended for general use.
 
-To use this adapter, you must first register on the [KISSHome research](https://kisshome-feldversuch.if-is.net) website and get the confirmation email.
+To use this adapter, you must first register on the [KISSHome research](https://kisshome-research.if-is.net) website and get the confirmation email.
 
 To run this adapter, you need:
 
