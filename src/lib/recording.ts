@@ -39,13 +39,11 @@ function analyzePacket(context: Context): boolean {
         return false;
     }
 
+    const seconds = context.libpCapFormat ? context.buffer.readUInt32BE(0) : context.buffer.readUInt32LE(0);
+    const microseconds = context.libpCapFormat ? context.buffer.readUInt32BE(4) : context.buffer.readUInt32LE(4);
+    const packageLen = context.libpCapFormat ? context.buffer.readUInt32BE(8) : context.buffer.readUInt32LE(8);
+    const packageLenSent = context.libpCapFormat ? context.buffer.readUInt32BE(12) : context.buffer.readUInt32LE(12);
     if (debug) {
-        const seconds = context.libpCapFormat ? context.buffer.readUInt32BE(0) : context.buffer.readUInt32LE(0);
-        const microseconds = context.libpCapFormat ? context.buffer.readUInt32BE(4) : context.buffer.readUInt32LE(4);
-        const packageLen = context.libpCapFormat ? context.buffer.readUInt32BE(8) : context.buffer.readUInt32LE(8);
-        const packageLenSent = context.libpCapFormat
-            ? context.buffer.readUInt32BE(12)
-            : context.buffer.readUInt32LE(12);
         let MAC1;
         let MAC2;
         if (context.networkType === 0x69) {
@@ -60,13 +58,12 @@ function analyzePacket(context: Context): boolean {
         );
     }
 
-    const nextPackageLen = context.libpCapFormat ? context.buffer.readUInt32BE(8) : context.buffer.readUInt32LE(8);
-    if (nextPackageLen > 10000) {
+    if (packageLen > 10000) {
         // error of capturing
-        throw new Error(`Packet length is too big: ${nextPackageLen}`);
+        throw new Error(`Packet length is too big: ${packageLen}`);
     }
 
-    if (len < headerLength + nextPackageLen) {
+    if (len < headerLength + packageLen) {
         return false;
     }
 
@@ -124,18 +121,33 @@ function analyzePacket(context: Context): boolean {
     }
 
     if (maxBytes) {
-        if (nextPackageLen < maxBytes) {
-            // remove from buffer nextPackageLen + 16 bytes
-            context.packets.push(context.buffer.subarray(0, headerLength + nextPackageLen));
-            context.totalBytes += headerLength + nextPackageLen;
+        if (packageLen < maxBytes) {
+            // remove from buffer packageLen + 16 bytes
+            const packetBuffer = context.buffer.subarray(0, headerLength + packageLen);
+            if (context.libpCapFormat) {
+                // write header in LE notation
+                packetBuffer.writeUInt32LE(seconds, 0);
+                packetBuffer.writeUInt32LE(microseconds, 4);
+                packetBuffer.writeUInt32LE(packageLen, 8);
+                packetBuffer.writeUInt32LE(packageLenSent, 12);
+            }
+            context.packets.push(packetBuffer);
+            context.totalBytes += headerLength + packageLen;
             if (debug) {
-                console.log(`Saved packet: ${headerLength + nextPackageLen}`);
+                console.log(`Saved packet: ${headerLength + packageLen}`);
             }
         } else {
-            const packet = context.buffer.subarray(0, headerLength + maxBytes);
+            const packetBuffer = context.buffer.subarray(0, headerLength + maxBytes);
+            if (context.libpCapFormat) {
+                // write header in LE notation
+                packetBuffer.writeUInt32LE(seconds, 0);
+                packetBuffer.writeUInt32LE(microseconds, 4);
+                packetBuffer.writeUInt32LE(packageLenSent, 12);
+            }
             // save new length in the packet
-            packet.writeUInt32LE(maxBytes, 8);
-            context.packets.push(packet);
+            packetBuffer.writeUInt32LE(maxBytes, 8);
+
+            context.packets.push(packetBuffer);
             context.totalBytes += headerLength + maxBytes;
             if (debug) {
                 console.log(`Saved packet: ${headerLength + maxBytes}`);
@@ -145,7 +157,7 @@ function analyzePacket(context: Context): boolean {
     }
 
     // remove this packet
-    context.buffer = context.buffer.subarray(headerLength + nextPackageLen);
+    context.buffer = context.buffer.subarray(headerLength + packageLen);
 
     return true;
 }
@@ -255,28 +267,34 @@ export function startRecordingOnFritzBox(
                                 ? context.buffer.readUInt32BE(4 * 5)
                                 : context.buffer.readUInt32LE(4 * 5);
 
+                            const versionMajor = context.libpCapFormat
+                                ? context.buffer.readUInt16BE(4)
+                                : context.buffer.readUInt16LE(4);
+                            const versionMinor = context.libpCapFormat
+                                ? context.buffer.readUInt16BE(4 + 2)
+                                : context.buffer.readUInt16LE(4 + 2);
+                            const reserved1 = context.libpCapFormat
+                                ? context.buffer.readUInt32BE(4 * 2)
+                                : context.buffer.readUInt32LE(4 * 2);
+                            const reserved2 = context.libpCapFormat
+                                ? context.buffer.readUInt32BE(4 * 3)
+                                : context.buffer.readUInt32LE(4 * 3);
+                            const snapLen = context.libpCapFormat
+                                ? context.buffer.readUInt32BE(4 * 4)
+                                : context.buffer.readUInt32LE(4 * 4);
+
                             if (debug) {
-                                const versionMajor = context.libpCapFormat
-                                    ? context.buffer.readUInt16BE(4)
-                                    : context.buffer.readUInt16LE(4);
-                                const versionMinor = context.libpCapFormat
-                                    ? context.buffer.readUInt16BE(4 + 2)
-                                    : context.buffer.readUInt16LE(4 + 2);
-                                const reserved1 = context.libpCapFormat
-                                    ? context.buffer.readUInt32BE(4 * 2)
-                                    : context.buffer.readUInt32LE(4 * 2);
-                                const reserved2 = context.libpCapFormat
-                                    ? context.buffer.readUInt32BE(4 * 3)
-                                    : context.buffer.readUInt32LE(4 * 3);
-                                const snapLen = context.libpCapFormat
-                                    ? context.buffer.readUInt32BE(4 * 4)
-                                    : context.buffer.readUInt32LE(4 * 4);
                                 console.log(
                                     `PCAP: ${magic.toString(16)} ${versionMajor}.${versionMinor} res1=${reserved1} res2=${reserved2} snaplen=${snapLen} ${context.networkType.toString(16)}`,
                                 );
                             }
-
-                            context.buffer = context.buffer.subarray(6 * 4);
+                            context.buffer = Buffer.alloc(4 * 6);
+                            context.buffer.writeUInt32LE(context.libpCapFormat ? 0xa1b2c3d4 : magic, 0);
+                            context.buffer.writeUInt16LE(versionMajor, 4);
+                            context.buffer.writeUInt16LE(versionMinor, 4 + 2);
+                            context.buffer.writeUInt32LE(reserved1, 4 * 2);
+                            context.buffer.writeUInt32LE(reserved2, 4 * 3);
+                            context.buffer.writeUInt32LE(snapLen, 4 * 4);
                         } else {
                             // wait for more data
                             return;
