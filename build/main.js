@@ -540,7 +540,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                 // create PCAP header
                 const byteArray = Buffer.alloc(6 * 4);
                 // magic number
-                byteArray.writeUInt32LE(this.context.modifiedMagic ? MODIFIED_MAGIC : STANDARD_MAGIC, 0);
+                byteArray.writeUInt32LE(this.context.modifiedMagic || this.context.libpCapFormat ? MODIFIED_MAGIC : STANDARD_MAGIC, 0);
                 // major version
                 byteArray.writeUInt16LE(2, 4);
                 // minor version

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "news": {
+      "1.0.5": {
+        "en": "Corrected the link in readme.md\nCorrected the Big-Endian PCAP format",
+        "de": "Korrigierte den Link im Readme. md\nKorrektur des Big-Endian PCAP Format",
+        "ru": "Исправлена ссылка в считывании. md\nИсправлены Большой индейец Формат PCAP",
+        "pt": "Corrigido o link no readme. Md\nCorrigido o Big-Endian Formato PCAP",
+        "nl": "De link in readme gecorrigeerd. md\nGecorrigeerd de Big-Endian PCAP-formaat",
+        "fr": "Corrigé le lien dans readme. md\nCorrigé le Big-Endian Format PAC",
+        "it": "Corretto il link in readme. M\nCorretto il Big-Endian Formato PCAP",
+        "es": "Corregido el enlace en readme. md\nCorregido el Gran Endian Formato PCAP",
+        "pl": "Naprawiłem link. md\nPoprawiono Wielkiego Endianina Format PCAP",
+        "uk": "Виправлено посилання в чителю. мд\nВиправлено великий Формат ПКАП",
+        "zh-cn": "更正了readme中的链接. 微额\n纠正了大印地安人 PCAP 格式"
+      },
       "1.0.4": {
         "en": "Corrected GUI\nFilter out not used interfaces\nAdded notification to admin if public key not accepted\nTry to detect zero bytes interfaces",
         "de": "Korrigierte GUI\nFiltern nicht genutzte Schnittstellen\nHinzugefügt Benachrichtigung zu Admin, wenn der öffentliche Schlüssel nicht akzeptiert\nVersuchen Sie, Null Bytes-Schnittstellen zu erkennen",
@@ -80,19 +93,6 @@
         "pl": "Dodano wykrywanie niektórych IP",
         "uk": "Додано виявлення деяких IP-адрес",
         "zh-cn": "添加检测一些IP"
-      },
-      "0.2.1": {
-        "en": "used valid URL address",
-        "de": "verwendete gültige URL-Adresse",
-        "ru": "использованный адрес",
-        "pt": "endereço URL válido usado",
-        "nl": "gebruikt geldig URL-adres",
-        "fr": "adresse URL valide utilisée",
-        "it": "indirizzo URL valido",
-        "es": "dirección URL válida",
-        "pl": "używany poprawny adres URL",
-        "uk": "використовується вірна адреса URL",
-        "zh-cn": "使用有效的 URL 地址"
       }
     },
     "titleLang": {
