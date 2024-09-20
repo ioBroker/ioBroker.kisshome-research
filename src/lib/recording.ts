@@ -130,6 +130,10 @@ function analyzePacket(context: Context): boolean {
                 packetBuffer.writeUInt32LE(microseconds, 4);
                 packetBuffer.writeUInt32LE(packageLen, 8);
                 packetBuffer.writeUInt32LE(packageLenSent, 12);
+                const ifindex = packetBuffer.readUInt32BE(16);
+                const protocol = packetBuffer.readUInt16BE(20);
+                packetBuffer.writeUInt32LE(ifindex, 16);
+                packetBuffer.writeUInt32LE(protocol, 20);
             }
             context.packets.push(packetBuffer);
             context.totalBytes += headerLength + packageLen;
@@ -143,6 +147,10 @@ function analyzePacket(context: Context): boolean {
                 packetBuffer.writeUInt32LE(seconds, 0);
                 packetBuffer.writeUInt32LE(microseconds, 4);
                 packetBuffer.writeUInt32LE(packageLenSent, 12);
+                const ifindex = packetBuffer.readUInt32BE(16);
+                const protocol = packetBuffer.readUInt16BE(20);
+                packetBuffer.writeUInt32LE(ifindex, 16);
+                packetBuffer.writeUInt32LE(protocol, 20);
             }
             // save new length in the packet
             packetBuffer.writeUInt32LE(maxBytes, 8);
@@ -263,10 +271,6 @@ export function startRecordingOnFritzBox(
                             const magic = context.buffer.readUInt32LE(0);
                             context.modifiedMagic = magic === 0xa1b2cd34;
                             context.libpCapFormat = magic === 0x34cdb2a1;
-                            context.networkType = context.libpCapFormat
-                                ? context.buffer.readUInt32BE(4 * 5)
-                                : context.buffer.readUInt32LE(4 * 5);
-
                             const versionMajor = context.libpCapFormat
                                 ? context.buffer.readUInt16BE(4)
                                 : context.buffer.readUInt16LE(4);
@@ -283,18 +287,17 @@ export function startRecordingOnFritzBox(
                                 ? context.buffer.readUInt32BE(4 * 4)
                                 : context.buffer.readUInt32LE(4 * 4);
 
+                            context.networkType = context.libpCapFormat
+                                ? context.buffer.readUInt32BE(4 * 5)
+                                : context.buffer.readUInt32LE(4 * 5);
+
                             if (debug) {
                                 console.log(
-                                    `PCAP: ${magic.toString(16)} ${versionMajor}.${versionMinor} res1=${reserved1} res2=${reserved2} snaplen=${snapLen} ${context.networkType.toString(16)}`,
+                                    `PCAP: ${magic.toString(16)} v${versionMajor}.${versionMinor} res1=${reserved1} res2=${reserved2} snaplen=${snapLen} network=${context.networkType.toString(16)}`,
                                 );
                             }
-                            context.buffer = Buffer.alloc(4 * 6);
-                            context.buffer.writeUInt32LE(context.libpCapFormat ? 0xa1b2c3d4 : magic, 0);
-                            context.buffer.writeUInt16LE(versionMajor, 4);
-                            context.buffer.writeUInt16LE(versionMinor, 4 + 2);
-                            context.buffer.writeUInt32LE(reserved1, 4 * 2);
-                            context.buffer.writeUInt32LE(reserved2, 4 * 3);
-                            context.buffer.writeUInt32LE(snapLen, 4 * 4);
+                            // remove header
+                            context.buffer = context.buffer.subarray(6 * 4);
                         } else {
                             // wait for more data
                             return;

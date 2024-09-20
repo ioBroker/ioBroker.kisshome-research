@@ -35,7 +35,7 @@ Detect IP addresses from:
 ## Changelog
 ### **WORK IN PROGRESS**
 -   (ChrisDietrich) Corrected the link in readme.md
--   (bluefox) Corrected the BigEndian PCAP format
+-   (bluefox) Corrected the Big-Endian PCAP format
 
 ### 1.0.4 (2024-09-19)
 
