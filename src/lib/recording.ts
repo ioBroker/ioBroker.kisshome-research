@@ -133,7 +133,7 @@ function analyzePacket(context: Context): boolean {
                 const ifindex = packetBuffer.readUInt32BE(16);
                 const protocol = packetBuffer.readUInt16BE(20);
                 packetBuffer.writeUInt32LE(ifindex, 16);
-                packetBuffer.writeUInt32LE(protocol, 20);
+                packetBuffer.writeUInt16LE(protocol, 20);
             }
             context.packets.push(packetBuffer);
             context.totalBytes += headerLength + packageLen;
@@ -150,7 +150,7 @@ function analyzePacket(context: Context): boolean {
                 const ifindex = packetBuffer.readUInt32BE(16);
                 const protocol = packetBuffer.readUInt16BE(20);
                 packetBuffer.writeUInt32LE(ifindex, 16);
-                packetBuffer.writeUInt32LE(protocol, 20);
+                packetBuffer.writeUInt16LE(protocol, 20);
             }
             // save new length in the packet
             packetBuffer.writeUInt32LE(maxBytes, 8);
