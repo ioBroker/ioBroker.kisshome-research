@@ -162,7 +162,7 @@ async function stopAllRecordingsOnFritzBox(ip, sid) {
     return response.data;
 }
 function getRecordURL(ip, sid, iface, MACs) {
-    const filter = MACs.length ? `ether host ${MACs.join(' || ')}` : '';
+    const filter = MACs.filter(m => m === null || m === void 0 ? void 0 : m.trim()).length ? `ether host ${MACs.filter(m => m === null || m === void 0 ? void 0 : m.trim()).join(' || ')}` : '';
     return `http://${ip.trim()}/cgi-bin/capture_notimeout?ifaceorminor=${encodeURIComponent(iface.trim())}&snaplen=${exports.MAX_PACKET_LENGTH}${filter ? `&filter=${encodeURIComponent(filter)}` : ''}&capture=Start&sid=${sid}`;
 }
 function startRecordingOnFritzBox(ip, sid, iface, MACs, onEnd, context, progress, log) {

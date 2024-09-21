@@ -177,7 +177,7 @@ export async function stopAllRecordingsOnFritzBox(ip: string, sid: string): Prom
 }
 
 export function getRecordURL(ip: string, sid: string, iface: string, MACs: string[]): string {
-    const filter = MACs.length ? `ether host ${MACs.join(' || ')}` : '';
+    const filter = MACs.filter(m => m?.trim()).length ? `ether host ${MACs.filter(m => m?.trim()).join(' || ')}` : '';
 
     return `http://${ip.trim()}/cgi-bin/capture_notimeout?ifaceorminor=${encodeURIComponent(iface.trim())}&snaplen=${MAX_PACKET_LENGTH}${filter ? `&filter=${encodeURIComponent(filter)}` : ''}&capture=Start&sid=${sid}`;
 }

@@ -703,15 +703,26 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             const _devices = [
                                                 ...(ConfigGeneric.getValue(this.props.data, 'devices') || []),
                                             ];
-                                            const pos = _devices.findIndex(item => item.ip === row.ip);
+                                            const pos = _devices.findIndex(item => item.uuid === row.uuid);
                                             if (pos === -1) {
-                                                _devices.push({
-                                                    ip: row.ip,
-                                                    mac: row.mac,
-                                                    desc: row.desc,
-                                                    enabled: true,
-                                                    uuid: row.uuid,
-                                                });
+                                                // check if maybe the device with this IP already exists
+                                                const posIp = _devices.findIndex(item => item.ip === row.ip);
+                                                if (posIp !== -1) {
+                                                    // Modify ips list
+                                                    const ips = JSON.parse(JSON.stringify(this.state.ips));
+                                                    const ipsItem = ips.find(item => item.uuid === row.uuid);
+                                                    ipsItem.uuid = _devices[posIp].uuid;
+                                                    _devices[posIp].enabled = true;
+                                                    this.setState({ ips }, () => this.onChange('devices', _devices));
+                                                } else {
+                                                    _devices.push({
+                                                        ip: row.ip,
+                                                        mac: row.mac,
+                                                        desc: row.desc,
+                                                        enabled: true,
+                                                        uuid: row.uuid,
+                                                    });
+                                                }
                                             } else {
                                                 _devices.splice(pos, 1);
                                             }
