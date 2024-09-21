@@ -14,7 +14,7 @@ function clean() {
 
 function copyAllFiles() {
     if (!existsSync('./src-admin/build/customComponents.js')) {
-        console.error('Invalid build: index.html not found!');
+        console.error(`[${new Date().toISOString()}] Invalid build: customComponents.js not found!`);
         process.exit(2);
     }
     copyFiles(['src-admin/build/static/js/*.js', '!src-admin/build/static/js/vendors*.js'], 'admin/custom/static/js');
@@ -30,13 +30,13 @@ if (process.argv.includes('--0-clean')) {
 } else if (process.argv.includes('--1-npm')) {
     if (!existsSync(`${__dirname}/src-admin/node_modules`)) {
         npmInstall(srcAdmin).catch(e => {
-            console.error(`Cannot install admin dependencies: ${e}`);
+            console.error(`[${new Date().toISOString()}] Cannot install admin dependencies: ${e}`);
             process.exit(1);
         });
     }
 } else if (process.argv.includes('--2-compile')) {
     buildReact(srcAdmin, { rootDir: __dirname, craco: true }).catch(e => {
-        console.error(`Cannot install admin dependencies: ${e}`);
+        console.error(`[${new Date().toISOString()}] Cannot build: ${e}`);
         process.exit(1);
     });
 } else if (process.argv.includes('--3-copy')) {
@@ -47,7 +47,7 @@ if (process.argv.includes('--0-clean')) {
         .then(() => buildReact(srcAdmin, { rootDir: __dirname, craco: true }))
         .then(() => copyAllFiles())
         .catch(e => {
-            console.error(`Cannot install admin dependencies: ${e}`);
+            console.error(`[${new Date().toISOString()}] Cannot build all: ${e}`);
             process.exit(1);
         });
 }

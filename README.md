@@ -33,6 +33,9 @@ Detect IP addresses from:
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+-   (bluefox) Trying to fix CI
+
 ### 1.0.7 (2024-09-21)
 -   (bluefox) Corrected the error if MAC address cannot be determined
 
