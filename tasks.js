@@ -13,6 +13,10 @@ function clean() {
 }
 
 function copyAllFiles() {
+    if (!existsSync('./src-admin/build/customComponents.js')) {
+        console.error('Invalid build: index.html not found!');
+        process.exit(2);
+    }
     copyFiles(['src-admin/build/static/js/*.js', '!src-admin/build/static/js/vendors*.js'], 'admin/custom/static/js');
     copyFiles(['src-admin/build/static/js/*.map', '!src-admin/build/static/js/vendors*.map'], 'admin/custom/static/js');
     copyFiles(['src-admin/build/customComponents.js'], 'admin/custom');
@@ -40,10 +44,8 @@ if (process.argv.includes('--0-clean')) {
 } else {
     clean();
     npmInstall(srcAdmin)
-        .then(async () => {
-            await buildReact(srcAdmin, { rootDir: __dirname, craco: true });
-            copyAllFiles();
-        })
+        .then(() => buildReact(srcAdmin, { rootDir: __dirname, craco: true }))
+        .then(() => copyAllFiles())
         .catch(e => {
             console.error(`Cannot install admin dependencies: ${e}`);
             process.exit(1);

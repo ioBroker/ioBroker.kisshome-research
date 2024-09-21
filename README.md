@@ -33,9 +33,10 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### 1.0.5 (2024-09-20)
+### **WORK IN PROGRESS**
 -   (ChrisDietrich) Corrected the link in readme.md
 -   (bluefox) Corrected the Big-Endian PCAP format
+-   (bluefox) the Fixed build pipeline
 
 ### 1.0.4 (2024-09-19)
 
