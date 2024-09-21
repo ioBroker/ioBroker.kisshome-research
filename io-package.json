@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "news": {
+      "1.0.6": {
+        "en": "Corrected the link in readme.md\nCorrected the Big-Endian PCAP format\nthe Fixed build pipeline",
+        "de": "Korrigierte den Link im Readme. md\nKorrektur des Big-Endian PCAP Format\ndie Fixed Build Pipeline",
+        "ru": "Исправлена ссылка в считывании. md\nИсправлены Большой индейец Формат PCAP\nfixed build pipeline",
+        "pt": "Corrigido o link no readme. Md\nCorrigido o Big-Endian Formato PCAP\no pipeline de construção fixa",
+        "nl": "De link in readme gecorrigeerd. md\nGecorrigeerd de Big-Endian PCAP-formaat\nde vaste bouwpijpleiding",
+        "fr": "Corrigé le lien dans readme. md\nCorrigé le Big-Endian Format PAC\nle pipeline de construction fixe",
+        "it": "Corretto il link in readme. M\nCorretto il Big-Endian Formato PCAP\nla pipeline di costruzione fissa",
+        "es": "Corregido el enlace en readme. md\nCorregido el Gran Endian Formato PCAP\nla tubería de construcción fija",
+        "pl": "Naprawiłem link. md\nPoprawiono Wielkiego Endianina Format PCAP\nstałe rurociąg budowlany",
+        "uk": "Виправлено посилання в чителю. мд\nВиправлено великий Формат ПКАП\nфіксований будівельний трубопровод",
+        "zh-cn": "更正了readme中的链接. 微额\n纠正了大印地安人 PCAP 格式\n固定建筑管道"
+      },
       "1.0.5": {
         "en": "Corrected the link in readme.md\nCorrected the Big-Endian PCAP format",
         "de": "Korrigierte den Link im Readme. md\nKorrektur des Big-Endian PCAP Format",
@@ -69,19 +82,6 @@
         "zh-cn": "已更正的配置页面"
       },
       "0.3.1": {
-        "en": "Added detection of some IPs",
-        "de": "Zusätzliche Erkennung einiger IPs",
-        "ru": "Добавлено обнаружение некоторых ИС",
-        "pt": "Adicionado detecção de alguns IPs",
-        "nl": "Toegevoegd detectie van sommige IP's",
-        "fr": "Ajout de la détection de certains IP",
-        "it": "Aggiunta di rilevamento di alcuni IP",
-        "es": "Se agregó la detección de algunos IPs",
-        "pl": "Dodano wykrywanie niektórych IP",
-        "uk": "Додано виявлення деяких IP-адрес",
-        "zh-cn": "添加检测一些IP"
-      },
-      "0.3.0": {
         "en": "Added detection of some IPs",
         "de": "Zusätzliche Erkennung einiger IPs",
         "ru": "Добавлено обнаружение некоторых ИС",

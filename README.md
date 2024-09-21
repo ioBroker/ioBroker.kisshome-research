@@ -33,7 +33,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.0.6 (2024-09-21)
 -   (ChrisDietrich) Corrected the link in readme.md
 -   (bluefox) Corrected the Big-Endian PCAP format
 -   (bluefox) the Fixed build pipeline
