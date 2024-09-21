@@ -33,7 +33,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.0.7 (2024-09-21)
 -   (bluefox) Corrected the error if MAC address cannot be determined
 
 ### 1.0.6 (2024-09-21)

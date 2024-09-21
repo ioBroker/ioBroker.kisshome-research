@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "news": {
+      "1.0.7": {
+        "en": "Corrected the error if MAC address cannot be determined",
+        "de": "Korrektur des Fehlers, wenn die MAC-Adresse nicht ermittelt werden kann",
+        "ru": "Исправлена ошибка, если MAC-адрес не может быть определен",
+        "pt": "Corrigido o erro se o endereço MAC não puder ser determinado",
+        "nl": "Fout gecorrigeerd als het MAC-adres niet kan worden bepaald",
+        "fr": "Correction de l'erreur si l'adresse MAC ne peut pas être déterminée",
+        "it": "Corretto l'errore se l'indirizzo MAC non può essere determinato",
+        "es": "Corregido el error si no se puede determinar la dirección MAC",
+        "pl": "Korekta błędu, jeżeli adres MAC nie może być określony",
+        "uk": "Виправлено помилку, якщо MAC адреса не може бути визначена",
+        "zh-cn": "如果无法确定 MAC 地址, 则更正了错误"
+      },
       "1.0.6": {
         "en": "Corrected the link in readme.md\nCorrected the Big-Endian PCAP format\nthe Fixed build pipeline",
         "de": "Korrigierte den Link im Readme. md\nKorrektur des Big-Endian PCAP Format\ndie Fixed Build Pipeline",
@@ -80,19 +93,6 @@
         "pl": "Skorygowana strona konfiguracji",
         "uk": "Правильна сторінка конфігурації",
         "zh-cn": "已更正的配置页面"
-      },
-      "0.3.1": {
-        "en": "Added detection of some IPs",
-        "de": "Zusätzliche Erkennung einiger IPs",
-        "ru": "Добавлено обнаружение некоторых ИС",
-        "pt": "Adicionado detecção de alguns IPs",
-        "nl": "Toegevoegd detectie van sommige IP's",
-        "fr": "Ajout de la détection de certains IP",
-        "it": "Aggiunta di rilevamento di alcuni IP",
-        "es": "Se agregó la detección de algunos IPs",
-        "pl": "Dodano wykrywanie niektórych IP",
-        "uk": "Додано виявлення деяких IP-адрес",
-        "zh-cn": "添加检测一些IP"
       }
     },
     "titleLang": {
