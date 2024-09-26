@@ -311,13 +311,33 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                         }
                     }
                 }
+                // print out the IP addresses without MAC
+                const missing = IPs.filter(item => !item.mac);
+                if (missing.length) {
+                    if (this.language === 'de') {
+                        this.log.warn(`Für folgende IP konnten keine MAC Adressen gefunden werden: ${missing.map(t => t.ip).join(', ')}`);
+                    }
+                    else {
+                        this.log.warn(`Cannot get MAC addresses for the following IPs: ${missing.map(t => t.ip).join(', ')}`);
+                    }
+                }
             }
             catch (e) {
-                if (this.language === 'de') {
-                    this.log.error(`MAC-Adressen können nicht ermittelt werden: ${e}`);
+                if (e.toString().includes('no results')) {
+                    if (this.language === 'de') {
+                        this.log.warn(`Für folgende IP könnten keine MAC Adressen gefunden: ${tasks.map(t => t.ip).join(', ')}`);
+                    }
+                    else {
+                        this.log.warn(`Cannot get MAC addresses for the following IPs: ${tasks.map(t => t.ip).join(', ')}`);
+                    }
                 }
                 else {
-                    this.log.error(`Cannot get MAC addresses: ${e}`);
+                    if (this.language === 'de') {
+                        this.log.error(`MAC-Adressen können nicht ermittelt werden: ${e}`);
+                    }
+                    else {
+                        this.log.error(`Cannot get MAC addresses: ${e}`);
+                    }
                 }
             }
         }

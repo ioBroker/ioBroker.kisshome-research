@@ -33,7 +33,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### 1.0.10 (2024-09-26)
+### **WORK IN PROGRESS**
 -   (bluefox) Trying to fix CI
 -   (bluefox) Do not allow the traffic recording of FritzBox 
 -   (bluefox) Do not allow recording the traffic if no any MAC provided
