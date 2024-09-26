@@ -283,11 +283,22 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         // try to get MAC addresses for all IPs
         const IPs = this.config.devices.filter(item => item.enabled && (item.ip || item.mac) && item.ip !== this.config.fritzbox);
         const tasks = IPs.filter(ip => !ip.mac);
-        // determine the MAC of Fritzbox
-        const fritzEntry = await this.getMacForIps([
-            { ip: this.config.fritzbox, mac: '', enabled: true, desc: 'FritzBox', uuid: '1' },
-        ]);
-        const fritzMac = ((_b = fritzEntry[0]) === null || _b === void 0 ? void 0 : _b.mac) || '';
+        let fritzMac = '';
+        try {
+            // determine the MAC of Fritzbox
+            const fritzEntry = await this.getMacForIps([
+                { ip: this.config.fritzbox, mac: '', enabled: true, desc: 'FritzBox', uuid: '1' },
+            ]);
+            fritzMac = ((_b = fritzEntry[0]) === null || _b === void 0 ? void 0 : _b.mac) || '';
+        }
+        catch {
+            if (this.language === 'de') {
+                this.log.debug(`Kann die MAC Adresse von FritzBox nicht finden`);
+            }
+            else {
+                this.log.debug(`Cannot determine MAC addresses of Fritz!Box`);
+            }
+        }
         if (tasks.length) {
             try {
                 const macs = await this.getMacForIps(tasks);

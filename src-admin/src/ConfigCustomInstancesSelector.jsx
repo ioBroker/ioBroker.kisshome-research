@@ -611,7 +611,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         }
 
         return <Message
-             text={I18n.t('You cannot record the traffic of Fritz!Box')}
+             text={I18n.t('custom_kisshome_You cannot record the traffic of Fritz!Box')}
              onClose={() => this.setState({ showMessage: false })}
          />;
     }
@@ -907,7 +907,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             ];
                                             const devIndex = _devices.findIndex(item => item.uuid === row.uuid);
                                             if (devIndex !== -1) {
-                                                _devices.splice(i, 1);
+                                                _devices.splice(devIndex, 1);
                                                 this.onChange('devices', _devices);
                                             }
                                         }}
