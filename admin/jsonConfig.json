@@ -18,7 +18,7 @@
                     "newLine": true,
                     "type": "staticLink",
                     "sm": 12,
-                    "href": "https://kisshome-research.if-is.net/#register",
+                    "href": "https://kisshome-research.if-is.net/#/register",
                     "text": "To participate in the KISSHome research, you need to register here."
                 },
                 "fritzbox": {
@@ -55,7 +55,7 @@
                     "newLine": true,
                     "type": "staticLink",
                     "sm": 12,
-                    "href": "https://kisshome-research.if-is.net/#faq/interface",
+                    "href": "https://kisshome-research.if-is.net/#/faq/interface",
                     "text": "Explanation of the Fritz!Box interface could be found at this link."
                 },
                 "iface": {

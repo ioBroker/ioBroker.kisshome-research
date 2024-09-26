@@ -33,10 +33,11 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### 1.0.8 (2024-09-26)
+### **WORK IN PROGRESS**
 -   (bluefox) Trying to fix CI
 -   (bluefox) Do not allow the traffic recording of FritzBox 
 -   (bluefox) Do not allow recording the traffic if no any MAC provided
+-   (bluefox) Corrected links to web page
 
 ### 1.0.7 (2024-09-21)
 -   (bluefox) Corrected the error if MAC address cannot be determined

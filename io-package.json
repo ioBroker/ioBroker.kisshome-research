@@ -3,19 +3,6 @@
     "name": "kisshome-research",
     "version": "1.0.8",
     "news": {
-      "1.0.8": {
-        "en": "Trying to fix CI\nDo not allow the traffic recording of FritzBox \nDo not allow recording the traffic if no any MAC provided",
-        "de": "Versuchen, CI zu reparieren\nDie Verkehrsaufzeichnung von FritzBox nicht zulassen\nNicht zulassen, dass der Verkehr aufgezeichnet wird, wenn kein MAC zur Verfügung gestellt wird",
-        "ru": "Попытка исправить CI\nНе позволяйте записи трафика FritzBox\nНе позволяйте записывать трафик, если не предусмотрено MAC",
-        "pt": "Tentando corrigir CI\nNão permita a gravação de tráfego de FritzBox\nNão permita gravar o tráfego se nenhum MAC fornecido",
-        "nl": "Proberen CI te repareren\nLaat de verkeersregistratie van FritzBox niet toe\nOpname van het verkeer is niet toegestaan als er geen MAC beschikbaar is",
-        "fr": "Essayer de corriger CI\nNe pas autoriser l'enregistrement du trafic de FritzBox\nNe pas autoriser l'enregistrement du trafic si aucune MAC n'est fournie",
-        "it": "Cercare di risolvere CI\nNon permettere la registrazione del traffico di FritzBox\nNon permettere la registrazione del traffico se non è fornito alcun MAC",
-        "es": "Intenta arreglar CI\nNo permita la grabación de tráfico de FritzBox\nNo permita grabar el tráfico si no se proporciona ningún MAC",
-        "pl": "Próbuję naprawić CI\nNie zezwalaj na rejestrowanie ruchu FritzBox\nNie wolno rejestrować ruchu, jeżeli nie dostarczono żadnego MAC",
-        "uk": "Спробуйте виправити CI\nНе дозволяйте запис трафіку FritzBox\nНе дозволяйте записувати трафік, якщо не передбачено MAC",
-        "zh-cn": "试图修复 CI\n不允许对 FritzBox 进行流量记录\n如果没有提供任何MAC,则不允许记录流量"
-      },
       "1.0.7": {
         "en": "Corrected the error if MAC address cannot be determined",
         "de": "Korrektur des Fehlers, wenn die MAC-Adresse nicht ermittelt werden kann",
