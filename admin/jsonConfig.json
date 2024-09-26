@@ -29,7 +29,8 @@
                     "lg": 3,
                     "label": "FritzBox IP",
                     "defaultSendTo": "getDefaultGateway",
-                    "allowSaveWithError": true
+                    "allowSaveWithError": true,
+                    "disabled": "!data.email"
                 },
                 "login": {
                     "newLine": true,
@@ -41,7 +42,8 @@
                     "sm": 12,
                     "md": 3,
                     "lg": 3,
-                    "label": "FritzBox Login"
+                    "label": "FritzBox Login",
+                    "disabled": "!data.email"
                 },
                 "password": {
                     "type": "password",
@@ -49,14 +51,16 @@
                     "md": 6,
                     "repeat": true,
                     "lg": 6,
-                    "label": "FritzBox Password"
+                    "label": "FritzBox Password",
+                    "disabled": "!data.email"
                 },
                 "_hint2": {
                     "newLine": true,
                     "type": "staticLink",
                     "sm": 12,
                     "href": "https://kisshome-research.if-is.net/#/faq/interface",
-                    "text": "Explanation of the Fritz!Box interface could be found at this link."
+                    "text": "Explanation of the Fritz!Box interface could be found at this link.",
+                    "disabled": "!data.email"
                 },
                 "iface": {
                     "newLine": true,
@@ -69,7 +73,8 @@
                     "md": 6,
                     "lg": 6,
                     "label": "FritzBox Interface",
-                    "help": "Default interface is 1-lan"
+                    "help": "Default interface is 1-lan",
+                    "disabled": "!data.email"
                 },
                 "tempDir": {
                     "newLine": true,
@@ -78,7 +83,8 @@
                     "md": 6,
                     "lg": 6,
                     "label": "Working directory",
-                    "help": "Directory for temporary files. Leave empty to use the system directory."
+                    "help": "Directory for temporary files. Leave empty to use the system directory.",
+                    "disabled": "!data.email"
                 },
                 "_header": {
                     "newLine": true,
@@ -113,7 +119,8 @@
                         "fontSize": 12,
                         "opacity": 0.7
                     },
-                    "trueText": "Recording is running"
+                    "trueText": "Recording is running",
+                    "disabled": "!data.email"
                 },
                 "_filter": {
                     "newLine": true,
@@ -123,13 +130,15 @@
                     "alsoDependsOn": ["fritzbox", "login", "password"],
                     "sm": 12,
                     "md": 12,
-                    "lg": 12
+                    "lg": 12,
+                    "disabled": "!data.email"
                 }
             }
         },
         "_instances": {
             "type": "panel",
             "label": "Addresses",
+            "disabled": "!data.email",
             "items": {
                 "_info": {
                     "type": "staticText",
