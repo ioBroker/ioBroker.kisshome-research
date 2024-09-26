@@ -23,7 +23,7 @@ import { Add, Delete } from '@mui/icons-material';
 // import ConfigGeneric from '@iobroker/adapter-react-v5/ConfigGeneric';
 // valid
 import { ConfigGeneric } from '@iobroker/json-config';
-import { i18n } from '@iobroker/adapter-react-v5';
+import { I18n, Message } from '@iobroker/adapter-react-v5';
 
 const styles = {
     table: {
@@ -269,6 +269,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             MAC2VENDOR: {},
             alive: this.props.alive,
             resolving: false,
+            showMessage: false,
         };
         this.resolveDone = false;
 
@@ -278,6 +279,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         if (this.props.alive) {
             this.resolveMACs();
         }
+        this.disableFritzBox();
     }
 
     resolveMACs() {
@@ -603,9 +605,37 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         return unique;
     }
 
+    renderMessage() {
+        if (!this.state.showMessage) {
+            return null;
+        }
+
+        return <Message
+             text={I18n.t('You cannot record the traffic of Fritz!Box')}
+             onClose={() => this.setState({ showMessage: false })}
+         />;
+    }
+
+    disableFritzBox() {
+        const devices = ConfigGeneric.getValue(this.props.data, 'devices') || [];
+        const fritzBox = ConfigGeneric.getValue(this.props.data, 'fritzbox');
+        let changed = false;
+        devices.forEach(item => {
+            if (item.ip === fritzBox && item.enabled) {
+                changed = true;
+                item.enabled = false;
+            }
+        });
+        if (changed) {
+            this.onChange('devices', devices);
+        }
+    }
+
     renderItem(error, disabled, defaultValue) {
         /** @type {{mac: string; ip: string; desc: string; enabled: boolean, uuid: string}[]} */
         const devices = ConfigGeneric.getValue(this.props.data, 'devices') || [];
+        const fritzBox = ConfigGeneric.getValue(this.props.data, 'fritzbox');
+
         devices.forEach(item => {
             if (!item.uuid) {
                 item.uuid = uuid();
@@ -622,6 +652,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
 
         return (
             <TableContainer>
+                {this.renderMessage()}
                 {this.state.runningRequest || this.state.resolving ? <LinearProgress /> : <div style={{ height: 2, width: '100%' }} />}
                 <Table
                     style={styles.table}
@@ -633,8 +664,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 <Checkbox
                                     title={
                                         allEnabled
-                                            ? i18n.t('custom_kisshome_unselect_all')
-                                            : i18n.t('custom_kisshome_select_all')
+                                            ? I18n.t('custom_kisshome_unselect_all')
+                                            : I18n.t('custom_kisshome_select_all')
                                     }
                                     checked={allEnabled}
                                     indeterminate={!allEnabled && devices.length > 0}
@@ -653,7 +684,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         } else {
                                             _devices.forEach(item => (item.enabled = true));
                                             this.state.ips.forEach(item => {
-                                                if (!_devices.find(iItem => item.ip === iItem.ip)) {
+                                                if (!_devices.find(iItem => item.ip === iItem.ip) && item.ip !== fritzBox) {
                                                     _devices.push({
                                                         ip: item.ip,
                                                         mac: item.mac,
@@ -682,10 +713,10 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                     <Add />
                                 </Fab>
                             </TableCell>
-                            <TableCell style={styles.header}>{i18n.t('custom_kisshome_ip')}</TableCell>
-                            <TableCell style={styles.header}>{i18n.t('custom_kisshome_mac')}</TableCell>
-                            <TableCell style={styles.header}>{i18n.t('custom_kisshome_vendor')}</TableCell>
-                            <TableCell style={styles.header}>{i18n.t('custom_kisshome_name')}</TableCell>
+                            <TableCell style={styles.header}>{I18n.t('custom_kisshome_ip')}</TableCell>
+                            <TableCell style={styles.header}>{I18n.t('custom_kisshome_mac')}</TableCell>
+                            <TableCell style={styles.header}>{I18n.t('custom_kisshome_vendor')}</TableCell>
+                            <TableCell style={styles.header}>{I18n.t('custom_kisshome_name')}</TableCell>
                             <TableCell style={styles.header} />
                         </TableRow>
                     </TableHead>
@@ -708,13 +739,17 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                                 // check if maybe the device with this IP already exists
                                                 const posIp = _devices.findIndex(item => item.ip === row.ip);
                                                 if (posIp !== -1) {
-                                                    // Modify ips list
+                                                    // Modify the ips list
                                                     const ips = JSON.parse(JSON.stringify(this.state.ips));
                                                     const ipsItem = ips.find(item => item.uuid === row.uuid);
                                                     ipsItem.uuid = _devices[posIp].uuid;
                                                     _devices[posIp].enabled = true;
                                                     this.setState({ ips }, () => this.onChange('devices', _devices));
                                                 } else {
+                                                    if (row.ip === fritzBox) {
+                                                        this.setState({ showMessage: true });
+                                                        return;
+                                                    }
                                                     _devices.push({
                                                         ip: row.ip,
                                                         mac: row.mac,
@@ -755,6 +790,11 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             ];
                                             const dev = _devices.find(item => item.uuid === row.uuid);
                                             if (dev) {
+                                                if (!dev.enabled && row.ip === fritzBox) {
+                                                    this.setState({ showMessage: true });
+                                                    return;
+                                                }
+
                                                 dev.enabled = !dev.enabled;
                                                 this.onChange('devices', _devices);
                                             }
@@ -775,6 +815,10 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             const dev = _devices.find(item => item.uuid === row.uuid);
                                             if (dev) {
                                                 dev.ip = e.target.value;
+                                                if (dev.ip === fritzBox && dev.enabled) {
+                                                    setTimeout(() => this.disableFritzBox(), 300);
+                                                }
+
                                                 this.onChange('devices', _devices);
                                                 this.validateAddresses();
                                             }

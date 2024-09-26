@@ -5,5 +5,6 @@
   "custom_kisshome_vendor": "Leverancier",
   "custom_kisshome_mac": "Mac adres",
   "custom_kisshome_select_all": "Schakel alles in",
-  "custom_kisshome_unselect_all": "Schakel alles uit"
+  "custom_kisshome_unselect_all": "Schakel alles uit",
+  "custom_kisshome_You cannot record the traffic of Fritz!Box": "U kunt het verkeer van Fritz!Box niet opnemen"
 }

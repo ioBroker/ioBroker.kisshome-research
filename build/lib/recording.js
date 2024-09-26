@@ -299,7 +299,6 @@ function startRecordingOnFritzBox(ip, sid, iface, MACs, onEnd, context, progress
             }
             if (!context.totalBytes && log && Date.now() - context.started < 3000) {
                 log(`No bytes received and file was closed by Fritzbox very fast. May be wrong interface selected`, 'info');
-                // In german
                 log(`Keine Bytes empfangen und Datei wurde von Fritzbox sehr schnell geschlossen. Möglicherweise falsche Schnittstelle ausgewählt`, 'info');
             }
             executeOnEnd(null);

@@ -349,7 +349,6 @@ export function startRecordingOnFritzBox(
                         `No bytes received and file was closed by Fritzbox very fast. May be wrong interface selected`,
                         'info',
                     );
-                    // In german
                     log(
                         `Keine Bytes empfangen und Datei wurde von Fritzbox sehr schnell geschlossen. Möglicherweise falsche Schnittstelle ausgewählt`,
                         'info',

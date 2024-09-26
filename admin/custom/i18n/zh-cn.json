@@ -5,5 +5,6 @@
   "custom_kisshome_vendor": "小贩",
   "custom_kisshome_mac": "MAC地址",
   "custom_kisshome_select_all": "全部启用",
-  "custom_kisshome_unselect_all": "禁用所有"
+  "custom_kisshome_unselect_all": "禁用所有",
+  "custom_kisshome_You cannot record the traffic of Fritz!Box": "您无法记录 Fritz!Box 的流量"
 }
