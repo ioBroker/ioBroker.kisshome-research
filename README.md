@@ -33,7 +33,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.0.12 (2024-10-17)
 -   (gsenkowski) Used actual IP and TCP header length for the PCAP file
 
 ### 1.0.11 (2024-09-26)

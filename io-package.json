@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "news": {
+      "1.0.12": {
+        "en": "Used actual IP and TCP header length for the PCAP file",
+        "de": "Gebrauchte tatsächliche IP- und TCP-Headerlänge für die PCAP-Datei",
+        "ru": "Используется фактическая длина заголовка IP и TCP для файла PCAP",
+        "pt": "Usado o comprimento real do cabeçalho IP e TCP para o arquivo PCAP",
+        "nl": "Gebruikte werkelijke IP en TCP header lengte voor het PCAP bestand",
+        "fr": "Longueur réelle de l'en-tête IP et TCP utilisée pour le fichier PACP",
+        "it": "Usata lunghezza effettiva dell'intestazione IP e TCP per il file PCAP",
+        "es": "Longitud de cabecera IP y TCP para el archivo PCAP",
+        "pl": "Użyta rzeczywista długość nagłówka IP i TCP dla pliku PCAP",
+        "uk": "Використовується фактична довжина заголовка IP і TCP для файла PCAP",
+        "zh-cn": "PCAP 文件使用的实际IP和TCP头长"
+      },
       "1.0.11": {
         "en": "Trying to fix CI\nDo not allow the traffic recording of FritzBox \nDo not allow recording the traffic if no any MAC provided\nCorrected links to web page",
         "de": "Versuchen, CI zu reparieren\nDie Verkehrsaufzeichnung von FritzBox nicht zulassen\nNicht zulassen, dass der Verkehr aufgezeichnet wird, wenn kein MAC zur Verfügung gestellt wird\nKorrigierte Links zur Webseite",
@@ -80,19 +93,6 @@
         "pl": "Dodano logowanie błędów",
         "uk": "Додано запис помилки",
         "zh-cn": "添加错误记录"
-      },
-      "1.0.1": {
-        "en": "Implemented the support for the big endian format of a PCAP file",
-        "de": "Implementierung der Unterstützung für das große endische Format einer PCAP-Datei",
-        "ru": "Выполнена поддержка большого конечного формата файла PCAP",
-        "pt": "Implementou o suporte para o grande formato endiano de um arquivo PCAP",
-        "nl": "De ondersteuning voor het grote endian formaat van een PCAP-bestand geïmplementeerd",
-        "fr": "Implémenté le support pour le format grand endian d'un fichier PACP",
-        "it": "Implementato il supporto per il grande formato endiano di un file PCAP",
-        "es": "Implementó el soporte para el gran formato endiano de un archivo PCAP",
-        "pl": "Wdrożenie wsparcia dla dużego formatu endiańskiego pliku PCAP",
-        "uk": "Реалізовано підтримку великого ендоріанного формату PCAP файл",
-        "zh-cn": "执行对 PCAP 文件大端格式的支持"
       }
     },
     "titleLang": {

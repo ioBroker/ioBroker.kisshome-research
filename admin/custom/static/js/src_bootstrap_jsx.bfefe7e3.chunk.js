@@ -1,3 +1,0 @@
-"use strict";(self.webpackChunkiobroker_admin_component_telegram=self.webpackChunkiobroker_admin_component_telegram||[]).push([["src_bootstrap_jsx"],{38733:(a,o,e)=>{var t=e(28437),n=e.n(t),r=e(94140),c=e(94976),l=e(28437);function s(){return l.createElement(c.A,null)}const u=s;r.createRoot(document.getElementById("root")).render(n().createElement(n().StrictMode,null,n().createElement(u,null)))},94140:(a,o,e)=>{var t=e(23479);if(1)o.createRoot=t.createRoot,o.hydrateRoot=t.hydrateRoot;else var n}}]);
-
-//# sourceMappingURL=src_bootstrap_jsx.bfefe7e3.chunk.js.map
