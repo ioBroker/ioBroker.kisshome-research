@@ -23,7 +23,7 @@
     "@network-utils/arp-lookup": "^2.1.0"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.2.1",
+    "@iobroker/adapter-core": "^3.2.2",
     "@network-utils/vendor-lookup": "^1.0.8",
     "axios": "^1.7.7",
     "network": "^0.7.0"
@@ -32,15 +32,15 @@
     "@alcalzone/release-script": "^3.8.0",
     "@alcalzone/release-script-plugin-iobroker": "^3.7.2",
     "@alcalzone/release-script-plugin-license": "^3.7.0",
-    "@iobroker/build-tools": "^1.1.0",
+    "@iobroker/build-tools": "^2.0.6",
     "@iobroker/eslint-config": "^0.1.6",
     "@iobroker/types": "^6.0.11",
     "@iobroker/legacy-testing": "^1.0.13",
     "@iobroker/testing": "^5.0.0",
-    "@types/node": "^22.7.4",
+    "@types/node": "^22.7.6",
     "chai": "^4.5.0",
     "mocha": "^10.7.3",
-    "typescript": "~5.6.2"
+    "typescript": "~5.6.3"
   },
   "bugs": {
     "url": "https://github.com/ioBroker/iobroker.kisshome-research/issues"

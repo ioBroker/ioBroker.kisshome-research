@@ -35,7 +35,7 @@ if (process.argv.includes('--0-clean')) {
         });
     }
 } else if (process.argv.includes('--2-compile')) {
-    buildReact(srcAdmin, { rootDir: __dirname, craco: true }).catch(e => {
+    buildReact(srcAdmin, { rootDir: __dirname, craco: true, exec: true }).catch(e => {
         console.error(`[${new Date().toISOString()}] Cannot build: ${e}`);
         process.exit(1);
     });
