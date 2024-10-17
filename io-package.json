@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.0.12",
+    "version": "1.0.13",
     "news": {
+      "1.0.13": {
+        "en": "Used actual IP and TCP header length for the PCAP file",
+        "de": "Gebrauchte tatsächliche IP- und TCP-Headerlänge für die PCAP-Datei",
+        "ru": "Используется фактическая длина заголовка IP и TCP для файла PCAP",
+        "pt": "Usado o comprimento real do cabeçalho IP e TCP para o arquivo PCAP",
+        "nl": "Gebruikte werkelijke IP en TCP header lengte voor het PCAP bestand",
+        "fr": "Longueur réelle de l'en-tête IP et TCP utilisée pour le fichier PACP",
+        "it": "Usata lunghezza effettiva dell'intestazione IP e TCP per il file PCAP",
+        "es": "Longitud de cabecera IP y TCP para el archivo PCAP",
+        "pl": "Użyta rzeczywista długość nagłówka IP i TCP dla pliku PCAP",
+        "uk": "Використовується фактична довжина заголовка IP і TCP для файла PCAP",
+        "zh-cn": "PCAP 文件使用的实际IP和TCP头长"
+      },
       "1.0.11": {
         "en": "Trying to fix CI\nDo not allow the traffic recording of FritzBox \nDo not allow recording the traffic if no any MAC provided\nCorrected links to web page",
         "de": "Versuchen, CI zu reparieren\nDie Verkehrsaufzeichnung von FritzBox nicht zulassen\nNicht zulassen, dass der Verkehr aufgezeichnet wird, wenn kein MAC zur Verfügung gestellt wird\nKorrigierte Links zur Webseite",
