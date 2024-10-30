@@ -66,19 +66,22 @@ function analyzePacket(context) {
         if (ethType === 0x0800) {
             const ipHeaderStart = offset + 2;
             const ipVersionAndIHL = context.buffer[ipHeaderStart];
-            const ipHeaderLength = (ipVersionAndIHL & 0x0F) * 4; // IHL field gives the length of the IP header
+            const ipHeaderLength = (ipVersionAndIHL & 0x0f) * 4; // IHL field gives the length of the IP header
             // read protocol type (TCP/UDP/ICMP/etc.)
             const protocolType = context.buffer[ipHeaderStart + 9]; // Protocol field in IP header
-            if (protocolType === 6) { // TCP
+            if (protocolType === 6) {
+                // TCP
                 const tcpHeaderStart = ipHeaderStart + ipHeaderLength;
                 const tcpOffsetAndFlags = context.buffer[tcpHeaderStart + 12];
                 const tcpHeaderLength = (tcpOffsetAndFlags >> 4) * 4; // Data offset in TCP header
                 maxBytes = ipHeaderLength + tcpHeaderLength + 14; // Total length: IP header + TCP header + Ethernet header
             }
-            else if (protocolType === 17) { // UDP
+            else if (protocolType === 17) {
+                // UDP
                 maxBytes = ipHeaderLength + 8 + 14; // IP header + 8 bytes UDP header + Ethernet header
             }
-            else if (protocolType === 1) { // ICMP
+            else if (protocolType === 1) {
+                // ICMP
                 maxBytes = 0;
             }
             else {
@@ -88,19 +91,22 @@ function analyzePacket(context) {
         else if (ethTypeModified === 0x0800) {
             const ipHeaderStart = offset + 2 + 18; // What is 18?
             const ipVersionAndIHL = context.buffer[ipHeaderStart];
-            const ipHeaderLength = (ipVersionAndIHL & 0x0F) * 4; // IHL field gives the length of the IP header
+            const ipHeaderLength = (ipVersionAndIHL & 0x0f) * 4; // IHL field gives the length of the IP header
             // read protocol type (TCP/UDP/ICMP/etc.)
             const protocolType = context.buffer[ipHeaderStart + 9]; // Protocol field in IP header
-            if (protocolType === 6) { // TCP
+            if (protocolType === 6) {
+                // TCP
                 const tcpHeaderStart = ipHeaderStart + ipHeaderLength;
                 const tcpOffsetAndFlags = context.buffer[tcpHeaderStart + 12];
                 const tcpHeaderLength = (tcpOffsetAndFlags >> 4) * 4; // Data offset in TCP header
                 maxBytes = ipHeaderLength + tcpHeaderLength + 14 + 18; // Total length: IP header + TCP header + Ethernet header
             }
-            else if (protocolType === 17) { // UDP
+            else if (protocolType === 17) {
+                // UDP
                 maxBytes = ipHeaderLength + 8 + 14 + 18; // IP header + 8 bytes UDP header + Ethernet header
             }
-            else if (protocolType === 1) { // ICMP
+            else if (protocolType === 1) {
+                // ICMP
                 maxBytes = 0;
             }
             else {

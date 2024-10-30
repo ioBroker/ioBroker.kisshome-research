@@ -6,5 +6,9 @@
   "custom_kisshome_mac": "Adres MAC",
   "custom_kisshome_select_all": "Włącz wszystkie",
   "custom_kisshome_unselect_all": "Wyłącz wszystkie",
-  "custom_kisshome_You cannot record the traffic of Fritz!Box": "Nie możesz rejestrować ruchu Fritz!Box"
+  "custom_kisshome_You cannot record the traffic of Fritz!Box": "Nie możesz rejestrować ruchu Fritz!Box",
+  "custom_kisshome_name_too_short": "Opis jest za krótki (min. 3 znaki)",
+  "custom_kisshome_name_ip_and_mac_missing": "Należy podać adres IP lub MAC",
+  "custom_kisshome_name_invalid_ip": "Nieprawidłowy adres IP",
+  "custom_kisshome_name_invalid_mac": "Nieprawidłowy adres MAC"
 }

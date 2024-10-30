@@ -13,13 +13,13 @@
         "@emotion/styled": "^11.13.0",
         "@iobroker/adapter-react-v5": "^7.2.6",
         "@iobroker/json-config": "^7.2.6",
-        "@mui/icons-material": "^6.1.4",
-        "@mui/material": "^6.1.4",
+        "@mui/icons-material": "^6.1.6",
+        "@mui/material": "^6.1.6",
         "@rollup/plugin-babel": "^6.0.4",
         "@rollup/plugin-commonjs": "^28.0.1",
         "@rollup/plugin-node-resolve": "^15.3.0",
         "@rollup/plugin-replace": "^6.0.1",
-        "@types/react": "^18.3.11",
+        "@types/react": "^18.3.12",
         "@types/react-dom": "^18.3.1",
         "craco-esbuild": "^0.6.1",
         "craco-module-federation": "^1.1.0",
@@ -29,7 +29,7 @@
         "react-qr-code": "^2.0.15",
         "react-refresh": "^0.14.2",
         "react-scripts": "^5.0.1",
-        "uuid": "^10.0.0"
+        "uuid": "^11.0.2"
     },
     "browserslist": {
         "production": [

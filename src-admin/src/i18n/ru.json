@@ -6,5 +6,9 @@
   "custom_kisshome_mac": "MAC-адрес",
   "custom_kisshome_select_all": "Включить все",
   "custom_kisshome_unselect_all": "Отключить все",
-  "custom_kisshome_You cannot record the traffic of Fritz!Box": "Вы не можете записывать трафик Fritz!Box"
+  "custom_kisshome_You cannot record the traffic of Fritz!Box": "Вы не можете записывать трафик Fritz!Box",
+  "custom_kisshome_name_too_short": "Описание слишком короткое (минимум 3 символа)",
+  "custom_kisshome_name_ip_and_mac_missing": "Необходимо указать IP- или MAC-адрес.",
+  "custom_kisshome_name_invalid_ip": "Неверный IP-адрес",
+  "custom_kisshome_name_invalid_mac": "Неверный MAC-адрес"
 }

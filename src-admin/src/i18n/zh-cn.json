@@ -6,5 +6,9 @@
   "custom_kisshome_mac": "MAC地址",
   "custom_kisshome_select_all": "全部启用",
   "custom_kisshome_unselect_all": "禁用所有",
-  "custom_kisshome_You cannot record the traffic of Fritz!Box": "您无法记录 Fritz!Box 的流量"
+  "custom_kisshome_You cannot record the traffic of Fritz!Box": "您无法记录 Fritz!Box 的流量",
+  "custom_kisshome_name_too_short": "描述太短（至少 3 个字符）",
+  "custom_kisshome_name_ip_and_mac_missing": "必须提供 IP 或 MAC 地址",
+  "custom_kisshome_name_invalid_ip": "无效的 IP 地址",
+  "custom_kisshome_name_invalid_mac": "无效的 MAC 地址"
 }

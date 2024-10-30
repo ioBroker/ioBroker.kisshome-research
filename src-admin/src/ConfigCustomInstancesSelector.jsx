@@ -274,12 +274,15 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         this.resolveDone = false;
 
         this.setState(newState);
-        this.props.socket.subscribeState(`system.adapter.kisshome-research.${this.props.instance}.alive`, this.onAliveChanged);
+        await this.props.socket.subscribeState(`system.adapter.kisshome-research.${this.props.instance}.alive`, this.onAliveChanged);
         // get vendor and MAC-Address information
         if (this.props.alive) {
             this.resolveMACs();
         }
         this.disableFritzBox();
+        if (!devices.find(item => (item.desc || '').length < 3)) {
+            this.props.onError('devices', I18n.t('custom_kisshome_name_too_short'));
+        }
     }
 
     resolveMACs() {
@@ -631,6 +634,21 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         }
     }
 
+    checkDevices(devices) {
+        let error = false;
+        if (devices.find(item => (item.desc || '').length < 3)) {
+            this.props.onError('devices', I18n.t('custom_kisshome_name_too_short'));
+        } else if (devices.find(item => !item.ip && !item.mac)) {
+            this.props.onError('devices', I18n.t('custom_kisshome_name_ip_and_mac_missing'));
+        } else if (devices.find(item => !validateIpAddress(item.ip))) {
+            this.props.onError('devices', I18n.t('custom_kisshome_name_invalid_ip'));
+        } else if (devices.find(item => !validateMacAddress(item.mac))) {
+            this.props.onError('devices', I18n.t('custom_kisshome_name_invalid_mac'));
+        } else {
+            this.props.onError('devices');
+        }
+    }
+
     renderItem(error, disabled, defaultValue) {
         /** @type {{mac: string; ip: string; desc: string; enabled: boolean, uuid: string}[]} */
         const devices = ConfigGeneric.getValue(this.props.data, 'devices') || [];
@@ -706,6 +724,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         ];
                                         _devices.push({ ip: '', mac: '', desc: '', enabled: true, uuid: uuid() });
                                         this.onChange('devices', _devices);
+                                        this.checkDevices(_devices);
                                     }}
                                     size="small"
                                     disabled={this.state.runningRequest}
@@ -804,7 +823,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 <TableCell style={styles.td}>
                                     <TextField
                                         fullWidth
-                                        error={!validateIpAddress(row.ip)}
+                                        error={!validateIpAddress(row.ip) || (!row.ip && !row.mac)}
+                                        helperText={validateIpAddress(row.ip) ? (!row.ip && !row.mac ? I18n.t('custom_kisshome_name_ip_and_mac_missing') : '') : I18n.t('custom_kisshome_name_invalid_ip')}
                                         value={row.ip}
                                         disabled={this.state.runningRequest}
                                         placeholder="192.168.x.y"
@@ -821,6 +841,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
 
                                                 this.onChange('devices', _devices);
                                                 this.validateAddresses();
+                                                this.checkDevices(_devices);
                                             }
                                         }}
                                         onBlur={() => {
@@ -833,6 +854,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                                     if (dev) {
                                                         dev.ip = normalized;
                                                         this.onChange('devices', _devices);
+                                                        this.checkDevices(_devices);
                                                     }
                                                 }
                                             }
@@ -845,7 +867,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         fullWidth
                                         value={row.mac}
                                         disabled={this.state.runningRequest}
-                                        error={!validateMacAddress(row.mac)}
+                                        error={!validateMacAddress(row.mac) || (!row.ip && !row.mac)}
+                                        helperText={validateMacAddress(row.mac) ? (!row.ip && !row.mac ? I18n.t('custom_kisshome_name_ip_and_mac_missing') : '') : I18n.t('custom_kisshome_name_invalid_mac')}
                                         placeholder={possibleMac || 'XX:XX:XX:XX:XX:XX'}
                                         onChange={e => {
                                             const _devices = [
@@ -856,6 +879,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                                 dev.mac = e.target.value;
                                                 this.onChange('devices', _devices);
                                                 this.validateAddresses();
+                                                this.checkDevices(_devices);
                                             }
                                         }}
                                         onBlur={() => {
@@ -869,6 +893,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                                     if (dev) {
                                                         dev.mac = normalized;
                                                         this.onChange('devices', _devices);
+                                                        this.checkDevices(_devices);
                                                     }
                                                 }
                                             }
@@ -893,8 +918,12 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             if (dev) {
                                                 dev.desc = e.target.value;
                                                 this.onChange('devices', _devices);
+                                                // check that all devices have a name
+                                                this.checkDevices(_devices);
                                             }
                                         }}
+                                        helperText={(row.desc || '').length >= 3 ? '' : I18n.t('custom_kisshome_name_too_short')}
+                                        error={(row.desc || '').length < 3}
                                         variant="standard"
                                     />
                                 </TableCell>
@@ -909,6 +938,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                             if (devIndex !== -1) {
                                                 _devices.splice(devIndex, 1);
                                                 this.onChange('devices', _devices);
+                                                this.checkDevices(_devices);
                                             }
                                         }}
                                     >

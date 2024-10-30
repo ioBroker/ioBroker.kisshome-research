@@ -34,12 +34,12 @@
     "@alcalzone/release-script-plugin-license": "^3.7.0",
     "@iobroker/build-tools": "^2.0.6",
     "@iobroker/eslint-config": "^0.1.6",
-    "@iobroker/types": "^6.0.11",
+    "@iobroker/types": "^6.0.12-alpha.0-20240924-4e8189ae0",
     "@iobroker/legacy-testing": "^1.0.13",
     "@iobroker/testing": "^5.0.0",
-    "@types/node": "^22.7.6",
+    "@types/node": "^22.8.4",
     "chai": "^4.5.0",
-    "mocha": "^10.7.3",
+    "mocha": "^10.8.2",
     "typescript": "~5.6.3"
   },
   "bugs": {

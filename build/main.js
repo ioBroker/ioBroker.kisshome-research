@@ -1,37 +1,14 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KISSHomeResearchAdapter = void 0;
-const utils = __importStar(require("@iobroker/adapter-core"));
-const node_fs_1 = __importDefault(require("node:fs"));
+const adapter_core_1 = require("@iobroker/adapter-core");
 const axios_1 = __importDefault(require("axios"));
-const node_path_1 = __importDefault(require("node:path"));
-const node_crypto_1 = __importDefault(require("node:crypto"));
+const node_path_1 = require("node:path");
+const node_crypto_1 = require("node:crypto");
+const node_fs_1 = require("node:fs");
 const utils_1 = require("./lib/utils");
 const recording_1 = require("./lib/recording");
 const fritzbox_1 = require("./lib/fritzbox");
@@ -50,7 +27,7 @@ function size2text(size) {
     }
     return `${Math.round((size * 10) / (1024 * 1024) / 10)} MB`;
 }
-class KISSHomeResearchAdapter extends utils.Adapter {
+class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
     constructor(options = {}) {
         super({
             ...options,
@@ -82,6 +59,9 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         this.publicKey = '';
         this.uuid = '';
         this.recordingEnabled = false;
+        this.IPs = [];
+        const pack = JSON.parse((0, node_fs_1.readFileSync)((0, node_path_1.join)(__dirname, '..', 'package.json'), 'utf8'));
+        this.versionPack = pack.version.replace(/\./g, '_');
         this.on('ready', () => this.onReady());
         this.on('unload', callback => this.onUnload(callback));
         this.on('message', this.onMessage.bind(this));
@@ -281,8 +261,8 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             return;
         }
         // try to get MAC addresses for all IPs
-        const IPs = this.config.devices.filter(item => item.enabled && (item.ip || item.mac) && item.ip !== this.config.fritzbox);
-        const tasks = IPs.filter(ip => !ip.mac);
+        this.IPs = this.config.devices.filter(item => item.enabled && (item.ip || item.mac) && item.ip !== this.config.fritzbox);
+        const tasks = this.IPs.filter(ip => !ip.mac);
         let fritzMac = '';
         try {
             // determine the MAC of Fritzbox
@@ -305,14 +285,14 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                 for (let i = 0; i < tasks.length; i++) {
                     const mac = macs[i];
                     if (mac === null || mac === void 0 ? void 0 : mac.mac) {
-                        const item = IPs.find(t => t.ip === mac.ip);
+                        const item = this.IPs.find(t => t.ip === mac.ip);
                         if (item) {
                             item.mac = mac.mac;
                         }
                     }
                 }
-                // print out the IP addresses without MAC
-                const missing = IPs.filter(item => !item.mac);
+                // print out the IP addresses without MAC addresses
+                const missing = this.IPs.filter(item => !item.mac);
                 if (missing.length) {
                     if (this.language === 'de') {
                         this.log.warn(`Für folgende IP konnten keine MAC Adressen gefunden werden: ${missing.map(t => t.ip).join(', ')}`);
@@ -343,10 +323,10 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         }
         // take only unique MAC addresses and not MAC of Fritzbox
         this.uniqueMacs = [];
-        IPs.forEach(item => !this.uniqueMacs.includes(item.mac) && item.mac !== fritzMac && this.uniqueMacs.push(item.mac));
+        this.IPs.forEach(item => !this.uniqueMacs.includes(item.mac) && item.mac !== fritzMac && this.uniqueMacs.push(item.mac));
         // detect temp directory
         this.tempDir = this.config.tempDir || '/run/shm';
-        if (node_fs_1.default.existsSync(this.tempDir)) {
+        if ((0, node_fs_1.existsSync)(this.tempDir)) {
             if (this.language === 'de') {
                 this.log.info(`${this.tempDir} wird als temporäres Verzeichnis verwendet`);
             }
@@ -354,7 +334,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                 this.log.info(`Using ${this.tempDir} as temporary directory`);
             }
         }
-        else if (node_fs_1.default.existsSync('/run/shm')) {
+        else if ((0, node_fs_1.existsSync)('/run/shm')) {
             this.tempDir = '/run/shm';
             if (this.language === 'de') {
                 this.log.info(`${this.tempDir} wird als temporäres Verzeichnis verwendet`);
@@ -363,7 +343,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                 this.log.info(`Using ${this.tempDir} as temporary directory`);
             }
         }
-        else if (node_fs_1.default.existsSync('/tmp')) {
+        else if ((0, node_fs_1.existsSync)('/tmp')) {
             this.tempDir = '/tmp';
             if (this.language === 'de') {
                 this.log.info(`${this.tempDir} wird als temporäres Verzeichnis verwendet`);
@@ -454,8 +434,8 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         this.workingDir = `${this.tempDir}/hourly_pcaps`;
         // create hourly directory
         try {
-            if (!node_fs_1.default.existsSync(this.workingDir)) {
-                node_fs_1.default.mkdirSync(this.workingDir);
+            if (!(0, node_fs_1.existsSync)(this.workingDir)) {
+                (0, node_fs_1.mkdirSync)(this.workingDir);
             }
         }
         catch (e) {
@@ -528,7 +508,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             }
             return;
         }
-        this.saveMetaFile(IPs);
+        this.saveMetaFile();
         await this.setState('info.recording.running', false, true);
         await this.setState('info.recording.triggerWrite', false, true);
         this.subscribeStates('info.recording.enabled');
@@ -654,7 +634,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             const timeStamp = KISSHomeResearchAdapter.getTimestamp();
             const fileName = `${this.workingDir}/${timeStamp}.pcap`;
             // get file descriptor of a file
-            const fd = node_fs_1.default.openSync(fileName, 'w');
+            const fd = (0, node_fs_1.openSync)(fileName, 'w');
             let offset = 0;
             const magic = packetsToSave[0].readUInt32LE(0);
             const STANDARD_MAGIC = 0xa1b2c3d4;
@@ -679,15 +659,15 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                 byteArray.writeUInt16LE(recording_1.MAX_PACKET_LENGTH, 16);
                 // network type
                 byteArray.writeUInt32LE(this.context.networkType, 20);
-                node_fs_1.default.writeSync(fd, byteArray, 0, byteArray.length, 0);
+                (0, node_fs_1.writeSync)(fd, byteArray, 0, byteArray.length, 0);
                 offset = byteArray.length;
             }
             for (let i = 0; i < packetsToSave.length; i++) {
                 const packet = packetsToSave[i];
-                node_fs_1.default.writeSync(fd, packet, 0, packet.length, offset);
+                (0, node_fs_1.writeSync)(fd, packet, 0, packet.length, offset);
                 offset += packet.length;
             }
-            node_fs_1.default.closeSync(fd);
+            (0, node_fs_1.closeSync)(fd);
             if (this.language === 'de') {
                 this.log.debug(`Datei ${fileName} mit ${size2text(offset)} gespeichert`);
             }
@@ -698,7 +678,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         this.context.lastSaved = Date.now();
     }
     calculateMd5(content) {
-        const hash = node_crypto_1.default.createHash('md5');
+        const hash = (0, node_crypto_1.createHash)('md5');
         hash.update(content);
         return hash.digest('hex');
     }
@@ -842,27 +822,30 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         const now = new Date();
         return `${now.getUTCFullYear()}-${(now.getUTCMonth() + 1).toString().padStart(2, '0')}-${now.getUTCDate().toString().padStart(2, '0')}_${now.getUTCHours().toString().padStart(2, '0')}-${now.getUTCMinutes().toString().padStart(2, '0')}-${now.getUTCSeconds().toString().padStart(2, '0')}`;
     }
-    saveMetaFile(IPs) {
-        const text = KISSHomeResearchAdapter.getDescriptionFile(IPs);
-        const newFile = `${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}_meta.json`;
+    saveMetaFile() {
+        const text = KISSHomeResearchAdapter.getDescriptionFile(this.IPs);
+        const newFile = `${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}_v${this.versionPack}_meta.json`;
         try {
             // find the latest file
-            const files = node_fs_1.default.readdirSync(this.workingDir);
+            const files = (0, node_fs_1.readdirSync)(this.workingDir);
+            // sort descending
             files.sort((a, b) => b.localeCompare(a));
             let latestFile = '';
             // find the latest file and delete all other _meta.json files
             for (const file of files) {
+                // Take the newest file as the latest file
                 if (!latestFile && file.endsWith('_meta.json')) {
                     latestFile = file;
                 }
                 else if (file.endsWith('_meta.json')) {
-                    node_fs_1.default.unlinkSync(`${this.workingDir}/${file}`);
+                    // delete all other _meta.json files
+                    (0, node_fs_1.unlinkSync)(`${this.workingDir}/${file}`);
                 }
             }
             // if existing meta file found
             if (latestFile) {
                 // compare the content
-                const oldFile = node_fs_1.default.readFileSync(`${this.workingDir}/${latestFile}`, 'utf8');
+                const oldFile = (0, node_fs_1.readFileSync)(`${this.workingDir}/${latestFile}`, 'utf8');
                 if (oldFile !== text) {
                     if (this.language === 'de') {
                         this.log.debug('Meta-Datei aktualisiert');
@@ -870,20 +853,21 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                     else {
                         this.log.debug('Meta file updated');
                     }
-                    node_fs_1.default.unlinkSync(`${this.workingDir}/${latestFile}`);
-                    node_fs_1.default.writeFileSync(newFile, text);
+                    (0, node_fs_1.unlinkSync)(`${this.workingDir}/${latestFile}`);
+                    (0, node_fs_1.writeFileSync)(newFile, text);
+                    return newFile;
                 }
+                return `${this.workingDir}/${latestFile}`;
+            }
+            if (this.language === 'de') {
+                this.log.info('Meta-Datei wurde angelegt.');
             }
             else {
-                if (this.language === 'de') {
-                    this.log.info('Meta-Datei wurde angelegt.');
-                }
-                else {
-                    this.log.info('Meta file created');
-                }
-                // if not found => create new one
-                node_fs_1.default.writeFileSync(newFile, text);
+                this.log.info('Meta file created');
             }
+            // if not found => create new one
+            (0, node_fs_1.writeFileSync)(newFile, text);
+            return newFile;
         }
         catch (e) {
             if (this.language === 'de') {
@@ -892,6 +876,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             else {
                 this.log.warn(`Cannot save meta file "${newFile}": ${e}`);
             }
+            return '';
         }
     }
     static getDescriptionFile(IPs) {
@@ -974,11 +959,11 @@ class KISSHomeResearchAdapter extends utils.Adapter {
     }
     clearWorkingDir() {
         try {
-            const files = node_fs_1.default.readdirSync(this.workingDir);
+            const files = (0, node_fs_1.readdirSync)(this.workingDir);
             for (const file of files) {
                 if (file.endsWith('.pcap')) {
                     try {
-                        node_fs_1.default.unlinkSync(`${this.workingDir}/${file}`);
+                        (0, node_fs_1.unlinkSync)(`${this.workingDir}/${file}`);
                     }
                     catch (e) {
                         if (this.language === 'de') {
@@ -992,7 +977,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                 else if (!file.endsWith('.json')) {
                     // delete unknown files
                     try {
-                        node_fs_1.default.unlinkSync(`${this.workingDir}/${file}`);
+                        (0, node_fs_1.unlinkSync)(`${this.workingDir}/${file}`);
                     }
                     catch (e) {
                         if (this.language === 'de') {
@@ -1017,8 +1002,8 @@ class KISSHomeResearchAdapter extends utils.Adapter {
     async sendOneFileToCloud(fileName) {
         var _a, _b;
         try {
-            const data = node_fs_1.default.readFileSync(fileName);
-            const name = node_path_1.default.basename(fileName);
+            const data = (0, node_fs_1.readFileSync)(fileName);
+            const name = (0, node_path_1.basename)(fileName);
             const len = data.length;
             const md5 = this.calculateMd5(data);
             // check if the file was sent successfully
@@ -1035,7 +1020,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
                 if (responseCheck.status === 200 && responseCheck.data === md5) {
                     // file already uploaded, do not upload it again
                     if (name.endsWith('.pcap')) {
-                        node_fs_1.default.unlinkSync(fileName);
+                        (0, node_fs_1.unlinkSync)(fileName);
                     }
                     return;
                 }
@@ -1053,7 +1038,7 @@ class KISSHomeResearchAdapter extends utils.Adapter {
             const response = await axios_1.default.get(`https://${PCAP_HOST}/api/v1/upload/${encodeURIComponent(this.config.email)}/${encodeURIComponent(name)}?key=${encodeURIComponent(this.publicKey)}&uuid=${encodeURIComponent(this.uuid)}`);
             if (response.status === 200 && response.data === md5) {
                 if (name.endsWith('.pcap')) {
-                    node_fs_1.default.unlinkSync(fileName);
+                    (0, node_fs_1.unlinkSync)(fileName);
                 }
                 if (this.language === 'de') {
                     this.log.debug(`[RSYNC] Datei ${fileName}(${size2text(len)}) an die Cloud gesendet: ${responsePost.status}`);
@@ -1102,10 +1087,10 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         let pcapFiles;
         let allFiles;
         try {
-            allFiles = node_fs_1.default.readdirSync(this.workingDir);
+            allFiles = (0, node_fs_1.readdirSync)(this.workingDir);
             pcapFiles = allFiles.filter(f => f.endsWith('.pcap'));
             for (const file of pcapFiles) {
-                totalBytes += node_fs_1.default.statSync(`${this.workingDir}/${file}`).size;
+                totalBytes += (0, node_fs_1.statSync)(`${this.workingDir}/${file}`).size;
             }
         }
         catch (e) {
@@ -1186,10 +1171,27 @@ class KISSHomeResearchAdapter extends utils.Adapter {
         // });
         // send files to the cloud
         // first send meta files
+        let sent = false;
         for (let i = 0; i < allFiles.length; i++) {
             const file = allFiles[i];
             if (file.endsWith('.json')) {
                 await this.sendOneFileToCloud(`${this.workingDir}/${file}`);
+                sent = true;
+            }
+        }
+        if (!sent) {
+            // create meta file anew and send it to the cloud
+            const fileName = this.saveMetaFile();
+            if (fileName) {
+                await this.sendOneFileToCloud(fileName);
+            }
+            else if (this.language === 'de') {
+                this.log.debug(`[RSYNC] Kann die META Datei nicht anlegen. Keine Synchronisierung`);
+                return;
+            }
+            else {
+                this.log.debug(`[RSYNC] Cannot create META file. No synchronization`);
+                return;
             }
         }
         // send all pcap files

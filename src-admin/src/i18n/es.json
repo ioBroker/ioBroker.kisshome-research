@@ -6,5 +6,9 @@
   "custom_kisshome_mac": "Dirección MAC",
   "custom_kisshome_select_all": "Activar todo",
   "custom_kisshome_unselect_all": "Desactivar todo",
-  "custom_kisshome_You cannot record the traffic of Fritz!Box": "No puedes grabar el tráfico de Fritz!Box"
+  "custom_kisshome_You cannot record the traffic of Fritz!Box": "No puedes grabar el tráfico de Fritz!Box",
+  "custom_kisshome_name_too_short": "La descripción es demasiado corta (mínimo 3 caracteres)",
+  "custom_kisshome_name_ip_and_mac_missing": "Se debe proporcionar la dirección IP o MAC",
+  "custom_kisshome_name_invalid_ip": "Dirección IP no válida",
+  "custom_kisshome_name_invalid_mac": "Dirección MAC no válida"
 }
