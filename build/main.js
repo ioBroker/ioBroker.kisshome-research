@@ -61,7 +61,7 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
         this.recordingEnabled = false;
         this.IPs = [];
         const pack = JSON.parse((0, node_fs_1.readFileSync)((0, node_path_1.join)(__dirname, '..', 'package.json'), 'utf8'));
-        this.versionPack = pack.version.replace(/\./g, '_');
+        this.versionPack = pack.version.replace(/\./g, '-');
         this.on('ready', () => this.onReady());
         this.on('unload', callback => this.onUnload(callback));
         this.on('message', this.onMessage.bind(this));

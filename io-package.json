@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "news": {
+      "1.1.1": {
+        "en": "Removed unused code\nCreation of META file if not exists\nDescription for address must be longer than three characters\nAdded adapter version to the meta file name",
+        "de": "Unbenutzter Code entfernt\nErstellung der META-Datei, wenn nicht vorhanden\nBeschreibung der Adresse muss länger als drei Zeichen sein\nAdapterversion zum Meta-Dateinamen hinzugefügt",
+        "ru": "Удаленный неиспользуемый код\nСоздание файла META, если не существует\nОписание адреса должно быть более трех символов\nДобавлена версия адаптера к мета-имя файла",
+        "pt": "Removido código não utilizado\nCriação de arquivo META se não existir\nDescrição do endereço deve ser maior que três caracteres\nAdicionado versão do adaptador para o nome do arquivo meta",
+        "nl": "Ongebruikte code verwijderd\nAanmaken van META-bestand indien niet bestaat\nBeschrijving van het adres moet langer zijn dan drie tekens\nAdapterversie toegevoegd aan de meta-bestandsnaam",
+        "fr": "Code inutilisé supprimé\nCréation du fichier META s'il n'existe pas\nLa description de l'adresse doit être supérieure à trois caractères\nAjout de la version adaptateur au nom du fichier méta",
+        "it": "Codice inutilizzato rimosso\nCreazione del file META se non esiste\nDescrizione per indirizzo deve essere più lungo di tre caratteri\nVersione adattatore aggiunto al nome del file meta",
+        "es": "Eliminado código no utilizado\nCreación de archivo META si no existe\nDescripción para la dirección debe ser más largo que tres caracteres\nVersión de adaptador a la meta nombre del archivo",
+        "pl": "Usunięto niewykorzystany kod\nTworzenie pliku META, jeśli nie istnieje\nOpis adresu musi być dłuższy niż trzy znaki\nDodano wersję adaptera do nazwy pliku meta",
+        "uk": "Видалити невикористаний код\nСтворення файлу META, якщо не існує\nОпис на адресу необхідно довше трьох символів\nДодано версію адаптера до назв файлів мета",
+        "zh-cn": "删除未使用的代码\n如果不存在, 则创建 META 文件\n地址描述必须超过三个字符\n添加适配器版本到元文件名"
+      },
       "1.0.13": {
         "en": "Used actual IP and TCP header length for the PCAP file",
         "de": "Gebrauchte tatsächliche IP- und TCP-Headerlänge für die PCAP-Datei",
