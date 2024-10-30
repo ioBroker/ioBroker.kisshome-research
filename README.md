@@ -33,7 +33,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.1.0 (2024-10-30)
 -   (bluefox) Removed unused code
 -   (bluefox) Creation of META file if not exists
 -   (bluefox) Description for address must be longer than three characters
