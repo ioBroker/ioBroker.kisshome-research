@@ -24,6 +24,10 @@ function analyzePacket(context: Context): boolean {
         return false;
     }
     const len = context.buffer.byteLength || 0;
+    // Normal header is 16 bytes
+    // modifiedMagic is true if the header is in Little-Endian format, and extended packet header (8 bytes more)
+    // libpCapFormat is true if the header is in Big-Endian format and extended packet header (8 bytes more)
+
     // first 4 bytes are timestamp in seconds
     // next 4 bytes are timestamp in microseconds
     // next 4 bytes are packet length saved in file
@@ -75,7 +79,6 @@ function analyzePacket(context: Context): boolean {
     if (offset + 2 <= len) {
         // next 2 bytes are Ethernet type
         const ethType = context.buffer.readUInt16BE(offset);
-        const ethTypeModified = offset + 20 <= len ? context.buffer.readUInt16BE(offset + 18) : 0;
 
         // If IPv4
         if (ethType === 0x0800) {
@@ -95,32 +98,6 @@ function analyzePacket(context: Context): boolean {
             } else if (protocolType === 17) {
                 // UDP
                 maxBytes = ipHeaderLength + 8 + 14; // IP header + 8 bytes UDP header + Ethernet header
-            } else if (protocolType === 1) {
-                // ICMP
-                maxBytes = 0;
-            } else {
-                maxBytes = 0;
-            }
-        } else if (ethTypeModified === 0x0800) {
-            const ipHeaderStart = offset + 2 + 18; // What is 18?
-            const ipVersionAndIHL = context.buffer[ipHeaderStart];
-            const ipHeaderLength = (ipVersionAndIHL & 0x0f) * 4; // IHL field gives the length of the IP header
-
-            // read protocol type (TCP/UDP/ICMP/etc.)
-            const protocolType = context.buffer[ipHeaderStart + 9]; // Protocol field in IP header
-
-            if (protocolType === 6) {
-                // TCP
-                const tcpHeaderStart = ipHeaderStart + ipHeaderLength;
-                const tcpOffsetAndFlags = context.buffer[tcpHeaderStart + 12];
-                const tcpHeaderLength = (tcpOffsetAndFlags >> 4) * 4; // Data offset in TCP header
-                maxBytes = ipHeaderLength + tcpHeaderLength + 14 + 18; // Total length: IP header + TCP header + Ethernet header
-            } else if (protocolType === 17) {
-                // UDP
-                maxBytes = ipHeaderLength + 8 + 14 + 18; // IP header + 8 bytes UDP header + Ethernet header
-            } else if (protocolType === 1) {
-                // ICMP
-                maxBytes = 0;
             } else {
                 maxBytes = 0;
             }
