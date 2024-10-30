@@ -33,10 +33,11 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### 1.1.0 (2024-10-30)
+### **WORK IN PROGRESS**
 -   (bluefox) Removed unused code
 -   (bluefox) Creation of META file if not exists
 -   (bluefox) Description for address must be longer than three characters
+-   (bluefox) Added adapter version to the meta file name
 
 ### 1.0.13 (2024-10-17)
 -   (gsenkowski) Used actual IP and TCP header length for the PCAP file

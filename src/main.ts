@@ -139,7 +139,7 @@ export class KISSHomeResearchAdapter extends Adapter {
         });
 
         const pack = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8'));
-        this.versionPack = pack.version.replace(/\./g, '_');
+        this.versionPack = pack.version.replace(/\./g, '-');
 
         this.on('ready', () => this.onReady());
         this.on('unload', callback => this.onUnload(callback));
