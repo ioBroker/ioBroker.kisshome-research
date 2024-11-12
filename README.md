@@ -33,7 +33,7 @@ Detect IP addresses from:
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.1.2 (2024-11-12)
 -   (bluefox) Corrected the input of IP addresses in the configuration
 
 ### 1.1.1 (2024-10-30)
