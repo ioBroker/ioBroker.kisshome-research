@@ -10,5 +10,7 @@
   "custom_kisshome_name_too_short": "La descrizione è troppo breve (minimo 3 caratteri)",
   "custom_kisshome_name_ip_and_mac_missing": "È necessario fornire l'indirizzo IP o MAC",
   "custom_kisshome_name_invalid_ip": "Indirizzo IP non valido",
-  "custom_kisshome_name_invalid_mac": "Indirizzo MAC non valido"
+  "custom_kisshome_name_invalid_mac": "Indirizzo MAC non valido",
+  "custom_kisshome_duplicate_ip": "Indirizzo IP duplicato",
+  "custom_kisshome_duplicate_mac": "Indirizzo MAC duplicato"
 }

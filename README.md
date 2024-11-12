@@ -33,6 +33,9 @@ Detect IP addresses from:
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+-   (bluefox) Corrected the input of IP addresses in the configuration
+
 ### 1.1.1 (2024-10-30)
 -   (bluefox) Removed unused code
 -   (bluefox) Creation of META file if not exists

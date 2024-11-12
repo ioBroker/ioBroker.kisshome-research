@@ -10,5 +10,7 @@
   "custom_kisshome_name_too_short": "Описание слишком короткое (минимум 3 символа)",
   "custom_kisshome_name_ip_and_mac_missing": "Необходимо указать IP- или MAC-адрес.",
   "custom_kisshome_name_invalid_ip": "Неверный IP-адрес",
-  "custom_kisshome_name_invalid_mac": "Неверный MAC-адрес"
+  "custom_kisshome_name_invalid_mac": "Неверный MAC-адрес",
+  "custom_kisshome_duplicate_ip": "Дублирующийся IP-адрес",
+  "custom_kisshome_duplicate_mac": "Дублирующийся MAC-адрес"
 }

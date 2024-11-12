@@ -10,5 +10,7 @@
   "custom_kisshome_name_too_short": "Beschrijving is te kort (minimaal 3 tekens)",
   "custom_kisshome_name_ip_and_mac_missing": "IP- of MAC-adres moet worden opgegeven",
   "custom_kisshome_name_invalid_ip": "Ongeldig IP-adres",
-  "custom_kisshome_name_invalid_mac": "Ongeldig MAC-adres"
+  "custom_kisshome_name_invalid_mac": "Ongeldig MAC-adres",
+  "custom_kisshome_duplicate_ip": "Dubbel IP-adres",
+  "custom_kisshome_duplicate_mac": "Dubbel MAC-adres"
 }

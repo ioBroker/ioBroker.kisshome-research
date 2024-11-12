@@ -6,9 +6,11 @@
   "custom_kisshome_mac": "MAC-Adresse",
   "custom_kisshome_select_all": "Alle aktivieren",
   "custom_kisshome_unselect_all": "Alle deaktivieren",
-  "custom_kisshome_You cannot record the traffic of Fritz!Box": "Nur Verkehr von Geräten, nicht der Fritz!Box selbst darf aufgezeichnet werden",
+  "custom_kisshome_You cannot record the traffic of Fritz!Box": "Sie können den Datenverkehr der Fritz!Box nicht aufzeichnen",
   "custom_kisshome_name_too_short": "Beschreibung ist zu kurz (mindestens 3 Zeichen)",
   "custom_kisshome_name_ip_and_mac_missing": "IP- oder MAC-Adresse muss angegeben werden",
   "custom_kisshome_name_invalid_ip": "Ungültige IP-Adresse",
-  "custom_kisshome_name_invalid_mac": "Ungültige MAC-Adresse"
+  "custom_kisshome_name_invalid_mac": "Ungültige MAC-Adresse",
+  "custom_kisshome_duplicate_ip": "Doppelte IP-Adresse",
+  "custom_kisshome_duplicate_mac": "Doppelte MAC-Adresse"
 }

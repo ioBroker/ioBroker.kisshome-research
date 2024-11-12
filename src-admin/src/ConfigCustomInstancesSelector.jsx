@@ -280,9 +280,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             this.resolveMACs();
         }
         this.disableFritzBox();
-        if (!devices.find(item => (item.desc || '').length < 3)) {
-            this.props.onError('devices', I18n.t('custom_kisshome_name_too_short'));
-        }
+        this.checkDevices(devices);
     }
 
     resolveMACs() {
@@ -415,7 +413,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             if (!this.state.alive) {
                 return;
             }
-            // read MACs for all IPs
+            // read MAC-Addresses for all IPs
             const unknownMacs = [];
             const devices = ConfigGeneric.getValue(this.props.data, 'devices') || [];
             const IP2MAC = { ...this.state.IP2MAC };
@@ -635,7 +633,6 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
     }
 
     checkDevices(devices) {
-        let error = false;
         if (devices.find(item => (item.desc || '').length < 3)) {
             this.props.onError('devices', I18n.t('custom_kisshome_name_too_short'));
         } else if (devices.find(item => !item.ip && !item.mac)) {
@@ -645,7 +642,19 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         } else if (devices.find(item => !validateMacAddress(item.mac))) {
             this.props.onError('devices', I18n.t('custom_kisshome_name_invalid_mac'));
         } else {
-            this.props.onError('devices');
+            // try to find duplicates that are enabled
+            const IPs = devices.filter(item => item.enabled && item.ip).map(item => item.ip);
+
+            if (IPs.length !== new Set(IPs).size) {
+                this.props.onError('devices', I18n.t('custom_kisshome_duplicate_ip'));
+            } else {
+                const MACs = devices.filter(item => item.enabled && item.mac).map(item => item.mac);
+                if (MACs.length !== new Set(MACs).size) {
+                    this.props.onError('devices', I18n.t('custom_kisshome_duplicate_mac'));
+                } else {
+                    this.props.onError('devices');
+                }
+            }
         }
     }
 
@@ -661,7 +670,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         });
 
         const notFound = this.state.ips
-            ? devices.filter(iItem => !this.state.ips.find(item => item.ip === iItem.ip))
+            ? devices.filter(iItem => !this.state.ips.find(item => item.ip === iItem.ip && item.uuid === iItem.uuid))
             : devices;
 
         const allEnabled =
@@ -795,13 +804,16 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                             const normalizedIp = normalizeIpAddress(row.ip);
                             const normalizedMac = normalizeMacAddress(row.mac);
                             const possibleMac = this.state.IP2MAC?.[normalizedIp];
+                            const duplicateIp = row.ip && row.enabled && devices.filter(it => row.ip === it.ip).length > 1 ? I18n.t('custom_kisshome_duplicate_ip') : '';
+                            const duplicateMac = row.mac && row.enabled && devices.filter(it => row.mac === it.mac).length > 1 ? I18n.t('custom_kisshome_duplicate_mac') : '';;
+
                             return <TableRow key={row.uuid}>
                                 <TableCell
                                     scope="row"
                                     style={styles.td}
                                 >
                                     <Checkbox
-                                        checked={!!devices.find(item => item.uuid === row.uuid)?.enabled}
+                                        checked={!!row.enabled}
                                         disabled={this.state.runningRequest}
                                         onClick={() => {
                                             const _devices = [
@@ -823,8 +835,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                 <TableCell style={styles.td}>
                                     <TextField
                                         fullWidth
-                                        error={!validateIpAddress(row.ip) || (!row.ip && !row.mac)}
-                                        helperText={validateIpAddress(row.ip) ? (!row.ip && !row.mac ? I18n.t('custom_kisshome_name_ip_and_mac_missing') : '') : I18n.t('custom_kisshome_name_invalid_ip')}
+                                        error={!!duplicateIp || !validateIpAddress(row.ip) || (!row.ip && !row.mac)}
+                                        helperText={duplicateIp || (validateIpAddress(row.ip) ? (!row.ip && !row.mac ? I18n.t('custom_kisshome_name_ip_and_mac_missing') : '') : I18n.t('custom_kisshome_name_invalid_ip'))}
                                         value={row.ip}
                                         disabled={this.state.runningRequest}
                                         placeholder="192.168.x.y"
@@ -867,8 +879,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                                         fullWidth
                                         value={row.mac}
                                         disabled={this.state.runningRequest}
-                                        error={!validateMacAddress(row.mac) || (!row.ip && !row.mac)}
-                                        helperText={validateMacAddress(row.mac) ? (!row.ip && !row.mac ? I18n.t('custom_kisshome_name_ip_and_mac_missing') : '') : I18n.t('custom_kisshome_name_invalid_mac')}
+                                        error={!!duplicateMac || !validateMacAddress(row.mac) || (!row.ip && !row.mac)}
+                                        helperText={duplicateMac ||(validateMacAddress(row.mac) ? (!row.ip && !row.mac ? I18n.t('custom_kisshome_name_ip_and_mac_missing') : '') : I18n.t('custom_kisshome_name_invalid_mac'))}
                                         placeholder={possibleMac || 'XX:XX:XX:XX:XX:XX'}
                                         onChange={e => {
                                             const _devices = [
