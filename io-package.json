@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.1.2",
+    "version": "1.2.0",
     "news": {
+      "1.2.0": {
+        "en": "The keys are stored in `0_userdata.0.kisshomeResearchPublicKey` to make it possible to uninstall and install the adapter again without any problems\nCorrected problem with PCAP files without the META-description",
+        "de": "Die Schlüssel werden in `0_userdata.0.kisshomeResearchPublicKey` gespeichert, um den Adapter ohne Probleme wieder zu deinstallieren und zu installieren\nProblem mit PCAP-Dateien ohne META-Description behoben",
+        "ru": "Ключи хранятся в `0_userdata.0.kisshomeResearchPublicKey», чтобы можно было удалить и установить адаптер снова без каких-либо проблем\nИсправленная проблема с файлами PCAP без подписи META",
+        "pt": "As chaves são armazenadas em `0_userdata.0.kisshomeResearchPublicKey` para tornar possível desinstalar e instalar o adaptador novamente sem problemas\nProblema corrigido com arquivos PCAP sem a descrição META",
+        "nl": "De sleutels worden opgeslagen in \nGecorrigeerd probleem met PCAP-bestanden zonder de META-beschrijving",
+        "fr": "Les clés sont stockées dans `0_userdata.0.kisshomeRecherchePublicKey` pour permettre de désinstaller et installer l`adaptateur à nouveau sans aucun problème\nCorrection du problème avec les fichiers PCAP sans la description META",
+        "it": "Le chiavi sono memorizzate in `0_userdata.0.kisshomeResearchPublicKey` per consentire di disinstallare e installare nuovamente l'adattatore senza problemi\nProblema corretto con i file PCAP senza la descrizione META",
+        "es": "Las teclas se almacenan en `0_userdata.0.kisshomeResearchPublicKey` para hacer posible desinstalar e instalar el adaptador de nuevo sin problemas\nProblema corregido con los archivos PCAP sin la descripción META",
+        "pl": "Klucze są przechowywane w '0 _ userdata.0.kisshomeResearchPublicKey', aby umożliwić ponowne odblokowanie i zainstalowanie adaptera bez żadnych problemów\nNaprawiony problem z plikami PCAP bez opisu META",
+        "uk": "Ключі зберігаються в `0_userdata.0.kisshomeResearchPublicKey`, щоб зробити його можливим для видалення та встановлення адаптера знову без проблем\nВиправлена проблема з файлами PCAP без META-description",
+        "zh-cn": "密钥存储在 `0_userdata.0. kisshomeResearch PublicKey' 中,以便可以毫无问题地再次卸载和安装适配器\n在没有 META 描述的情况下纠正 PCAP 文件的问题"
+      },
       "1.1.2": {
         "en": "Corrected the input of IP addresses in the configuration",
         "de": "Die Eingabe von IP-Adressen in der Konfiguration korrigiert",
@@ -80,19 +93,6 @@
         "pl": "Naprawiłem link. md\nPoprawiono Wielkiego Endianina Format PCAP\nstałe rurociąg budowlany",
         "uk": "Виправлено посилання в чителю. мд\nВиправлено великий Формат ПКАП\nфіксований будівельний трубопровод",
         "zh-cn": "更正了readme中的链接. 微额\n纠正了大印地安人 PCAP 格式\n固定建筑管道"
-      },
-      "1.0.5": {
-        "en": "Corrected the link in readme.md\nCorrected the Big-Endian PCAP format",
-        "de": "Korrigierte den Link im Readme. md\nKorrektur des Big-Endian PCAP Format",
-        "ru": "Исправлена ссылка в считывании. md\nИсправлены Большой индейец Формат PCAP",
-        "pt": "Corrigido o link no readme. Md\nCorrigido o Big-Endian Formato PCAP",
-        "nl": "De link in readme gecorrigeerd. md\nGecorrigeerd de Big-Endian PCAP-formaat",
-        "fr": "Corrigé le lien dans readme. md\nCorrigé le Big-Endian Format PAC",
-        "it": "Corretto il link in readme. M\nCorretto il Big-Endian Formato PCAP",
-        "es": "Corregido el enlace en readme. md\nCorregido el Gran Endian Formato PCAP",
-        "pl": "Naprawiłem link. md\nPoprawiono Wielkiego Endianina Format PCAP",
-        "uk": "Виправлено посилання в чителю. мд\nВиправлено великий Формат ПКАП",
-        "zh-cn": "更正了readme中的链接. 微额\n纠正了大印地安人 PCAP 格式"
       }
     },
     "titleLang": {
