@@ -1,481 +1,459 @@
 {
-  "common": {
-    "name": "kisshome-research",
-    "version": "1.2.0",
-    "news": {
-      "1.2.0": {
-        "en": "The keys are stored in `0_userdata.0.kisshomeResearchPublicKey` to make it possible to uninstall and install the adapter again without any problems\nCorrected problem with PCAP files without the META-description",
-        "de": "Die Schlüssel werden in `0_userdata.0.kisshomeResearchPublicKey` gespeichert, um den Adapter ohne Probleme wieder zu deinstallieren und zu installieren\nProblem mit PCAP-Dateien ohne META-Description behoben",
-        "ru": "Ключи хранятся в `0_userdata.0.kisshomeResearchPublicKey», чтобы можно было удалить и установить адаптер снова без каких-либо проблем\nИсправленная проблема с файлами PCAP без подписи META",
-        "pt": "As chaves são armazenadas em `0_userdata.0.kisshomeResearchPublicKey` para tornar possível desinstalar e instalar o adaptador novamente sem problemas\nProblema corrigido com arquivos PCAP sem a descrição META",
-        "nl": "De sleutels worden opgeslagen in \nGecorrigeerd probleem met PCAP-bestanden zonder de META-beschrijving",
-        "fr": "Les clés sont stockées dans `0_userdata.0.kisshomeRecherchePublicKey` pour permettre de désinstaller et installer l`adaptateur à nouveau sans aucun problème\nCorrection du problème avec les fichiers PCAP sans la description META",
-        "it": "Le chiavi sono memorizzate in `0_userdata.0.kisshomeResearchPublicKey` per consentire di disinstallare e installare nuovamente l'adattatore senza problemi\nProblema corretto con i file PCAP senza la descrizione META",
-        "es": "Las teclas se almacenan en `0_userdata.0.kisshomeResearchPublicKey` para hacer posible desinstalar e instalar el adaptador de nuevo sin problemas\nProblema corregido con los archivos PCAP sin la descripción META",
-        "pl": "Klucze są przechowywane w '0 _ userdata.0.kisshomeResearchPublicKey', aby umożliwić ponowne odblokowanie i zainstalowanie adaptera bez żadnych problemów\nNaprawiony problem z plikami PCAP bez opisu META",
-        "uk": "Ключі зберігаються в `0_userdata.0.kisshomeResearchPublicKey`, щоб зробити його можливим для видалення та встановлення адаптера знову без проблем\nВиправлена проблема з файлами PCAP без META-description",
-        "zh-cn": "密钥存储在 `0_userdata.0. kisshomeResearch PublicKey' 中,以便可以毫无问题地再次卸载和安装适配器\n在没有 META 描述的情况下纠正 PCAP 文件的问题"
-      },
-      "1.1.2": {
-        "en": "Corrected the input of IP addresses in the configuration",
-        "de": "Die Eingabe von IP-Adressen in der Konfiguration korrigiert",
-        "ru": "Исправлен ввод IP-адресов в конфигурации",
-        "pt": "Corrigido a entrada de endereços IP na configuração",
-        "nl": "De invoer van IP-adressen in de configuratie corrigeren",
-        "fr": "Correction de l'entrée des adresses IP dans la configuration",
-        "it": "Corretto l'ingresso degli indirizzi IP nella configurazione",
-        "es": "Corregido la entrada de direcciones IP en la configuración",
-        "pl": "Poprawiono wejście adresów IP w konfiguracji",
-        "uk": "Виправлено введення IP-адрес в конфігурації",
-        "zh-cn": "纠正配置中 IP 地址的输入"
-      },
-      "1.1.1": {
-        "en": "Removed unused code\nCreation of META file if not exists\nDescription for address must be longer than three characters\nAdded adapter version to the meta file name",
-        "de": "Unbenutzter Code entfernt\nErstellung der META-Datei, wenn nicht vorhanden\nBeschreibung der Adresse muss länger als drei Zeichen sein\nAdapterversion zum Meta-Dateinamen hinzugefügt",
-        "ru": "Удаленный неиспользуемый код\nСоздание файла META, если не существует\nОписание адреса должно быть более трех символов\nДобавлена версия адаптера к мета-имя файла",
-        "pt": "Removido código não utilizado\nCriação de arquivo META se não existir\nDescrição do endereço deve ser maior que três caracteres\nAdicionado versão do adaptador para o nome do arquivo meta",
-        "nl": "Ongebruikte code verwijderd\nAanmaken van META-bestand indien niet bestaat\nBeschrijving van het adres moet langer zijn dan drie tekens\nAdapterversie toegevoegd aan de meta-bestandsnaam",
-        "fr": "Code inutilisé supprimé\nCréation du fichier META s'il n'existe pas\nLa description de l'adresse doit être supérieure à trois caractères\nAjout de la version adaptateur au nom du fichier méta",
-        "it": "Codice inutilizzato rimosso\nCreazione del file META se non esiste\nDescrizione per indirizzo deve essere più lungo di tre caratteri\nVersione adattatore aggiunto al nome del file meta",
-        "es": "Eliminado código no utilizado\nCreación de archivo META si no existe\nDescripción para la dirección debe ser más largo que tres caracteres\nVersión de adaptador a la meta nombre del archivo",
-        "pl": "Usunięto niewykorzystany kod\nTworzenie pliku META, jeśli nie istnieje\nOpis adresu musi być dłuższy niż trzy znaki\nDodano wersję adaptera do nazwy pliku meta",
-        "uk": "Видалити невикористаний код\nСтворення файлу META, якщо не існує\nОпис на адресу необхідно довше трьох символів\nДодано версію адаптера до назв файлів мета",
-        "zh-cn": "删除未使用的代码\n如果不存在, 则创建 META 文件\n地址描述必须超过三个字符\n添加适配器版本到元文件名"
-      },
-      "1.0.13": {
-        "en": "Used actual IP and TCP header length for the PCAP file",
-        "de": "Gebrauchte tatsächliche IP- und TCP-Headerlänge für die PCAP-Datei",
-        "ru": "Используется фактическая длина заголовка IP и TCP для файла PCAP",
-        "pt": "Usado o comprimento real do cabeçalho IP e TCP para o arquivo PCAP",
-        "nl": "Gebruikte werkelijke IP en TCP header lengte voor het PCAP bestand",
-        "fr": "Longueur réelle de l'en-tête IP et TCP utilisée pour le fichier PACP",
-        "it": "Usata lunghezza effettiva dell'intestazione IP e TCP per il file PCAP",
-        "es": "Longitud de cabecera IP y TCP para el archivo PCAP",
-        "pl": "Użyta rzeczywista długość nagłówka IP i TCP dla pliku PCAP",
-        "uk": "Використовується фактична довжина заголовка IP і TCP для файла PCAP",
-        "zh-cn": "PCAP 文件使用的实际IP和TCP头长"
-      },
-      "1.0.11": {
-        "en": "Trying to fix CI\nDo not allow the traffic recording of FritzBox \nDo not allow recording the traffic if no any MAC provided\nCorrected links to web page",
-        "de": "Versuchen, CI zu reparieren\nDie Verkehrsaufzeichnung von FritzBox nicht zulassen\nNicht zulassen, dass der Verkehr aufgezeichnet wird, wenn kein MAC zur Verfügung gestellt wird\nKorrigierte Links zur Webseite",
-        "ru": "Попытка исправить CI\nНе позволяйте записи трафика FritzBox\nНе позволяйте записывать трафик, если не предусмотрено MAC\nИсправленные ссылки на веб-страницу",
-        "pt": "Tentando corrigir CI\nNão permita a gravação de tráfego de FritzBox\nNão permita gravar o tráfego se nenhum MAC fornecido\nLinks corretos para a página da web",
-        "nl": "Proberen CI te repareren\nLaat de verkeersregistratie van FritzBox niet toe\nOpname van het verkeer is niet toegestaan als er geen MAC beschikbaar is\nGecorrigeerde links naar webpagina",
-        "fr": "Essayer de corriger CI\nNe pas autoriser l'enregistrement du trafic de FritzBox\nNe pas autoriser l'enregistrement du trafic si aucune MAC n'est fournie\nLiens corrigés vers la page Web",
-        "it": "Cercare di risolvere CI\nNon permettere la registrazione del traffico di FritzBox\nNon permettere la registrazione del traffico se non è fornito alcun MAC\nLink corretti alla pagina web",
-        "es": "Intenta arreglar CI\nNo permita la grabación de tráfico de FritzBox\nNo permita grabar el tráfico si no se proporciona ningún MAC\nEnlaces corregidos a la página web",
-        "pl": "Próbuję naprawić CI\nNie zezwalaj na rejestrowanie ruchu FritzBox\nNie wolno rejestrować ruchu, jeżeli nie dostarczono żadnego MAC\nSkorygowane linki do strony internetowej",
-        "uk": "Спробуйте виправити CI\nНе дозволяйте запис трафіку FritzBox\nНе дозволяйте записувати трафік, якщо не передбачено MAC\nВиправлені посилання на сторінку",
-        "zh-cn": "试图修复 CI\n不允许对 FritzBox 进行流量记录\n如果没有提供任何MAC,则不允许记录流量\n已更正的网页链接"
-      },
-      "1.0.7": {
-        "en": "Corrected the error if MAC address cannot be determined",
-        "de": "Korrektur des Fehlers, wenn die MAC-Adresse nicht ermittelt werden kann",
-        "ru": "Исправлена ошибка, если MAC-адрес не может быть определен",
-        "pt": "Corrigido o erro se o endereço MAC não puder ser determinado",
-        "nl": "Fout gecorrigeerd als het MAC-adres niet kan worden bepaald",
-        "fr": "Correction de l'erreur si l'adresse MAC ne peut pas être déterminée",
-        "it": "Corretto l'errore se l'indirizzo MAC non può essere determinato",
-        "es": "Corregido el error si no se puede determinar la dirección MAC",
-        "pl": "Korekta błędu, jeżeli adres MAC nie może być określony",
-        "uk": "Виправлено помилку, якщо MAC адреса не може бути визначена",
-        "zh-cn": "如果无法确定 MAC 地址, 则更正了错误"
-      },
-      "1.0.6": {
-        "en": "Corrected the link in readme.md\nCorrected the Big-Endian PCAP format\nthe Fixed build pipeline",
-        "de": "Korrigierte den Link im Readme. md\nKorrektur des Big-Endian PCAP Format\ndie Fixed Build Pipeline",
-        "ru": "Исправлена ссылка в считывании. md\nИсправлены Большой индейец Формат PCAP\nfixed build pipeline",
-        "pt": "Corrigido o link no readme. Md\nCorrigido o Big-Endian Formato PCAP\no pipeline de construção fixa",
-        "nl": "De link in readme gecorrigeerd. md\nGecorrigeerd de Big-Endian PCAP-formaat\nde vaste bouwpijpleiding",
-        "fr": "Corrigé le lien dans readme. md\nCorrigé le Big-Endian Format PAC\nle pipeline de construction fixe",
-        "it": "Corretto il link in readme. M\nCorretto il Big-Endian Formato PCAP\nla pipeline di costruzione fissa",
-        "es": "Corregido el enlace en readme. md\nCorregido el Gran Endian Formato PCAP\nla tubería de construcción fija",
-        "pl": "Naprawiłem link. md\nPoprawiono Wielkiego Endianina Format PCAP\nstałe rurociąg budowlany",
-        "uk": "Виправлено посилання в чителю. мд\nВиправлено великий Формат ПКАП\nфіксований будівельний трубопровод",
-        "zh-cn": "更正了readme中的链接. 微额\n纠正了大印地安人 PCAP 格式\n固定建筑管道"
-      }
+    "common": {
+        "name": "kisshome-research",
+        "version": "1.2.0",
+        "news": {
+            "1.1.2": {
+                "en": "Corrected the input of IP addresses in the configuration",
+                "de": "Die Eingabe von IP-Adressen in der Konfiguration korrigiert",
+                "ru": "Исправлен ввод IP-адресов в конфигурации",
+                "pt": "Corrigido a entrada de endereços IP na configuração",
+                "nl": "De invoer van IP-adressen in de configuratie corrigeren",
+                "fr": "Correction de l'entrée des adresses IP dans la configuration",
+                "it": "Corretto l'ingresso degli indirizzi IP nella configurazione",
+                "es": "Corregido la entrada de direcciones IP en la configuración",
+                "pl": "Poprawiono wejście adresów IP w konfiguracji",
+                "uk": "Виправлено введення IP-адрес в конфігурації",
+                "zh-cn": "纠正配置中 IP 地址的输入"
+            },
+            "1.1.1": {
+                "en": "Removed unused code\nCreation of META file if not exists\nDescription for address must be longer than three characters\nAdded adapter version to the meta file name",
+                "de": "Unbenutzter Code entfernt\nErstellung der META-Datei, wenn nicht vorhanden\nBeschreibung der Adresse muss länger als drei Zeichen sein\nAdapterversion zum Meta-Dateinamen hinzugefügt",
+                "ru": "Удаленный неиспользуемый код\nСоздание файла META, если не существует\nОписание адреса должно быть более трех символов\nДобавлена версия адаптера к мета-имя файла",
+                "pt": "Removido código não utilizado\nCriação de arquivo META se não existir\nDescrição do endereço deve ser maior que três caracteres\nAdicionado versão do adaptador para o nome do arquivo meta",
+                "nl": "Ongebruikte code verwijderd\nAanmaken van META-bestand indien niet bestaat\nBeschrijving van het adres moet langer zijn dan drie tekens\nAdapterversie toegevoegd aan de meta-bestandsnaam",
+                "fr": "Code inutilisé supprimé\nCréation du fichier META s'il n'existe pas\nLa description de l'adresse doit être supérieure à trois caractères\nAjout de la version adaptateur au nom du fichier méta",
+                "it": "Codice inutilizzato rimosso\nCreazione del file META se non esiste\nDescrizione per indirizzo deve essere più lungo di tre caratteri\nVersione adattatore aggiunto al nome del file meta",
+                "es": "Eliminado código no utilizado\nCreación de archivo META si no existe\nDescripción para la dirección debe ser más largo que tres caracteres\nVersión de adaptador a la meta nombre del archivo",
+                "pl": "Usunięto niewykorzystany kod\nTworzenie pliku META, jeśli nie istnieje\nOpis adresu musi być dłuższy niż trzy znaki\nDodano wersję adaptera do nazwy pliku meta",
+                "uk": "Видалити невикористаний код\nСтворення файлу META, якщо не існує\nОпис на адресу необхідно довше трьох символів\nДодано версію адаптера до назв файлів мета",
+                "zh-cn": "删除未使用的代码\n如果不存在, 则创建 META 文件\n地址描述必须超过三个字符\n添加适配器版本到元文件名"
+            },
+            "1.0.13": {
+                "en": "Used actual IP and TCP header length for the PCAP file",
+                "de": "Gebrauchte tatsächliche IP- und TCP-Headerlänge für die PCAP-Datei",
+                "ru": "Используется фактическая длина заголовка IP и TCP для файла PCAP",
+                "pt": "Usado o comprimento real do cabeçalho IP e TCP para o arquivo PCAP",
+                "nl": "Gebruikte werkelijke IP en TCP header lengte voor het PCAP bestand",
+                "fr": "Longueur réelle de l'en-tête IP et TCP utilisée pour le fichier PACP",
+                "it": "Usata lunghezza effettiva dell'intestazione IP e TCP per il file PCAP",
+                "es": "Longitud de cabecera IP y TCP para el archivo PCAP",
+                "pl": "Użyta rzeczywista długość nagłówka IP i TCP dla pliku PCAP",
+                "uk": "Використовується фактична довжина заголовка IP і TCP для файла PCAP",
+                "zh-cn": "PCAP 文件使用的实际IP和TCP头长"
+            },
+            "1.0.11": {
+                "en": "Trying to fix CI\nDo not allow the traffic recording of FritzBox \nDo not allow recording the traffic if no any MAC provided\nCorrected links to web page",
+                "de": "Versuchen, CI zu reparieren\nDie Verkehrsaufzeichnung von FritzBox nicht zulassen\nNicht zulassen, dass der Verkehr aufgezeichnet wird, wenn kein MAC zur Verfügung gestellt wird\nKorrigierte Links zur Webseite",
+                "ru": "Попытка исправить CI\nНе позволяйте записи трафика FritzBox\nНе позволяйте записывать трафик, если не предусмотрено MAC\nИсправленные ссылки на веб-страницу",
+                "pt": "Tentando corrigir CI\nNão permita a gravação de tráfego de FritzBox\nNão permita gravar o tráfego se nenhum MAC fornecido\nLinks corretos para a página da web",
+                "nl": "Proberen CI te repareren\nLaat de verkeersregistratie van FritzBox niet toe\nOpname van het verkeer is niet toegestaan als er geen MAC beschikbaar is\nGecorrigeerde links naar webpagina",
+                "fr": "Essayer de corriger CI\nNe pas autoriser l'enregistrement du trafic de FritzBox\nNe pas autoriser l'enregistrement du trafic si aucune MAC n'est fournie\nLiens corrigés vers la page Web",
+                "it": "Cercare di risolvere CI\nNon permettere la registrazione del traffico di FritzBox\nNon permettere la registrazione del traffico se non è fornito alcun MAC\nLink corretti alla pagina web",
+                "es": "Intenta arreglar CI\nNo permita la grabación de tráfico de FritzBox\nNo permita grabar el tráfico si no se proporciona ningún MAC\nEnlaces corregidos a la página web",
+                "pl": "Próbuję naprawić CI\nNie zezwalaj na rejestrowanie ruchu FritzBox\nNie wolno rejestrować ruchu, jeżeli nie dostarczono żadnego MAC\nSkorygowane linki do strony internetowej",
+                "uk": "Спробуйте виправити CI\nНе дозволяйте запис трафіку FritzBox\nНе дозволяйте записувати трафік, якщо не передбачено MAC\nВиправлені посилання на сторінку",
+                "zh-cn": "试图修复 CI\n不允许对 FritzBox 进行流量记录\n如果没有提供任何MAC,则不允许记录流量\n已更正的网页链接"
+            },
+            "1.0.7": {
+                "en": "Corrected the error if MAC address cannot be determined",
+                "de": "Korrektur des Fehlers, wenn die MAC-Adresse nicht ermittelt werden kann",
+                "ru": "Исправлена ошибка, если MAC-адрес не может быть определен",
+                "pt": "Corrigido o erro se o endereço MAC não puder ser determinado",
+                "nl": "Fout gecorrigeerd als het MAC-adres niet kan worden bepaald",
+                "fr": "Correction de l'erreur si l'adresse MAC ne peut pas être déterminée",
+                "it": "Corretto l'errore se l'indirizzo MAC non può essere determinato",
+                "es": "Corregido el error si no se puede determinar la dirección MAC",
+                "pl": "Korekta błędu, jeżeli adres MAC nie może być określony",
+                "uk": "Виправлено помилку, якщо MAC адреса не може бути визначена",
+                "zh-cn": "如果无法确定 MAC 地址, 则更正了错误"
+            },
+            "1.0.6": {
+                "en": "Corrected the link in readme.md\nCorrected the Big-Endian PCAP format\nthe Fixed build pipeline",
+                "de": "Korrigierte den Link im Readme. md\nKorrektur des Big-Endian PCAP Format\ndie Fixed Build Pipeline",
+                "ru": "Исправлена ссылка в считывании. md\nИсправлены Большой индейец Формат PCAP\nfixed build pipeline",
+                "pt": "Corrigido o link no readme. Md\nCorrigido o Big-Endian Formato PCAP\no pipeline de construção fixa",
+                "nl": "De link in readme gecorrigeerd. md\nGecorrigeerd de Big-Endian PCAP-formaat\nde vaste bouwpijpleiding",
+                "fr": "Corrigé le lien dans readme. md\nCorrigé le Big-Endian Format PAC\nle pipeline de construction fixe",
+                "it": "Corretto il link in readme. M\nCorretto il Big-Endian Formato PCAP\nla pipeline di costruzione fissa",
+                "es": "Corregido el enlace en readme. md\nCorregido el Gran Endian Formato PCAP\nla tubería de construcción fija",
+                "pl": "Naprawiłem link. md\nPoprawiono Wielkiego Endianina Format PCAP\nstałe rurociąg budowlany",
+                "uk": "Виправлено посилання в чителю. мд\nВиправлено великий Формат ПКАП\nфіксований будівельний трубопровод",
+                "zh-cn": "更正了readme中的链接. 微额\n纠正了大印地安人 PCAP 格式\n固定建筑管道"
+            }
+        },
+        "titleLang": {
+            "en": "KISSHome research",
+            "de": "KISSHome-Forschung",
+            "ru": "Исследование KISSHome",
+            "pt": "Pesquisa KISSHome",
+            "nl": "KISSHome-onderzoek",
+            "fr": "Recherche KISSHome",
+            "it": "Ricerca KISSHome",
+            "es": "Investigación de KISSHome",
+            "pl": "Badania KISSHome",
+            "uk": "Дослідження KISSHome",
+            "zh-cn": "KISSHome研究"
+        },
+        "desc": {
+            "en": "Collection of information for KISSHome research",
+            "de": "Sammlung von Informationen für KISSHome-Forschung",
+            "ru": "Сбор информации для исследования KISSHome",
+            "pt": "Coleção de informações para pesquisa KISSHome",
+            "nl": "Verzameling informatie voor KISSHome-onderzoek",
+            "fr": "Collection d'informations pour la recherche KISSHome",
+            "it": "Raccolta di informazioni per la ricerca KISSHome",
+            "es": "Colección de información para la investigación de KISSHome",
+            "pl": "Zbiór informacji do badań KISSHome",
+            "uk": "Збір інформації для дослідження KISSHome",
+            "zh-cn": "KISSHome研究信息收集"
+        },
+        "authors": ["Denis Haev <dogafox@gmail.com>"],
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "nogit": true,
+        "loglevel": "info",
+        "readme": "https://github.com/ioBroker/ioBroker.kisshome-research/blob/master/README.md",
+        "icon": "kisshome-research.png",
+        "connectionType": "local",
+        "dataSource": "push",
+        "adminUI": {
+            "config": "json"
+        },
+        "tier": 3,
+        "keywords": ["kisshome-research"],
+        "stopTimeout": 5000,
+        "enabled": true,
+        "compact": true,
+        "singletonHost": true,
+        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.kisshome-research/main/admin/kisshome-research.png",
+        "type": "utility",
+        "messagebox": true,
+        "plugins": {
+            "sentry": {
+                "dsn": "https://10a9528535e3bbbf99f4282a20ff43d1@sentry.iobroker.net/248"
+            }
+        },
+        "licenseInformation": {
+            "type": "free",
+            "license": "MIT"
+        },
+        "globalDependencies": [
+            {
+                "admin": ">=7.0.25"
+            }
+        ]
     },
-    "titleLang": {
-      "en": "KISSHome research",
-      "de": "KISSHome-Forschung",
-      "ru": "Исследование KISSHome",
-      "pt": "Pesquisa KISSHome",
-      "nl": "KISSHome-onderzoek",
-      "fr": "Recherche KISSHome",
-      "it": "Ricerca KISSHome",
-      "es": "Investigación de KISSHome",
-      "pl": "Badania KISSHome",
-      "uk": "Дослідження KISSHome",
-      "zh-cn": "KISSHome研究"
+    "protectedNative": ["password", "login"],
+    "encryptedNative": ["password"],
+    "native": {
+        "fritzbox": "0.0.0.0",
+        "iface": "1-lan",
+        "login": "",
+        "password": "",
+        "tempDir": "",
+        "devices": []
     },
-    "desc": {
-      "en": "Collection of information for KISSHome research",
-      "de": "Sammlung von Informationen für KISSHome-Forschung",
-      "ru": "Сбор информации для исследования KISSHome",
-      "pt": "Coleção de informações para pesquisa KISSHome",
-      "nl": "Verzameling informatie voor KISSHome-onderzoek",
-      "fr": "Collection d'informations pour la recherche KISSHome",
-      "it": "Raccolta di informazioni per la ricerca KISSHome",
-      "es": "Colección de información para la investigación de KISSHome",
-      "pl": "Zbiór informacji do badań KISSHome",
-      "uk": "Збір інформації для дослідження KISSHome",
-      "zh-cn": "KISSHome研究信息收集"
-    },
-    "authors": [
-      "Denis Haev <dogafox@gmail.com>"
-    ],
-    "platform": "Javascript/Node.js",
-    "mode": "daemon",
-    "nogit": true,
-    "loglevel": "info",
-    "readme": "https://github.com/ioBroker/ioBroker.kisshome-research/blob/master/README.md",
-    "icon": "kisshome-research.png",
-    "connectionType": "local",
-    "dataSource": "push",
-    "adminUI": {
-      "config": "json"
-    },
-    "tier": 3,
-    "keywords": [
-      "kisshome-research"
-    ],
-    "stopTimeout": 5000,
-    "enabled": true,
-    "compact": true,
-    "singletonHost": true,
-    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.kisshome-research/main/admin/kisshome-research.png",
-    "type": "utility",
-    "messagebox": true,
-    "plugins": {
-      "sentry": {
-        "dsn": "https://10a9528535e3bbbf99f4282a20ff43d1@sentry.iobroker.net/248"
-      }
-    },
-    "licenseInformation": {
-      "type": "free",
-      "license": "MIT"
-    },
-    "globalDependencies": [
-      {
-        "admin": ">=7.0.25"
-      }
-    ]
-  },
-  "protectedNative": [
-    "password",
-    "login"
-  ],
-  "encryptedNative": [
-    "password"
-  ],
-  "native": {
-    "fritzbox": "0.0.0.0",
-    "iface": "1-lan",
-    "login": "",
-    "password": "",
-    "tempDir": "",
-    "devices": []
-  },
-  "notifications": [
-    {
-      "scope": "kisshome-research",
-      "name": {
-        "en": "KISSHome-Research",
-        "de": "KISSHome-Research",
-        "ru": "KISSHome-Research",
-        "pt": "KISSHome-Research",
-        "nl": "KISSHome-Research",
-        "fr": "KISSHome-Research",
-        "it": "KISSHome-Research",
-        "es": "KISSHome-Research",
-        "pl": "KISSHome-Research",
-        "uk": "KISSHome-Research",
-        "zh-cn": "KISSHome-Research"
-      },
-      "description": {
-        "en": "Problem with KISSHome-Research instance",
-        "de": "Problem mit KISSHome-Research-Instanz",
-        "ru": "Проблема с экземпляром KISSHome-Research",
-        "pt": "Problema com a instância KISSHome-Research",
-        "nl": "Probleem met KISSHome-Research-instantie",
-        "fr": "Problème avec l'instance KISSHome-Research",
-        "it": "Problema con l'istanza KISSHome-Research",
-        "es": "Problema con la instancia KISSHome-Research",
-        "pl": "Problem z instancją KISSHome-Research",
-        "uk": "Проблема з екземпляром KISSHome-Research",
-        "zh-cn": "KISSHome-Research 实例存在问题"
-      },
-      "categories": [
+    "notifications": [
         {
-          "category": "publicKey",
-          "name": {
-            "en": "Problem with KISSHome-Research instance",
-            "de": "Problem mit KISSHome-Research-Instanz",
-            "ru": "Проблема с экземпляром KISSHome-Research",
-            "pt": "Problema com a instância KISSHome-Research",
-            "nl": "Probleem met KISSHome-Research-instantie",
-            "fr": "Problème avec l'instance KISSHome-Research",
-            "it": "Problema con l'istanza KISSHome-Research",
-            "es": "Problema con la instancia KISSHome-Research",
-            "pl": "Problem z instancją KISSHome-Research",
-            "uk": "Проблема з екземпляром KISSHome-Research",
-            "zh-cn": "KISSHome-Research 实例存在问题"
-          },
-          "severity": "notify",
-          "description": {
-            "en": "The public key was rejected because previous connections used a different one. It can happens, if your settings for instance was deleted and then the instance was created again. To make the acceptance of the new public key possible, please contact us under kisshome@internet-sicherheit.de and provide the reason why the public key was changed.",
-            "de": "Der Public-Schlüssel wurde abgelehnt, da frühere Verbindungen einen anderen verwendeten. Es kann vorkommen, wenn Ihre Einstellungen für die Instanz gelöscht wurden und dann die Instanz erneut erstellt wurde. Um die Annahme des neuen öffentlichen Schlüssels zu ermöglichen, kontaktieren Sie uns bitte unter kisshome@internet-sicherheit.de und geben Sie den Grund an, warum der öffentliche Schlüssel geändert wurde.",
-            "ru": "Публичный ключ был отклонен, потому что предыдущие подключения использовали другой. Это может произойти, если ваши настройки для экземпляра были удалены, а затем экземпляр был создан снова. Чтобы сделать возможным принятие нового открытого ключа, пожалуйста, свяжитесь с нами по адресу kisshome@internet-sicherheit.de и укажите причину изменения открытого ключа.",
-            "pt": "A chave pública foi rejeitada porque as conexões anteriores usaram uma diferente. Pode acontecer se suas configurações para a instância foram excluídas e, em seguida, a instância foi criada novamente. Para tornar possível a aceitação da nova chave pública, entre em contato conosco em kisshome@internet-sicherheit.de e forneça o motivo da alteração da chave pública.",
-            "nl": "De openbare sleutel werd afgewezen omdat eerdere verbindingen een andere gebruikten. Het kan gebeuren als uw instellingen voor de instantie zijn verwijderd en vervolgens de instantie opnieuw is gemaakt. Om de acceptatie van de nieuwe openbare sleutel mogelijk te maken, neem contact met ons op via kisshome@internet-sicherheit.de en geef de reden op waarom de openbare sleutel is gewijzigd.",
-            "fr": "La clé publique a été rejetée car les connexions précédentes utilisaient une autre clé. Cela peut se produire si vos paramètres pour l'instance ont été supprimés, puis que l'instance a été recréée. Pour rendre possible l'acceptation de la nouvelle clé publique, veuillez nous contacter à kisshome@internet-sicherheit.de et fournir la raison pour laquelle la clé publique a été modifiée.",
-            "it": "La chiave pubblica è stata rifiutata perché le connessioni precedenti ne utilizzavano una diversa. Può accadere se le impostazioni per l'istanza sono state eliminate e quindi l'istanza è stata creata nuovamente. Per rendere possibile l'accettazione del nuovo chiave pubblica, contattaci a kisshome@internet-sicherheit.de e fornisci il motivo per cui la chiave pubblica è stata modificata.",
-            "es": "La clave pública fue rechazada porque las conexiones anteriores usaban una diferente. Puede suceder si su configuración para la instancia fue eliminada y luego la instancia fue creada nuevamente. Para hacer posible la aceptación de la nueva clave pública, contáctenos en kisshome@internet-sicherheit.de y proporcione la razón por la que se cambió la clave pública.",
-            "pl": "Klucz publiczny został odrzucony, ponieważ poprzednie połączenia używały innego. Może się zdarzyć, jeśli Twoje ustawienia dla instancji zostały usunięte, a następnie instancja została utworzona ponownie. Aby umożliwić akceptację nowego klucza publicznego, skontaktuj się z nami pod adresem kisshome@internet-sicherheit.de i podaj powód zmiany klucza publicznego.",
-            "uk": "Відкритий ключ був відхилений, оскільки попередні підключення використовували інший. Це може статися, якщо ваші налаштування для екземпляра були видалені, а потім екземпляр був створений знову. Щоб зробити прийняття нового відкритого ключа можливим, будь ласка, зв'яжіться з нами за адресою kisshome@internet-sicherheit.de і вкажіть причину зміни відкритого ключа.",
-            "zh-cn": "公钥被拒绝，因为之前的连接使用了不同的公钥. 如果您的实例设置被删除，然后实例被重新创建，就会发生这种情况。为了使新公钥的接受成为可能，请通过 kisshome@internet-sicherheit.de 与我们联系，并提供更改公钥的原因。"
-          },
-          "regex": [],
-          "limit": 1
+            "scope": "kisshome-research",
+            "name": {
+                "en": "KISSHome-Research",
+                "de": "KISSHome-Research",
+                "ru": "KISSHome-Research",
+                "pt": "KISSHome-Research",
+                "nl": "KISSHome-Research",
+                "fr": "KISSHome-Research",
+                "it": "KISSHome-Research",
+                "es": "KISSHome-Research",
+                "pl": "KISSHome-Research",
+                "uk": "KISSHome-Research",
+                "zh-cn": "KISSHome-Research"
+            },
+            "description": {
+                "en": "Problem with KISSHome-Research instance",
+                "de": "Problem mit KISSHome-Research-Instanz",
+                "ru": "Проблема с экземпляром KISSHome-Research",
+                "pt": "Problema com a instância KISSHome-Research",
+                "nl": "Probleem met KISSHome-Research-instantie",
+                "fr": "Problème avec l'instance KISSHome-Research",
+                "it": "Problema con l'istanza KISSHome-Research",
+                "es": "Problema con la instancia KISSHome-Research",
+                "pl": "Problem z instancją KISSHome-Research",
+                "uk": "Проблема з екземпляром KISSHome-Research",
+                "zh-cn": "KISSHome-Research 实例存在问题"
+            },
+            "categories": [
+                {
+                    "category": "publicKey",
+                    "name": {
+                        "en": "Problem with KISSHome-Research instance",
+                        "de": "Problem mit KISSHome-Research-Instanz",
+                        "ru": "Проблема с экземпляром KISSHome-Research",
+                        "pt": "Problema com a instância KISSHome-Research",
+                        "nl": "Probleem met KISSHome-Research-instantie",
+                        "fr": "Problème avec l'instance KISSHome-Research",
+                        "it": "Problema con l'istanza KISSHome-Research",
+                        "es": "Problema con la instancia KISSHome-Research",
+                        "pl": "Problem z instancją KISSHome-Research",
+                        "uk": "Проблема з екземпляром KISSHome-Research",
+                        "zh-cn": "KISSHome-Research 实例存在问题"
+                    },
+                    "severity": "notify",
+                    "description": {
+                        "en": "The public key was rejected because previous connections used a different one. It can happens, if your settings for instance was deleted and then the instance was created again. To make the acceptance of the new public key possible, please contact us under kisshome@internet-sicherheit.de and provide the reason why the public key was changed.",
+                        "de": "Der Public-Schlüssel wurde abgelehnt, da frühere Verbindungen einen anderen verwendeten. Es kann vorkommen, wenn Ihre Einstellungen für die Instanz gelöscht wurden und dann die Instanz erneut erstellt wurde. Um die Annahme des neuen öffentlichen Schlüssels zu ermöglichen, kontaktieren Sie uns bitte unter kisshome@internet-sicherheit.de und geben Sie den Grund an, warum der öffentliche Schlüssel geändert wurde.",
+                        "ru": "Публичный ключ был отклонен, потому что предыдущие подключения использовали другой. Это может произойти, если ваши настройки для экземпляра были удалены, а затем экземпляр был создан снова. Чтобы сделать возможным принятие нового открытого ключа, пожалуйста, свяжитесь с нами по адресу kisshome@internet-sicherheit.de и укажите причину изменения открытого ключа.",
+                        "pt": "A chave pública foi rejeitada porque as conexões anteriores usaram uma diferente. Pode acontecer se suas configurações para a instância foram excluídas e, em seguida, a instância foi criada novamente. Para tornar possível a aceitação da nova chave pública, entre em contato conosco em kisshome@internet-sicherheit.de e forneça o motivo da alteração da chave pública.",
+                        "nl": "De openbare sleutel werd afgewezen omdat eerdere verbindingen een andere gebruikten. Het kan gebeuren als uw instellingen voor de instantie zijn verwijderd en vervolgens de instantie opnieuw is gemaakt. Om de acceptatie van de nieuwe openbare sleutel mogelijk te maken, neem contact met ons op via kisshome@internet-sicherheit.de en geef de reden op waarom de openbare sleutel is gewijzigd.",
+                        "fr": "La clé publique a été rejetée car les connexions précédentes utilisaient une autre clé. Cela peut se produire si vos paramètres pour l'instance ont été supprimés, puis que l'instance a été recréée. Pour rendre possible l'acceptation de la nouvelle clé publique, veuillez nous contacter à kisshome@internet-sicherheit.de et fournir la raison pour laquelle la clé publique a été modifiée.",
+                        "it": "La chiave pubblica è stata rifiutata perché le connessioni precedenti ne utilizzavano una diversa. Può accadere se le impostazioni per l'istanza sono state eliminate e quindi l'istanza è stata creata nuovamente. Per rendere possibile l'accettazione del nuovo chiave pubblica, contattaci a kisshome@internet-sicherheit.de e fornisci il motivo per cui la chiave pubblica è stata modificata.",
+                        "es": "La clave pública fue rechazada porque las conexiones anteriores usaban una diferente. Puede suceder si su configuración para la instancia fue eliminada y luego la instancia fue creada nuevamente. Para hacer posible la aceptación de la nueva clave pública, contáctenos en kisshome@internet-sicherheit.de y proporcione la razón por la que se cambió la clave pública.",
+                        "pl": "Klucz publiczny został odrzucony, ponieważ poprzednie połączenia używały innego. Może się zdarzyć, jeśli Twoje ustawienia dla instancji zostały usunięte, a następnie instancja została utworzona ponownie. Aby umożliwić akceptację nowego klucza publicznego, skontaktuj się z nami pod adresem kisshome@internet-sicherheit.de i podaj powód zmiany klucza publicznego.",
+                        "uk": "Відкритий ключ був відхилений, оскільки попередні підключення використовували інший. Це може статися, якщо ваші налаштування для екземпляра були видалені, а потім екземпляр був створений знову. Щоб зробити прийняття нового відкритого ключа можливим, будь ласка, зв'яжіться з нами за адресою kisshome@internet-sicherheit.de і вкажіть причину зміни відкритого ключа.",
+                        "zh-cn": "公钥被拒绝，因为之前的连接使用了不同的公钥. 如果您的实例设置被删除，然后实例被重新创建，就会发生这种情况。为了使新公钥的接受成为可能，请通过 kisshome@internet-sicherheit.de 与我们联系，并提供更改公钥的原因。"
+                    },
+                    "regex": [],
+                    "limit": 1
+                }
+            ]
         }
-      ]
-    }
-  ],
-  "objects": [],
-  "instanceObjects": [
-    {
-      "_id": "info",
-      "type": "device",
-      "common": {
-        "name": {
-          "en": "Information",
-          "de": "Informationen",
-          "ru": "Информация",
-          "pt": "Informação",
-          "nl": "Informatie",
-          "fr": "Information",
-          "it": "Informazioni",
-          "es": "Información",
-          "pl": "Informacja",
-          "uk": "Інформація",
-          "zh-cn": "信息"
+    ],
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "device",
+            "common": {
+                "name": {
+                    "en": "Information",
+                    "de": "Informationen",
+                    "ru": "Информация",
+                    "pt": "Informação",
+                    "nl": "Informatie",
+                    "fr": "Information",
+                    "it": "Informazioni",
+                    "es": "Información",
+                    "pl": "Informacja",
+                    "uk": "Інформація",
+                    "zh-cn": "信息"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Connected to FritzBox",
+                    "de": "Verbindung mit FritzBox",
+                    "ru": "Подключен к FritzBox",
+                    "pt": "Conectado ao FritzBox",
+                    "nl": "Verbinding met FritzBoxr",
+                    "fr": "Connecté au FritzBox",
+                    "it": "Collegato al FritzBox",
+                    "es": "Conectado al FritzBox",
+                    "pl": "Łączy się z FritzBox",
+                    "uk": "Підключення до FritzBox",
+                    "zh-cn": "Connected with FritzBox"
+                },
+                "type": "boolean",
+                "role": "indicator.connected",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.recording",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Recoding on Fritz!Box",
+                    "de": "Aufnahme auf Fritz!Box",
+                    "ru": "Запись на Fritz!Box",
+                    "pt": "Recoding no Fritz!Box",
+                    "nl": "Opname op Fritz!Box",
+                    "fr": "Enregistrement sur Fritz!Box",
+                    "it": "Registrazione su Fritz!Box",
+                    "es": "Grabación en Fritz!Box",
+                    "pl": "Nagrywanie na Fritz!Box",
+                    "uk": "Запис на Fritz!Box",
+                    "zh-cn": "Fritz!Box上的录制"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.recording.captured",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "How many packets captured after last start",
+                    "de": "Wie viele Pakete wurden nach dem letzten Start erfasst",
+                    "ru": "Сколько пакетов было захвачено после последнего запуска",
+                    "pt": "Quantos pacotes foram capturados após a última inicialização",
+                    "nl": "Hoeveel pakketten zijn er vastgelegd na de laatste start",
+                    "fr": "Combien de paquets ont été capturés après le dernier démarrage",
+                    "it": "Quanti pacch, etti sono stati catturati dopo l'ultimo avvio",
+                    "es": "Cuántos paquetes se capturaron después del último inicio",
+                    "pl": "Ile pakietów zostało przechwyconych po ostatnim uruchomieniu",
+                    "uk": "Скільки пакетів було захоплено після останнього запуску",
+                    "zh-cn": "上次启动后捕获了多少数据包"
+                },
+                "type": "number",
+                "role": "state",
+                "unit": "packets",
+                "read": true,
+                "write": false,
+                "def": 0
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.recording.enabled",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Is recording is running",
+                    "de": "Wird aufgezeichnet",
+                    "ru": "Идет запись",
+                    "pt": "A gravação está em execução",
+                    "nl": "Wordt opgenomen",
+                    "fr": "L'enregistrement est en cours",
+                    "it": "La registrazione è in corso",
+                    "es": "La grabación está en curso",
+                    "pl": "Nagrywanie jest w toku",
+                    "uk": "Запис виконується",
+                    "zh-cn": "录制正在进行中"
+                },
+                "type": "boolean",
+                "role": "state",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.recording.running",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Is recording is running",
+                    "de": "Wird aufgezeichnet",
+                    "ru": "Идет запись",
+                    "pt": "A gravação está em execução",
+                    "nl": "Wordt opgenomen",
+                    "fr": "L'enregistrement est en cours",
+                    "it": "La registrazione è in corso",
+                    "es": "La grabación está en curso",
+                    "pl": "Nagrywanie jest w toku",
+                    "uk": "Запис виконується",
+                    "zh-cn": "录制正在进行中"
+                },
+                "type": "boolean",
+                "role": "state",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.recording.triggerWrite",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Triggers the creation of PCAP file",
+                    "de": "Startet die Erstellung der PCAP-Datei",
+                    "ru": "Запускает создание файла PCAP",
+                    "pt": "Dispara a criação do arquivo PCAP",
+                    "nl": "Start de creatie van het PCAP-bestand",
+                    "fr": "Déclenche la création du fichier PCAP",
+                    "it": "Avvia la creazione del file PCAP",
+                    "es": "Desencadena la creación del archivo PCAP",
+                    "pl": "Uruchamia tworzenie pliku PCAP",
+                    "uk": "Запускає створення файлу PCAP",
+                    "zh-cn": "触发PCAP文件的创建"
+                },
+                "type": "boolean",
+                "role": "state",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.sync",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Synchronization with KISSHome",
+                    "de": "Synchronisation mit KISSHome",
+                    "ru": "Синхронизация с KISSHome",
+                    "pt": "Sincronização com KISSHome",
+                    "nl": "Synchronisatie met KISSHome",
+                    "fr": "Synchronisation avec KISSHome",
+                    "it": "Sincronizzazione con KISSHome",
+                    "es": "Sincronización con KISSHome",
+                    "pl": "Synchronizacja z KISSHome",
+                    "uk": "Синхронізація з KISSHome",
+                    "zh-cn": "与KISSHome同步"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.sync.running",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "RSync is running",
+                    "de": "RSync läuft",
+                    "ru": "RSync работает",
+                    "pt": "RSync está em execução",
+                    "nl": "RSync is aan het lopen",
+                    "fr": "RSync est en cours d'exécution",
+                    "it": "RSync è in esecuzione",
+                    "es": "RSync está corriendo",
+                    "pl": "RSync działa",
+                    "uk": "RSync працює",
+                    "zh-cn": "RSync正在运行"
+                },
+                "type": "boolean",
+                "role": "state",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.sync.keys",
+            "type": "config",
+            "common": {
+                "name": {
+                    "en": "Public and private keys",
+                    "de": "Öffentliche und private Schlüssel",
+                    "ru": "Публичные и частные ключи",
+                    "pt": "Chaves públicas e privadas",
+                    "nl": "Openbare en privésleutels",
+                    "fr": "Clés publiques et privées",
+                    "it": "Chiavi pubbliche e private",
+                    "es": "Claves públicas y privadas",
+                    "pl": "Klucze publiczne i prywatne",
+                    "uk": "Публічні та приватні ключі",
+                    "zh-cn": "公钥和私钥"
+                }
+            },
+            "native": {
+                "publicKey": "",
+                "privateKey": ""
+            }
         }
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "name": {
-          "en": "Connected to FritzBox",
-          "de": "Verbindung mit FritzBox",
-          "ru": "Подключен к FritzBox",
-          "pt": "Conectado ao FritzBox",
-          "nl": "Verbinding met FritzBoxr",
-          "fr": "Connecté au FritzBox",
-          "it": "Collegato al FritzBox",
-          "es": "Conectado al FritzBox",
-          "pl": "Łączy się z FritzBox",
-          "uk": "Підключення до FritzBox",
-          "zh-cn": "Connected with FritzBox"
-        },
-        "type": "boolean",
-        "role": "indicator.connected",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.recording",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Recoding on Fritz!Box",
-          "de": "Aufnahme auf Fritz!Box",
-          "ru": "Запись на Fritz!Box",
-          "pt": "Recoding no Fritz!Box",
-          "nl": "Opname op Fritz!Box",
-          "fr": "Enregistrement sur Fritz!Box",
-          "it": "Registrazione su Fritz!Box",
-          "es": "Grabación en Fritz!Box",
-          "pl": "Nagrywanie na Fritz!Box",
-          "uk": "Запис на Fritz!Box",
-          "zh-cn": "Fritz!Box上的录制"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.recording.captured",
-      "type": "state",
-      "common": {
-        "name": {
-          "en": "How many packets captured after last start",
-          "de": "Wie viele Pakete wurden nach dem letzten Start erfasst",
-          "ru": "Сколько пакетов было захвачено после последнего запуска",
-          "pt": "Quantos pacotes foram capturados após a última inicialização",
-          "nl": "Hoeveel pakketten zijn er vastgelegd na de laatste start",
-          "fr": "Combien de paquets ont été capturés après le dernier démarrage",
-          "it": "Quanti pacch, etti sono stati catturati dopo l'ultimo avvio",
-          "es": "Cuántos paquetes se capturaron después del último inicio",
-          "pl": "Ile pakietów zostało przechwyconych po ostatnim uruchomieniu",
-          "uk": "Скільки пакетів було захоплено після останнього запуску",
-          "zh-cn": "上次启动后捕获了多少数据包"
-        },
-        "type": "number",
-        "role": "state",
-        "unit": "packets",
-        "read": true,
-        "write": false,
-        "def": 0
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.recording.enabled",
-      "type": "state",
-      "common": {
-        "name": {
-          "en": "Is recording is running",
-          "de": "Wird aufgezeichnet",
-          "ru": "Идет запись",
-          "pt": "A gravação está em execução",
-          "nl": "Wordt opgenomen",
-          "fr": "L'enregistrement est en cours",
-          "it": "La registrazione è in corso",
-          "es": "La grabación está en curso",
-          "pl": "Nagrywanie jest w toku",
-          "uk": "Запис виконується",
-          "zh-cn": "录制正在进行中"
-        },
-        "type": "boolean",
-        "role": "state",
-        "read": true,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.recording.running",
-      "type": "state",
-      "common": {
-        "name": {
-          "en": "Is recording is running",
-          "de": "Wird aufgezeichnet",
-          "ru": "Идет запись",
-          "pt": "A gravação está em execução",
-          "nl": "Wordt opgenomen",
-          "fr": "L'enregistrement est en cours",
-          "it": "La registrazione è in corso",
-          "es": "La grabación está en curso",
-          "pl": "Nagrywanie jest w toku",
-          "uk": "Запис виконується",
-          "zh-cn": "录制正在进行中"
-        },
-        "type": "boolean",
-        "role": "state",
-        "read": true,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.recording.triggerWrite",
-      "type": "state",
-      "common": {
-        "name": {
-          "en": "Triggers the creation of PCAP file",
-          "de": "Startet die Erstellung der PCAP-Datei",
-          "ru": "Запускает создание файла PCAP",
-          "pt": "Dispara a criação do arquivo PCAP",
-          "nl": "Start de creatie van het PCAP-bestand",
-          "fr": "Déclenche la création du fichier PCAP",
-          "it": "Avvia la creazione del file PCAP",
-          "es": "Desencadena la creación del archivo PCAP",
-          "pl": "Uruchamia tworzenie pliku PCAP",
-          "uk": "Запускає створення файлу PCAP",
-          "zh-cn": "触发PCAP文件的创建"
-        },
-        "type": "boolean",
-        "role": "state",
-        "read": true,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.sync",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Synchronization with KISSHome",
-          "de": "Synchronisation mit KISSHome",
-          "ru": "Синхронизация с KISSHome",
-          "pt": "Sincronização com KISSHome",
-          "nl": "Synchronisatie met KISSHome",
-          "fr": "Synchronisation avec KISSHome",
-          "it": "Sincronizzazione con KISSHome",
-          "es": "Sincronización con KISSHome",
-          "pl": "Synchronizacja z KISSHome",
-          "uk": "Синхронізація з KISSHome",
-          "zh-cn": "与KISSHome同步"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.sync.running",
-      "type": "state",
-      "common": {
-        "name": {
-          "en": "RSync is running",
-          "de": "RSync läuft",
-          "ru": "RSync работает",
-          "pt": "RSync está em execução",
-          "nl": "RSync is aan het lopen",
-          "fr": "RSync est en cours d'exécution",
-          "it": "RSync è in esecuzione",
-          "es": "RSync está corriendo",
-          "pl": "RSync działa",
-          "uk": "RSync працює",
-          "zh-cn": "RSync正在运行"
-        },
-        "type": "boolean",
-        "role": "state",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.sync.keys",
-      "type": "config",
-      "common": {
-        "name": {
-          "en": "Public and private keys",
-          "de": "Öffentliche und private Schlüssel",
-          "ru": "Публичные и частные ключи",
-          "pt": "Chaves públicas e privadas",
-          "nl": "Openbare en privésleutels",
-          "fr": "Clés publiques et privées",
-          "it": "Chiavi pubbliche e private",
-          "es": "Claves públicas y privadas",
-          "pl": "Klucze publiczne i prywatne",
-          "uk": "Публічні та приватні ключі",
-          "zh-cn": "公钥和私钥"
-        }
-      },
-      "native": {
-        "publicKey": "",
-        "privateKey": ""
-      }
-    }
-  ]
+    ]
 }

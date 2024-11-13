@@ -33,7 +33,7 @@ This was required to make it possible to uninstall and install the adapter again
 -->
 
 ## Changelog
-### 1.2.0 (2024-11-13)
+### **WORK IN PROGRESS**
 -   (bluefox) The keys are stored in `0_userdata.0.kisshomeResearchPublicKey` to make it possible to uninstall and install the adapter again without any problems
 -   (bluefox) Corrected problem with PCAP files without the META-description
 
