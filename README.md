@@ -22,17 +22,21 @@ To run this adapter, you need:
 -   Fritz!Box Router. Without `Fritz!Box`, the adapter will not work.
 -   iobroker must run on debian/raspbian (or at least on linux, where the following commands are available: `which`, `rsync`)
 
-## Todo
+## De-installation
+The public key required for the communication is stored in `0_userdata.0.kisshomeResearchPublicKey`.
+After the adapter is uninstalled, the key must be deleted manually.
 
-Detect IP addresses from:
--   [ ] homeconnect,
-
+This was required to make it possible to uninstall and install the adapter again without any problems.
 <!--
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+-   (bluefox) The keys are stored in `0_userdata.0.kisshomeResearchPublicKey` to make it possible to uninstall and install the adapter again without any problems
+-   (bluefox) Corrected problem with PCAP files without the META-description
+
 ### 1.1.2 (2024-11-12)
 -   (bluefox) Corrected the input of IP addresses in the configuration
 

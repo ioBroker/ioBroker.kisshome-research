@@ -18,6 +18,7 @@ const SAVE_DATA_EVERY_MS = 3600000;
 // save files if bigger than 50 Mb
 const SAVE_DATA_IF_BIGGER = 50 * 1024 * 1024;
 const SYNC_INTERVAL = 3600000; // 3_600_000;
+const BACKUP_KEYS = '0_userdata.0.kisshomeResearchKeys';
 function size2text(size) {
     if (size < 1024) {
         return `${size} B`;
@@ -365,7 +366,7 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
         if (this.tempDir.endsWith('/')) {
             this.tempDir = this.tempDir.substring(0, this.tempDir.length - 1);
         }
-        let privateKey;
+        let privateKey = '';
         // retrieve public and private keys
         let keysObj;
         try {
@@ -384,15 +385,37 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
             keysObj = null;
         }
         if (!keysObj || !((_c = keysObj === null || keysObj === void 0 ? void 0 : keysObj.native) === null || _c === void 0 ? void 0 : _c.publicKey) || !((_d = keysObj.native) === null || _d === void 0 ? void 0 : _d.privateKey)) {
-            if (this.language === 'de') {
-                this.log.info('Schlüssel werden erstmalig generiert.');
+            // try to read the key on the address '0_userdata.0.kisshomeResearchPublicKey'
+            let keysRestored = false;
+            try {
+                const keysState = await this.getForeignStateAsync(BACKUP_KEYS);
+                if ((keysState === null || keysState === void 0 ? void 0 : keysState.val) && typeof keysState.val === 'string' && keysState.val.includes('/////')) {
+                    const [_public, _private] = keysState.val.split('/////');
+                    this.publicKey = _public;
+                    privateKey = _private;
+                    keysRestored = true;
+                    if (this.language === 'de') {
+                        this.log.info('Schlüssel wurde aus "0_userdata.0.kisshomeResearchKeys" wiederherstellt.');
+                    }
+                    else {
+                        this.log.info('The keys were restored from "0_userdata.0.kisshomeResearchKeys".');
+                    }
+                }
             }
-            else {
-                this.log.info('Generating keys for the first time.');
+            catch {
+                // ignore
             }
-            const result = (0, utils_1.generateKeys)();
-            privateKey = result.privateKey;
-            this.publicKey = result.publicKey;
+            if (!keysRestored) {
+                if (this.language === 'de') {
+                    this.log.info('Schlüssel werden erstmalig generiert.');
+                }
+                else {
+                    this.log.info('Generating keys for the first time.');
+                }
+                const result = (0, utils_1.generateKeys)();
+                privateKey = result.privateKey;
+                this.publicKey = result.publicKey;
+            }
             keysObj = {
                 _id: 'info.sync.keys',
                 type: 'config',
@@ -417,10 +440,14 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
                 },
             };
             await this.setObjectAsync(keysObj._id, keysObj);
+            if (!keysRestored) {
+                await this.saveKeyForUninstallAndInstall(this.publicKey, privateKey);
+            }
         }
         else {
             privateKey = keysObj.native.privateKey;
             this.publicKey = keysObj.native.publicKey;
+            await this.saveKeyForUninstallAndInstall(this.publicKey, privateKey, true);
         }
         if (!this.publicKey || !privateKey) {
             if (this.language === 'de') {
@@ -535,6 +562,57 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
                 this.log.warn('Recording is not enabled. Do nothing.');
             }
         }
+    }
+    async saveKeyForUninstallAndInstall(publicKey, privateKey, check) {
+        if (check) {
+            // check if the key is already saved
+            const keysState = await this.getForeignStateAsync(BACKUP_KEYS);
+            if ((keysState === null || keysState === void 0 ? void 0 : keysState.val) === `${publicKey}/////${privateKey}`) {
+                return;
+            }
+            if (keysState) {
+                await this.setForeignStateAsync(BACKUP_KEYS, `${publicKey}/////${privateKey}`, true);
+                return;
+            }
+        }
+        // create state "0_userdata.0.kisshomeResearchKeys"
+        await this.setForeignObjectAsync(BACKUP_KEYS, {
+            type: 'state',
+            common: {
+                name: {
+                    en: 'Keys for KISSHome adapter',
+                    de: 'Schlüssel für KISSHome adapter',
+                    ru: 'Ключи для адаптера KISSHome',
+                    pt: 'Chaves para o adaptador KISSHome',
+                    nl: 'Sleutels voor KISSHome-adapter',
+                    fr: "Clés pour l'adaptateur KISSHome",
+                    it: "Chiavi per l'adattatore KISSHome",
+                    es: 'Claves para el adaptador KISSHome',
+                    pl: 'Klucze dla adaptera KISSHome',
+                    uk: 'Ключі для адаптера KISSHome',
+                    'zh-cn': 'KISSHome适配器的密钥',
+                },
+                desc: {
+                    en: 'It can be deleted if KISSHome adapter uninstalled and does not used anymore',
+                    de: 'Es kann gelöscht werden, wenn der KISSHome-Adapter deinstalliert und nicht mehr verwendet wird',
+                    ru: 'Его можно удалить, если адаптер KISSHome удален и больше не используется',
+                    pt: 'Pode ser excluído se o adaptador KISSHome for desinstalado e não for mais usado',
+                    nl: 'Het kan worden verwijderd als de KISSHome-adapter is verwijderd en niet meer wordt gebruikt',
+                    fr: "Il peut être supprimé si l'adaptateur KISSHome est désinstallé et n'est plus utilisé",
+                    it: "Può essere eliminato se l'adattatore KISSHome è disinstallato e non viene più utilizzato",
+                    es: 'Se puede eliminar si se desinstala el adaptador KISSHome y ya no se usa',
+                    pl: 'Można go usunąć, jeśli adapter KISSHome jest odinstalowany i nie jest już używany',
+                    uk: 'Можна видалити, якщо адаптер KISSHome видалено і більше не використовується',
+                    'zh-cn': '如果KISSHome适配器已卸载且不再使用，则可以删除它',
+                },
+                type: 'string',
+                read: true,
+                write: false,
+                role: 'state',
+            },
+            native: {},
+        });
+        await this.setForeignStateAsync(BACKUP_KEYS, `${publicKey}/////${privateKey}`, true);
     }
     syncJob() {
         // Send the data every hour to the cloud
@@ -827,21 +905,25 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
         const newFile = `${this.workingDir}/${KISSHomeResearchAdapter.getTimestamp()}_v${this.versionPack}_meta.json`;
         try {
             // find the latest file
-            const files = (0, node_fs_1.readdirSync)(this.workingDir);
+            let changed = false;
+            let files = (0, node_fs_1.readdirSync)(this.workingDir);
             // sort descending
             files.sort((a, b) => b.localeCompare(a));
-            let latestFile = '';
-            // find the latest file and delete all other _meta.json files
-            for (const file of files) {
-                // Take the newest file as the latest file
-                if (!latestFile && file.endsWith('_meta.json')) {
-                    latestFile = file;
-                }
-                else if (file.endsWith('_meta.json')) {
-                    // delete all other _meta.json files
-                    (0, node_fs_1.unlinkSync)(`${this.workingDir}/${file}`);
+            // if two JSON files are coming after each other, the older one must be deleted
+            for (let f = files.length - 1; f > 0; f--) {
+                if (files[f].endsWith('_meta.json') && files[f - 1].endsWith('_meta.json')) {
+                    (0, node_fs_1.unlinkSync)(`${this.workingDir}/${files[f]}`);
+                    changed = true;
                 }
             }
+            // read the list anew as it was changed
+            if (changed) {
+                files = (0, node_fs_1.readdirSync)(this.workingDir);
+                // sort descending
+                files.sort((a, b) => b.localeCompare(a));
+            }
+            // find the latest file and delete all other _meta.json files
+            const latestFile = files.find(f => f.endsWith('_meta.json'));
             // if existing meta file found
             if (latestFile) {
                 // compare the content
@@ -853,7 +935,10 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
                     else {
                         this.log.debug('Meta file updated');
                     }
-                    (0, node_fs_1.unlinkSync)(`${this.workingDir}/${latestFile}`);
+                    // delete the old JSON file only if no pcap files exists
+                    if (files[0].endsWith('_meta.json')) {
+                        (0, node_fs_1.unlinkSync)(`${this.workingDir}/${latestFile}`);
+                    }
                     (0, node_fs_1.writeFileSync)(newFile, text);
                     return newFile;
                 }
