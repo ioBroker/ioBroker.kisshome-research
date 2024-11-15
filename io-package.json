@@ -3,32 +3,6 @@
     "name": "kisshome-research",
     "version": "1.2.2",
     "news": {
-      "1.2.2": {
-        "en": "Do not start recording if no one MAC address was provided",
-        "de": "Starten Sie keine Aufnahme, wenn keine MAC-Adresse angegeben wurde",
-        "ru": "Не начинайте запись, если не был предоставлен один MAC-адрес",
-        "pt": "Não comece a gravar se nenhum endereço MAC foi fornecido",
-        "nl": "Begin niet met opnemen als er geen MAC-adres is opgegeven",
-        "fr": "Ne pas commencer à enregistrer si aucune adresse MAC n'a été fournie",
-        "it": "Non avviare la registrazione se non è stato fornito un indirizzo MAC",
-        "es": "No empiece a grabar si no se proporcionó una dirección MAC",
-        "pl": "Nie należy rozpoczynać rejestracji, jeżeli nie podano żadnego adresu MAC",
-        "uk": "Не запустіть запис, якщо жодна адреса MAC була надана",
-        "zh-cn": "如果没有提供任何MAC地址, 请不要开始记录"
-      },
-      "1.2.1": {
-        "en": "The keys are stored in `0_userdata.0.kisshomeResearchPublicKey` to make it possible to uninstall and install the adapter again without any problems\nCorrected problem with PCAP files without the META-description",
-        "de": "Die Schlüssel werden in `0_userdata.0.kisshomeResearchPublicKey` gespeichert, um den Adapter ohne Probleme wieder zu deinstallieren und zu installieren\nProblem mit PCAP-Dateien ohne META-Description behoben",
-        "ru": "Ключи хранятся в `0_userdata.0.kisshomeResearchPublicKey», чтобы можно было удалить и установить адаптер снова без каких-либо проблем\nИсправленная проблема с файлами PCAP без подписи META",
-        "pt": "As chaves são armazenadas em `0_userdata.0.kisshomeResearchPublicKey` para tornar possível desinstalar e instalar o adaptador novamente sem problemas\nProblema corrigido com arquivos PCAP sem a descrição META",
-        "nl": "De sleutels worden opgeslagen in \nGecorrigeerd probleem met PCAP-bestanden zonder de META-beschrijving",
-        "fr": "Les clés sont stockées dans `0_userdata.0.kisshomeRecherchePublicKey` pour permettre de désinstaller et installer l`adaptateur à nouveau sans aucun problème\nCorrection du problème avec les fichiers PCAP sans la description META",
-        "it": "Le chiavi sono memorizzate in `0_userdata.0.kisshomeResearchPublicKey` per consentire di disinstallare e installare nuovamente l'adattatore senza problemi\nProblema corretto con i file PCAP senza la descrizione META",
-        "es": "Las teclas se almacenan en `0_userdata.0.kisshomeResearchPublicKey` para hacer posible desinstalar e instalar el adaptador de nuevo sin problemas\nProblema corregido con los archivos PCAP sin la descripción META",
-        "pl": "Klucze są przechowywane w '0 _ userdata.0.kisshomeResearchPublicKey', aby umożliwić ponowne odblokowanie i zainstalowanie adaptera bez żadnych problemów\nNaprawiony problem z plikami PCAP bez opisu META",
-        "uk": "Ключі зберігаються в `0_userdata.0.kisshomeResearchPublicKey`, щоб зробити його можливим для видалення та встановлення адаптера знову без проблем\nВиправлена проблема з файлами PCAP без META-description",
-        "zh-cn": "密钥存储在 `0_userdata.0. kisshomeResearch PublicKey' 中,以便可以毫无问题地再次卸载和安装适配器\n在没有 META 描述的情况下纠正 PCAP 文件的问题"
-      },
       "1.1.2": {
         "en": "Corrected the input of IP addresses in the configuration",
         "de": "Die Eingabe von IP-Adressen in der Konfiguration korrigiert",
