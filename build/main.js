@@ -538,6 +538,15 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
         this.saveMetaFile();
         await this.setState('info.recording.running', false, true);
         await this.setState('info.recording.triggerWrite', false, true);
+        if (!this.uniqueMacs.length) {
+            if (this.language === 'de') {
+                this.log.error(`[PCAP] Keine MAC-Adressen für die Aufzeichnung angegeben. Bitte geben Sie einige MAC-Adressen oder IP-Adressen an, die in MAC-Adressen aufgelöst werden können`);
+            }
+            else {
+                this.log.error(`[PCAP] No any MAC addresses provided for recording. Please provide some MAC addresses or Ip addresses, that could be resolved to MAC address`);
+            }
+            return;
+        }
         this.subscribeStates('info.recording.enabled');
         this.subscribeStates('info.recording.triggerWrite');
         this.recordingEnabled = ((await this.getStateAsync('info.recording.enabled')) || {}).val || false;
