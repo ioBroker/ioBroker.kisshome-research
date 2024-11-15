@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "news": {
+      "1.2.2": {
+        "en": "Do not start recording if no one MAC address was provided",
+        "de": "Starten Sie keine Aufnahme, wenn keine MAC-Adresse angegeben wurde",
+        "ru": "Не начинайте запись, если не был предоставлен один MAC-адрес",
+        "pt": "Não comece a gravar se nenhum endereço MAC foi fornecido",
+        "nl": "Begin niet met opnemen als er geen MAC-adres is opgegeven",
+        "fr": "Ne pas commencer à enregistrer si aucune adresse MAC n'a été fournie",
+        "it": "Non avviare la registrazione se non è stato fornito un indirizzo MAC",
+        "es": "No empiece a grabar si no se proporcionó una dirección MAC",
+        "pl": "Nie należy rozpoczynać rejestracji, jeżeli nie podano żadnego adresu MAC",
+        "uk": "Не запустіть запис, якщо жодна адреса MAC була надана",
+        "zh-cn": "如果没有提供任何MAC地址, 请不要开始记录"
+      },
       "1.2.1": {
         "en": "The keys are stored in `0_userdata.0.kisshomeResearchPublicKey` to make it possible to uninstall and install the adapter again without any problems\nCorrected problem with PCAP files without the META-description",
         "de": "Die Schlüssel werden in `0_userdata.0.kisshomeResearchPublicKey` gespeichert, um den Adapter ohne Probleme wieder zu deinstallieren und zu installieren\nProblem mit PCAP-Dateien ohne META-Description behoben",
@@ -80,19 +93,6 @@
         "pl": "Korekta błędu, jeżeli adres MAC nie może być określony",
         "uk": "Виправлено помилку, якщо MAC адреса не може бути визначена",
         "zh-cn": "如果无法确定 MAC 地址, 则更正了错误"
-      },
-      "1.0.6": {
-        "en": "Corrected the link in readme.md\nCorrected the Big-Endian PCAP format\nthe Fixed build pipeline",
-        "de": "Korrigierte den Link im Readme. md\nKorrektur des Big-Endian PCAP Format\ndie Fixed Build Pipeline",
-        "ru": "Исправлена ссылка в считывании. md\nИсправлены Большой индейец Формат PCAP\nfixed build pipeline",
-        "pt": "Corrigido o link no readme. Md\nCorrigido o Big-Endian Formato PCAP\no pipeline de construção fixa",
-        "nl": "De link in readme gecorrigeerd. md\nGecorrigeerd de Big-Endian PCAP-formaat\nde vaste bouwpijpleiding",
-        "fr": "Corrigé le lien dans readme. md\nCorrigé le Big-Endian Format PAC\nle pipeline de construction fixe",
-        "it": "Corretto il link in readme. M\nCorretto il Big-Endian Formato PCAP\nla pipeline di costruzione fissa",
-        "es": "Corregido el enlace en readme. md\nCorregido el Gran Endian Formato PCAP\nla tubería de construcción fija",
-        "pl": "Naprawiłem link. md\nPoprawiono Wielkiego Endianina Format PCAP\nstałe rurociąg budowlany",
-        "uk": "Виправлено посилання в чителю. мд\nВиправлено великий Формат ПКАП\nфіксований будівельний трубопровод",
-        "zh-cn": "更正了readme中的链接. 微额\n纠正了大印地安人 PCAP 格式\n固定建筑管道"
       }
     },
     "titleLang": {

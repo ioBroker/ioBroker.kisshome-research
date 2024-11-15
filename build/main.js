@@ -540,10 +540,10 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
         await this.setState('info.recording.triggerWrite', false, true);
         if (!this.uniqueMacs.length) {
             if (this.language === 'de') {
-                this.log.error(`[PCAP] Keine MAC-Adressen für die Aufzeichnung angegeben. Bitte geben Sie einige MAC-Adressen oder IP-Adressen an, die in MAC-Adressen aufgelöst werden können`);
+                this.log.warn(`[PCAP] Keine MAC-Adressen für die Aufzeichnung angegeben. Bitte geben Sie einige MAC-Adressen oder IP-Adressen an, die in MAC-Adressen aufgelöst werden können`);
             }
             else {
-                this.log.error(`[PCAP] No any MAC addresses provided for recording. Please provide some MAC addresses or Ip addresses, that could be resolved to MAC address`);
+                this.log.warn(`[PCAP] No any MAC addresses provided for recording. Please provide some MAC addresses or Ip addresses, that could be resolved to MAC address`);
             }
             return;
         }

@@ -33,7 +33,7 @@ This was required to make it possible to uninstall and install the adapter again
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.2.2 (2024-11-15)
 -   (bluefox) Do not start recording if no one MAC address was provided
 
 ### 1.2.1 (2024-11-13)
