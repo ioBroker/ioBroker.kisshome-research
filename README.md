@@ -33,7 +33,7 @@ This was required to make it possible to uninstall and install the adapter again
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.2.3 (2024-11-15)
 -   (bluefox) Do not start recording if no one MAC address was provided
 -   (bluefox) The keys are stored in `0_userdata.0.kisshomeResearchPublicKey` to make it possible to uninstall and install the adapter again without any problems
 -   (bluefox) Corrected problem with PCAP files without the META-description
