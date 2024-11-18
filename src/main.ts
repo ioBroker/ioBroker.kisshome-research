@@ -428,8 +428,13 @@ export class KISSHomeResearchAdapter extends Adapter {
         // take only unique MAC addresses and not MAC of Fritzbox
         this.uniqueMacs = [];
         this.IPs.forEach(
-            item => !this.uniqueMacs.includes(item.mac) && item.mac !== fritzMac && this.uniqueMacs.push(item.mac),
+            item =>
+                !this.uniqueMacs.includes(item.mac) &&
+                item.mac?.trim() &&
+                item.mac !== fritzMac &&
+                this.uniqueMacs.push(item.mac),
         );
+        this.uniqueMacs = this.uniqueMacs.filter(mac => mac);
 
         // detect temp directory
         this.tempDir = this.config.tempDir || '/run/shm';
