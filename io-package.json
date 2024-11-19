@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "news": {
+      "1.2.4": {
+        "en": "Empty MAC addresses will be ignored",
+        "de": "Leere MAC-Adressen werden ignoriert",
+        "ru": "Пустые адреса MAC будут проигнорированы",
+        "pt": "Endereços MAC vazios serão ignorados",
+        "nl": "Lege MAC-adressen worden genegeerd",
+        "fr": "Les adresses MAC vides seront ignorées",
+        "it": "Gli indirizzi MAC vuoti saranno ignorati",
+        "es": "Se ignorarán las direcciones de MAC vacías",
+        "pl": "Puste adresy MAC zostaną zignorowane",
+        "uk": "Empty MAC адреси будуть ігноруватися",
+        "zh-cn": "空 MAC 地址将被忽略"
+      },
       "1.2.3": {
         "en": "Do not start recording if no one MAC address was provided\nThe keys are stored in `0_userdata.0.kisshomeResearchPublicKey` to make it possible to uninstall and install the adapter again without any problems\nCorrected problem with PCAP files without the META-description",
         "de": "Starten Sie keine Aufnahme, wenn keine MAC-Adresse angegeben wurde\nDie Schlüssel werden in `0_userdata.0.kisshomeResearchPublicKey` gespeichert, um den Adapter ohne Probleme wieder zu deinstallieren und zu installieren\nProblem mit PCAP-Dateien ohne META-Description behoben",

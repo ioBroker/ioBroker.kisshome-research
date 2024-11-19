@@ -35,8 +35,7 @@ This was required to make it possible to uninstall and install the adapter again
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.2.4 (2024-11-19)
 
 -   Empty MAC addresses will be ignored
 
