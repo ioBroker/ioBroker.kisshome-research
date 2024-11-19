@@ -12,12 +12,16 @@ export default [
     ...config,
     ...reactConfig,
     {
+        ignores: ['node_modules/**/*', 'build/**/*', 'craco.config.js', 'modulefederation.config.js'],
+        files: ['src-admin/src/**/*.jsx', '**/*.tsx'],
+    },
+    {
         languageOptions: {
             parserOptions: {
                 projectService: {
-                    allowDefaultProject: ['*.js', '*.mjs'],
+                    allowDefaultProject: ['*.mjs'],
                 },
-                //tsconfigRootDir: import.meta.dirname,
+                tsconfigRootDir: import.meta.dirname,
             },
         },
     },

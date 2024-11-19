@@ -324,7 +324,14 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
         }
         // take only unique MAC addresses and not MAC of Fritzbox
         this.uniqueMacs = [];
-        this.IPs.forEach(item => !this.uniqueMacs.includes(item.mac) && item.mac !== fritzMac && this.uniqueMacs.push(item.mac));
+        this.IPs.forEach(item => {
+            var _a;
+            return !this.uniqueMacs.includes(item.mac) &&
+                ((_a = item.mac) === null || _a === void 0 ? void 0 : _a.trim()) &&
+                item.mac !== fritzMac &&
+                this.uniqueMacs.push(item.mac);
+        });
+        this.uniqueMacs = this.uniqueMacs.filter(mac => mac);
         // detect temp directory
         this.tempDir = this.config.tempDir || '/run/shm';
         if ((0, node_fs_1.existsSync)(this.tempDir)) {
