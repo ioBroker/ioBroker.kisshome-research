@@ -13,7 +13,36 @@ const network_1 = require("network");
 const arp_lookup_1 = require("@network-utils/arp-lookup");
 const vendor_lookup_1 = require("@network-utils/vendor-lookup");
 const node_crypto_1 = __importDefault(require("node:crypto"));
+const node_net_1 = require("node:net");
+// This function is used trigger the OS to resolve IP to MAC address
+async function httpPing(ip) {
+    // try to open the TCP socket to this IP
+    const client = new node_net_1.Socket();
+    return await new Promise(resolve => {
+        let timeout = setTimeout(() => {
+            timeout = null;
+            resolve(false);
+        }, 200);
+        client.connect(18001, ip, () => {
+            client.destroy();
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = null;
+                resolve(true);
+            }
+        });
+        client.on('error', () => {
+            client.destroy();
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = null;
+                resolve(false);
+            }
+        });
+    });
+}
 async function getMacForIp(ip) {
+    await httpPing(ip);
     const mac = await (0, arp_lookup_1.toMAC)(ip);
     if (mac) {
         return { mac: mac.toUpperCase(), vendor: (0, vendor_lookup_1.toVendor)(mac), ip };

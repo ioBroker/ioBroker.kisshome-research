@@ -3,8 +3,39 @@ import { get_gateway_ip } from 'network';
 import { toMAC } from '@network-utils/arp-lookup';
 import { toVendor } from '@network-utils/vendor-lookup';
 import crypto from 'node:crypto';
+import { Socket } from 'node:net';
+
+// This function is used trigger the OS to resolve IP to MAC address
+async function httpPing(ip: string): Promise<boolean> {
+    // try to open the TCP socket to this IP
+    const client = new Socket();
+    return await new Promise<boolean>(resolve => {
+        let timeout: NodeJS.Timeout | null = setTimeout(() => {
+            timeout = null;
+            resolve(false);
+        }, 200);
+        client.connect(18001, ip, () => {
+            client.destroy();
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = null;
+                resolve(true);
+            }
+        });
+        client.on('error', () => {
+            client.destroy();
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = null;
+                resolve(false);
+            }
+        });
+    });
+}
 
 export async function getMacForIp(ip: string): Promise<{ mac: string; vendor?: string; ip: string } | null> {
+    // trigger the OS to resolve IP to MAC address
+    await httpPing(ip);
     const mac = await toMAC(ip);
     if (mac) {
         return { mac: mac.toUpperCase(), vendor: toVendor(mac), ip };
