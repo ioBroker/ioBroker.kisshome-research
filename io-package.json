@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "news": {
+      "1.2.5": {
+        "en": "Added the trigger to resolve the MAC address before MAC resolution",
+        "de": "Der Trigger wurde hinzugefügt, um die MAC-Adresse vor der MAC-Auflösung zu beheben",
+        "ru": "Добавил триггер для разрешения MAC-адреса перед резолюцией MAC",
+        "pt": "Adicionado o gatilho para resolver o endereço MAC antes da resolução MAC",
+        "nl": "De trigger toegevoegd om het MAC-adres op te lossen vóór MAC-resolutie",
+        "fr": "Ajout du déclencheur pour résoudre l'adresse MAC avant la résolution MAC",
+        "it": "Aggiunto il trigger per risolvere l'indirizzo MAC prima della risoluzione MAC",
+        "es": "Agregó el gatillo para resolver la dirección MAC antes de la resolución MAC",
+        "pl": "Dodano przycisk do rozwiązania adresu MAC przed rozdzielczością MAC",
+        "uk": "Додано тригер для вирішення адрес MAC перед вирішенням MAC",
+        "zh-cn": "在 MAC 解析前添加了解析 MAC 地址的触发器"
+      },
       "1.2.4": {
         "en": "Empty MAC addresses will be ignored",
         "de": "Leere MAC-Adressen werden ignoriert",
@@ -80,19 +93,6 @@
         "pl": "Próbuję naprawić CI\nNie zezwalaj na rejestrowanie ruchu FritzBox\nNie wolno rejestrować ruchu, jeżeli nie dostarczono żadnego MAC\nSkorygowane linki do strony internetowej",
         "uk": "Спробуйте виправити CI\nНе дозволяйте запис трафіку FritzBox\nНе дозволяйте записувати трафік, якщо не передбачено MAC\nВиправлені посилання на сторінку",
         "zh-cn": "试图修复 CI\n不允许对 FritzBox 进行流量记录\n如果没有提供任何MAC,则不允许记录流量\n已更正的网页链接"
-      },
-      "1.0.7": {
-        "en": "Corrected the error if MAC address cannot be determined",
-        "de": "Korrektur des Fehlers, wenn die MAC-Adresse nicht ermittelt werden kann",
-        "ru": "Исправлена ошибка, если MAC-адрес не может быть определен",
-        "pt": "Corrigido o erro se o endereço MAC não puder ser determinado",
-        "nl": "Fout gecorrigeerd als het MAC-adres niet kan worden bepaald",
-        "fr": "Correction de l'erreur si l'adresse MAC ne peut pas être déterminée",
-        "it": "Corretto l'errore se l'indirizzo MAC non può essere determinato",
-        "es": "Corregido el error si no se puede determinar la dirección MAC",
-        "pl": "Korekta błędu, jeżeli adres MAC nie może być określony",
-        "uk": "Виправлено помилку, якщо MAC адреса не може бути визначена",
-        "zh-cn": "如果无法确定 MAC 地址, 则更正了错误"
       }
     },
     "titleLang": {

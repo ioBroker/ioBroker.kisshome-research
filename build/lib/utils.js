@@ -42,6 +42,7 @@ async function httpPing(ip) {
     });
 }
 async function getMacForIp(ip) {
+    // trigger the OS to resolve IP to MAC address
     await httpPing(ip);
     const mac = await (0, arp_lookup_1.toMAC)(ip);
     if (mac) {
