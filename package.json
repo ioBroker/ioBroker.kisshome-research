@@ -25,7 +25,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^3.2.2",
     "@network-utils/vendor-lookup": "^1.0.8",
-    "axios": "^1.7.7",
+    "axios": "^1.7.8",
     "network": "^0.7.0"
   },
   "devDependencies": {
