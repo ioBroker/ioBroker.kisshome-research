@@ -35,7 +35,7 @@ This was required to make it possible to uninstall and install the adapter again
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.2.6 (2024-12-16)
 
 -   (@GermanBluefox) Check if the file exists before sending it
 

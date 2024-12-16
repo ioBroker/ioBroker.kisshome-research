@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.2.5",
+    "version": "1.2.6",
     "news": {
+      "1.2.6": {
+        "en": "Check if the file exists before sending it",
+        "de": "Überprüfen Sie, ob die Datei existiert, bevor Sie sie senden",
+        "ru": "Проверьте, существует ли файл до его отправки",
+        "pt": "Verifique se o arquivo existe antes de enviá-lo",
+        "nl": "Controleer of het bestand bestaat voordat het verzonden wordt",
+        "fr": "Vérifiez si le fichier existe avant de l'envoyer",
+        "it": "Controllare se il file esiste prima di inviarlo",
+        "es": "Compruebe si el archivo existe antes de enviarlo",
+        "pl": "Sprawdź, czy plik istnieje przed wysłaniem go",
+        "uk": "Перевірте, чи існує файл перед відправленням",
+        "zh-cn": "发送前检查文件是否存在"
+      },
       "1.2.5": {
         "en": "Added the trigger to resolve the MAC address before MAC resolution",
         "de": "Der Trigger wurde hinzugefügt, um die MAC-Adresse vor der MAC-Auflösung zu beheben",
@@ -80,19 +93,6 @@
         "pl": "Użyta rzeczywista długość nagłówka IP i TCP dla pliku PCAP",
         "uk": "Використовується фактична довжина заголовка IP і TCP для файла PCAP",
         "zh-cn": "PCAP 文件使用的实际IP和TCP头长"
-      },
-      "1.0.11": {
-        "en": "Trying to fix CI\nDo not allow the traffic recording of FritzBox \nDo not allow recording the traffic if no any MAC provided\nCorrected links to web page",
-        "de": "Versuchen, CI zu reparieren\nDie Verkehrsaufzeichnung von FritzBox nicht zulassen\nNicht zulassen, dass der Verkehr aufgezeichnet wird, wenn kein MAC zur Verfügung gestellt wird\nKorrigierte Links zur Webseite",
-        "ru": "Попытка исправить CI\nНе позволяйте записи трафика FritzBox\nНе позволяйте записывать трафик, если не предусмотрено MAC\nИсправленные ссылки на веб-страницу",
-        "pt": "Tentando corrigir CI\nNão permita a gravação de tráfego de FritzBox\nNão permita gravar o tráfego se nenhum MAC fornecido\nLinks corretos para a página da web",
-        "nl": "Proberen CI te repareren\nLaat de verkeersregistratie van FritzBox niet toe\nOpname van het verkeer is niet toegestaan als er geen MAC beschikbaar is\nGecorrigeerde links naar webpagina",
-        "fr": "Essayer de corriger CI\nNe pas autoriser l'enregistrement du trafic de FritzBox\nNe pas autoriser l'enregistrement du trafic si aucune MAC n'est fournie\nLiens corrigés vers la page Web",
-        "it": "Cercare di risolvere CI\nNon permettere la registrazione del traffico di FritzBox\nNon permettere la registrazione del traffico se non è fornito alcun MAC\nLink corretti alla pagina web",
-        "es": "Intenta arreglar CI\nNo permita la grabación de tráfico de FritzBox\nNo permita grabar el tráfico si no se proporciona ningún MAC\nEnlaces corregidos a la página web",
-        "pl": "Próbuję naprawić CI\nNie zezwalaj na rejestrowanie ruchu FritzBox\nNie wolno rejestrować ruchu, jeżeli nie dostarczono żadnego MAC\nSkorygowane linki do strony internetowej",
-        "uk": "Спробуйте виправити CI\nНе дозволяйте запис трафіку FritzBox\nНе дозволяйте записувати трафік, якщо не передбачено MAC\nВиправлені посилання на сторінку",
-        "zh-cn": "试图修复 CI\n不允许对 FritzBox 进行流量记录\n如果没有提供任何MAC,则不允许记录流量\n已更正的网页链接"
       }
     },
     "titleLang": {
