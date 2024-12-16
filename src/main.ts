@@ -1264,8 +1264,20 @@ export class KISSHomeResearchAdapter extends Adapter {
         }
     }
 
-    async sendOneFileToCloud(fileName: string): Promise<void> {
+    async sendOneFileToCloud(fileName: string, size?: number): Promise<void> {
         try {
+            if (!existsSync(fileName)) {
+                if (this.language === 'de') {
+                    this.log.warn(
+                        `[RSYNC] Datei "${fileName}" existiert nicht. Größe: ${size ? size2text(size) : 'unbekannt'}`,
+                    );
+                } else {
+                    this.log.warn(
+                        `[RSYNC] File "${fileName}" does not exist. Size: ${size ? size2text(size) : 'unknown'}`,
+                    );
+                }
+                return;
+            }
             const data = readFileSync(fileName);
             const name = basename(fileName);
             const len = data.length;
@@ -1314,29 +1326,33 @@ export class KISSHomeResearchAdapter extends Adapter {
                 }
                 if (this.language === 'de') {
                     this.log.debug(
-                        `[RSYNC] Datei ${fileName}(${size2text(len)}) an die Cloud gesendet: ${responsePost.status}`,
+                        `[RSYNC] Datei ${fileName}(${size2text(len)}) an die Cloud gesendet (${size ? size2text(size) : 'unbekannt'}): ${responsePost.status}`,
                     );
                 } else {
                     this.log.debug(
-                        `[RSYNC] Sent file ${fileName}(${size2text(len)}) to the cloud: ${responsePost.status}`,
+                        `[RSYNC] Sent file ${fileName}(${size2text(len)}) to the cloud (${size ? size2text(size) : 'unbekannt'}): ${responsePost.status}`,
                     );
                 }
             } else {
                 if (this.language === 'de') {
                     this.log.warn(
-                        `[RSYNC] Datei wurde zum Server gesendet, aber Prüfung war nicht erfolgreich. ${fileName} an die Cloud: status=${responsePost.status}, len=${len}, response=${response.data}`,
+                        `[RSYNC] Datei wurde zum Server gesendet, aber Prüfung war nicht erfolgreich (${size ? size2text(size) : 'unbekannt'}). ${fileName} an die Cloud: status=${responsePost.status}, len=${len}, response=${response.data}`,
                     );
                 } else {
                     this.log.warn(
-                        `[RSYNC] File sent to server, but check fails. ${fileName} to the cloud: status=${responsePost.status}, len=${len}, response=${response.data}`,
+                        `[RSYNC] File sent to server, but check fails (${size ? size2text(size) : 'unbekannt'}). ${fileName} to the cloud: status=${responsePost.status}, len=${len}, response=${response.data}`,
                     );
                 }
             }
         } catch (e) {
             if (this.language === 'de') {
-                this.log.error(`[RSYNC] Datei ${fileName} kann nicht zum Server geschickt werden: ${e}`);
+                this.log.error(
+                    `[RSYNC] Datei ${fileName} kann nicht zum Server geschickt werden (${size ? size2text(size) : 'unbekannt'}): ${e}`,
+                );
             } else {
-                this.log.error(`[RSYNC] Cannot send file ${fileName} to the cloud: ${e}`);
+                this.log.error(
+                    `[RSYNC] Cannot send file ${fileName} to the cloud (${size ? size2text(size) : 'unbekannt'}): ${e}`,
+                );
             }
         }
     }
@@ -1361,11 +1377,13 @@ export class KISSHomeResearchAdapter extends Adapter {
         // calculate the total number of bytes in pcap files
         let pcapFiles: string[];
         let allFiles: string[];
+        const sizes: Record<string, number> = {};
         try {
             allFiles = readdirSync(this.workingDir);
             pcapFiles = allFiles.filter(f => f.endsWith('.pcap'));
             for (const file of pcapFiles) {
-                totalBytes += statSync(`${this.workingDir}/${file}`).size;
+                sizes[file] = statSync(`${this.workingDir}/${file}`).size;
+                totalBytes += sizes[file];
             }
         } catch (e) {
             if (this.language === 'de') {
@@ -1406,47 +1424,6 @@ export class KISSHomeResearchAdapter extends Adapter {
             this.log.debug(`[RSYNC] Syncing files to the cloud (${size2text(totalBytes)})`);
         }
 
-        // const cmd = this.getRSyncCommand();
-        //
-        // let error = '';
-        //
-        // this.log.debug(`[RSYNC] cmd: "${cmd}"`);
-        //
-        // this.syncProcess = exec(cmd, (_error, stdout, stderr) => {
-        //     (stderr || _error) && this.log.warn(`[RSYNC] Error by synchronization: ${stderr}, ${_error}`);
-        //     error = _error ? _error.message : '';
-        // });
-        //
-        // this.syncProcess.on('error', (_error) => error = _error.message);
-        //
-        // this.syncProcess.on('exit', (code) => {
-        //     this.syncProcess = null;
-        //
-        //     // delete all pcap files if no error
-        //     if (!error && code === 0) {
-        //         this.clearWorkingDir();
-        //     }
-        //
-        //     if (this.syncRunning) {
-        //         this.syncRunning = false;
-        //         this.setState('info.syncRunning', false, true);
-        //     }
-        //
-        //     if (this.saveAfterSync) {
-        //         this.saveAfterSync = false;
-        //         this.savePacketsToFile();
-        //     }
-        //
-        //     if (code !== 0) {
-        //         this.log.warn(`[RSYNC] Cannot sync files. rsync returned ${code}, error: ${error}`);
-        //     } else {
-        //         this.log.debug(`[RSYNC] Syncing files done with code ${code}`);
-        //     }
-        //
-        //     if (cb) {
-        //         cb();
-        //     }
-        // });
         // send files to the cloud
 
         // first send meta files
@@ -1475,7 +1452,7 @@ export class KISSHomeResearchAdapter extends Adapter {
         // send all pcap files
         for (let i = 0; i < pcapFiles.length; i++) {
             const file = pcapFiles[i];
-            await this.sendOneFileToCloud(`${this.workingDir}/${file}`);
+            await this.sendOneFileToCloud(`${this.workingDir}/${file}`, sizes[file]);
         }
         this.syncRunning = false;
         await this.setState('info.sync.running', false, true);

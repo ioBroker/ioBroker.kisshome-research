@@ -231,15 +231,18 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
     async componentDidMount() {
         super.componentDidMount();
 
+        this.socket = this.props.oContext ? this.props.oContext.socket : this.props.socket;
+        this.instance = this.props.oContext ? this.props.oContext.instance : this.props.instance;
+
         let address = [];
         // get own ip address
-        const config = await this.props.socket.getObject(`system.adapter.kisshome-research.${this.props.instance}`);
+        const config = await this.socket.getObject(`system.adapter.kisshome-research.${this.instance}`);
         if (config?.common.host) {
-            const host = await this.props.socket.getObject(`system.host.${config.common.host}`);
+            const host = await this.socket.getObject(`system.host.${config.common.host}`);
             address = host.common.address;
         }
 
-        let instances = await this.props.socket.getAdapterInstances();
+        let instances = await this.socket.getAdapterInstances();
         instances = instances
             .filter(
                 instance =>
@@ -274,7 +277,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
         this.resolveDone = false;
 
         this.setState(newState);
-        await this.props.socket.subscribeState(`system.adapter.kisshome-research.${this.props.instance}.alive`, this.onAliveChanged);
+        await this.socket.subscribeState(`system.adapter.kisshome-research.${this.instance}.alive`, this.onAliveChanged);
         // get vendor and MAC-Address information
         if (this.props.alive) {
             this.resolveMACs();
@@ -310,8 +313,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                 }
             });
 
-            return this.props.socket
-                .sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', requestIps)
+            return this.socket
+                .sendTo(`kisshome-research.${this.instance}`, 'getMacForIps', requestIps)
                 .then(result => {
                     if (result?.error) {
                         this.setState({ runningRequest: false });
@@ -386,7 +389,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
 
     componentWillUnmount() {
         super.componentWillUnmount();
-        this.props.socket.unsubscribeState(`system.adapter.kisshome-research.${this.props.instance}.alive`, this.onAliveChanged);
+        this.socket.unsubscribeState(`system.adapter.kisshome-research.${this.instance}.alive`, this.onAliveChanged);
         this.validateTimeout && clearTimeout(this.validateTimeout);
         this.validateTimeout = null;
     }
@@ -434,8 +437,8 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
             });
             if (unknownMacs.length) {
                 this.setState({ resolving: true, IP2MAC, MAC2VENDOR }, () => {
-                    this.props.socket
-                        .sendTo(`kisshome-research.${this.props.instance}`, 'getMacForIps', unknownMacs)
+                    this.socket
+                        .sendTo(`kisshome-research.${this.instance}`, 'getMacForIps', unknownMacs)
                         .then(result => {
                             if (result?.error) {
                                 this.setState({ resolving: false });
@@ -511,7 +514,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                 if (adapter.browse) {
                     try {
                         const devices = await adapter.browse(
-                            this.props.socket,
+                            this.socket,
                             instances[i].id.replace('system.adapter.', ''),
                         );
                         devices.forEach(item => {
@@ -534,7 +537,7 @@ class ConfigCustomInstancesSelector extends ConfigGeneric {
                 if (adapter.clients) {
                     try {
                         const devices = await browseClients(
-                            this.props.socket,
+                            this.socket,
                             instances[i].id.replace('system.adapter.', ''),
                         );
                         devices.forEach(item => {
