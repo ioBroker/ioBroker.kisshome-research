@@ -40,7 +40,7 @@
     "@types/node": "^22.10.2",
     "chai": "^4.5.0",
     "mocha": "^11.0.1",
-    "typescript": "~5.7.2"
+    "typescript": "~5.7.3"
   },
   "bugs": {
     "url": "https://github.com/ioBroker/iobroker.kisshome-research/issues"
