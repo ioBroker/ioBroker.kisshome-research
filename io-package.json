@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "kisshome-research",
-    "version": "1.2.6",
+    "version": "1.2.7",
     "news": {
+      "1.2.7": {
+        "en": "The research will be stopped at 1.05.2025. This update will stop the adapter on 1.05.2025. The adapter will be removed from the repository.",
+        "de": "Die Forschung wird um 1.05.2025 gestoppt. Dieses Update wird den Adapter auf 1.05.2025 stoppen. Der Adapter wird aus dem Repository entfernt.",
+        "ru": "Исследование будет остановлено в 1.05.2025. Это обновление остановит адаптер на 1.05.2025. Адаптер будет удален из хранилища.",
+        "pt": "A pesquisa será interrompida em 1.05.2025. Esta atualização irá parar o adaptador em 1.05.2025. O adaptador será removido do repositório.",
+        "nl": "Het onderzoek zal om 1.05.2025 worden stopgezet. Deze update zal de adapter stoppen op 1.05.2025. De adapter wordt uit de repository verwijderd.",
+        "fr": "La recherche sera arrêtée à 1.05.2025. Cette mise à jour arrêtera l'adaptateur au 1.05.2025. L'adaptateur sera retiré du dépôt.",
+        "it": "La ricerca sarà fermata a 1.05.2025. Questo aggiornamento fermerà l'adattatore su 1.05.2025. L'adattatore verrà rimosso dal repository.",
+        "es": "La investigación se detendrá en 1.05.2025. Esta actualización detendrá el adaptador en 1.05.2025. El adaptador será eliminado del repositorio.",
+        "pl": "Badania zostaną wstrzymane o godz. 1.05.2025. Ta aktualizacja zatrzyma adapter 1.05.2025. Adapter zostanie usunięty z repozytorium.",
+        "uk": "Дослідження буде припинено на 1.05.2025. Це оновлення зупинить адаптер на 1.05.2025. Адаптер буде видалений з репозиторій.",
+        "zh-cn": "研究将在1.05.2025停止. 此更新将在1.05.2025上停止适配器. 适配器将从寄存器中移除."
+      },
       "1.2.6": {
         "en": "Check if the file exists before sending it",
         "de": "Überprüfen Sie, ob die Datei existiert, bevor Sie sie senden",
@@ -80,19 +93,6 @@
         "pl": "Usunięto niewykorzystany kod\nTworzenie pliku META, jeśli nie istnieje\nOpis adresu musi być dłuższy niż trzy znaki\nDodano wersję adaptera do nazwy pliku meta",
         "uk": "Видалити невикористаний код\nСтворення файлу META, якщо не існує\nОпис на адресу необхідно довше трьох символів\nДодано версію адаптера до назв файлів мета",
         "zh-cn": "删除未使用的代码\n如果不存在, 则创建 META 文件\n地址描述必须超过三个字符\n添加适配器版本到元文件名"
-      },
-      "1.0.13": {
-        "en": "Used actual IP and TCP header length for the PCAP file",
-        "de": "Gebrauchte tatsächliche IP- und TCP-Headerlänge für die PCAP-Datei",
-        "ru": "Используется фактическая длина заголовка IP и TCP для файла PCAP",
-        "pt": "Usado o comprimento real do cabeçalho IP e TCP para o arquivo PCAP",
-        "nl": "Gebruikte werkelijke IP en TCP header lengte voor het PCAP bestand",
-        "fr": "Longueur réelle de l'en-tête IP et TCP utilisée pour le fichier PACP",
-        "it": "Usata lunghezza effettiva dell'intestazione IP e TCP per il file PCAP",
-        "es": "Longitud de cabecera IP y TCP para el archivo PCAP",
-        "pl": "Użyta rzeczywista długość nagłówka IP i TCP dla pliku PCAP",
-        "uk": "Використовується фактична довжина заголовка IP і TCP для файла PCAP",
-        "zh-cn": "PCAP 文件使用的实际IP和TCP头长"
       }
     },
     "titleLang": {

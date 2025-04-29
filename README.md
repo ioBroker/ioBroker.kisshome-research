@@ -1,4 +1,4 @@
- ![Logo](admin/kisshome-research.png)
+![Logo](admin/kisshome-research.png)
 
 # ioBroker KISSHome research
 
@@ -35,7 +35,7 @@ This was required to make it possible to uninstall and install the adapter again
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.2.7 (2025-04-29)
 
 -   (@GermanBluefox) The research will be stopped at 1.05.2025. This update will stop the adapter on 1.05.2025. The adapter will be removed from the repository.
 

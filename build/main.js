@@ -228,6 +228,21 @@ class KISSHomeResearchAdapter extends adapter_core_1.Adapter {
     }
     async onReady() {
         var _a, _b, _c, _d, _e, _f;
+        const date = new Date();
+        if (date.getFullYear() >= 2025 && date.getMonth() >= 4) {
+            if (this.language === 'de') {
+                this.log.error('Die Studie ist beendet. Danke für eure Teilnahme. Der Adapter beendet sich jetzt.');
+            }
+            else {
+                this.log.error('The study is finished. Thank you for your participation. The adapter will terminate now.');
+            }
+            const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
+            if (obj === null || obj === void 0 ? void 0 : obj.common) {
+                obj.common.enabled = false;
+                await this.setForeignObject(obj._id, obj);
+            }
+            return;
+        }
         // read UUID
         const uuidObj = await this.getForeignObjectAsync('system.meta.uuid');
         if ((_a = uuidObj === null || uuidObj === void 0 ? void 0 : uuidObj.native) === null || _a === void 0 ? void 0 : _a.uuid) {
