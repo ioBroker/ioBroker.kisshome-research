@@ -324,6 +324,23 @@ export class KISSHomeResearchAdapter extends Adapter {
     }
 
     async onReady(): Promise<void> {
+        const date = new Date();
+        if (date.getFullYear() >= 2025 && date.getMonth() >= 4) {
+            if (this.language === 'de') {
+                this.log.error('Die Studie ist beendet. Danke für eure Teilnahme. Der Adapter beendet sich jetzt.');
+            } else {
+                this.log.error('The study is finished. Thank you for your participation. The adapter will terminate now.');
+            }
+
+            const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
+            if (obj?.common) {
+                obj.common.enabled = false;
+                await this.setForeignObject(obj._id, obj);
+            }
+            return;
+        }
+
+
         // read UUID
         const uuidObj = await this.getForeignObjectAsync('system.meta.uuid');
         if (uuidObj?.native?.uuid) {
